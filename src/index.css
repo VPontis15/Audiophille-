@@ -1,1 +1,35 @@
 @import 'tailwindcss';
+@theme {
+  --color-accent: #d87d4a;
+  --color-hover: #fbaf85;
+  --color-body: #fafafa;
+  --color-grey: #f1f1f1;
+  --color-text: #101010;
+  --font-sans: 'Manrope', sans-serif;
+  --text-h1: 3.5rem;
+  --text-h2: 2.5rem;
+  --text-h3: 2rem;
+  --text-h4: 1.75rem;
+  --text-h5: 1.5rem;
+  --text-h6: 1.125rem;
+  --text-main: 0.975rem;
+  --spacing-container: 68.75rem;
+  --tracking-main: 0.125rem;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.hero-img {
+  background-image: url('./assets/image-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 95vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
