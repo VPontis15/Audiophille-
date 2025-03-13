@@ -1,8 +1,8 @@
 import Button from '../utils/Button';
 export default function Hero(): React.ReactElement {
   return (
-    <div className=" max-w-container mx-auto items-center justify-center  grid grid-cols-2 ">
-      <div className="text-white grid pt-24  self-center h-full  gap-4 ">
+    <div className=" max-w-container min-h-[90vh] mx-auto  grid grid-cols-2 ">
+      <div className="text-white flex flex-col items-start pt-24  self-center h-full  gap-4 ">
         <h3 className="text-[14px] opacity-50 uppercase tracking-[10px]">
           {' '}
           New product
