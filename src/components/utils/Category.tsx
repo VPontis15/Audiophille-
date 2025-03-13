@@ -1,0 +1,29 @@
+import React from 'react';
+import arrow from '../../assets/icon-arrow-right.svg';
+import Button from './Button';
+interface CategoryProps {
+  img: string;
+  title: string;
+  to: string;
+}
+
+export default function Category({
+  img,
+  title,
+  to,
+}: CategoryProps): React.ReactElement {
+  return (
+    <div className="bg-grey w-[350px] relative flex flex-col place-items-center  h-[200px] px-4 py-2">
+      <img
+        className="w-[120px] -mt-16 h-[160px] object-cover"
+        src={img}
+        alt=""
+      />
+      <h6 className="text-h6 uppercase font-bold tracking-[1.26px]">{title}</h6>
+      <Button to={to} transparent className="uppercase flex gap-2">
+        <span className="text-small">Shop</span>
+        <img src={arrow} alt="" />
+      </Button>
+    </div>
+  );
+}
