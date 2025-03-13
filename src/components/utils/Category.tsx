@@ -20,9 +20,13 @@ export default function Category({
         alt=""
       />
       <h6 className="text-h6 uppercase font-bold tracking-[1.26px]">{title}</h6>
-      <Button to={to} transparent className="uppercase flex gap-2">
+      <Button
+        to={to}
+        transparent
+        className="uppercase text-text inline-flex items-center gap-2 "
+      >
         <span className="text-small">Shop</span>
-        <img src={arrow} alt="" />
+        <img className="w-[5px] h-[10px]" src={arrow} alt="" />
       </Button>
     </div>
   );
