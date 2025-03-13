@@ -1,5 +1,6 @@
 import type { FunctionComponent } from 'react';
 import className from 'classnames';
+import arrow from '../assets/icon-arrow-right.svg';
 
 type ExcludeFromTuple<T extends any[], U> = {
   [K in keyof T]: T[K] extends U ? never : T[K];
@@ -16,18 +17,15 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     outline?: boolean;
     rounded?: boolean;
     to?: string;
+    children: React.ReactNode;
   }> &
-  Exclusive<['primary', 'secondary', 'success', 'warning', 'danger'], boolean>;
+  Exclusive<['primary', 'secondary', 'transparent'], boolean>;
 
 const Button: FunctionComponent<ButtonProps> = ({
   children,
   primary,
   secondary,
-  success,
-  warning,
-  danger,
-  outline,
-  rounded,
+  transparent,
   to = '',
   ...rest
 }) => {
@@ -37,6 +35,7 @@ const Button: FunctionComponent<ButtonProps> = ({
     {
       'bg-accent text-white hover:bg-hover border-accent': primary,
       'border-text text-text hover:bg-text hover:text-white': secondary,
+      'border-none bg-none text-text hover:text-accent': transparent,
     }
   );
   if (to) {
