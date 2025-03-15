@@ -13,7 +13,7 @@ export default function Category({
   to,
 }: CategoryProps): React.ReactElement {
   return (
-    <div className="bg-grey w-[350px] relative flex flex-col place-items-center  h-[200px] px-4 py-2">
+    <div className="rounded-xl bg-grey w-[350px] relative flex flex-col place-items-center  h-[200px] px-4 py-2">
       <img
         className="w-[120px] -mt-16 h-[160px] object-cover"
         src={img}
@@ -21,7 +21,7 @@ export default function Category({
       />
       <h6 className="text-h6 uppercase font-bold tracking-[1.26px]">{title}</h6>
       <Button
-        to={to}
+        to={`/products/${to}`}
         transparent
         className="uppercase text-text inline-flex items-center gap-2 "
       >

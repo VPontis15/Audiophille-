@@ -1,6 +1,6 @@
 import type { FunctionComponent } from 'react';
 import className from 'classnames';
-import arrow from '../assets/icon-arrow-right.svg';
+import Link from './Link';
 
 type ExcludeFromTuple<T extends any[], U> = {
   [K in keyof T]: T[K] extends U ? never : T[K];
@@ -30,7 +30,7 @@ const Button: FunctionComponent<ButtonProps> = ({
   ...rest
 }) => {
   const classes = className(
-    'py-2 px-4 border uppercase tracking-[1px] text-[13px] transition duration-300 ease-in-out cursor-pointer',
+    ' py-3 px-8 md:py-4 font-bold md:px-8 border uppercase tracking-[1px] text-[13px] transition duration-300 ease-in-out cursor-pointer',
     rest.className, // Add custom classes directly as a separate argument
     {
       'bg-accent text-white hover:bg-hover border-accent': primary,
@@ -40,9 +40,9 @@ const Button: FunctionComponent<ButtonProps> = ({
   );
   if (to) {
     return (
-      <a href={to} className={classes}>
+      <Link href={to} className={classes}>
         {children}
-      </a>
+      </Link>
     );
   }
 

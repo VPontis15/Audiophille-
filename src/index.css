@@ -4,6 +4,7 @@
   --color-hover: #fbaf85;
   --color-body: #fafafa;
   --color-grey: #f1f1f1;
+  --color-dark-grey: #4c4c4c;
   --color-text: #101010;
   --font-sans: 'Manrope', sans-serif;
   --text-h1: 3.5rem;
@@ -12,8 +13,9 @@
   --text-h4: 1.75rem;
   --text-h5: 1.5rem;
   --text-h6: 1.125rem;
+  --text-smal: 0.8125rem;
   --text-main: 0.975rem;
-  --spacing-container: 68.75rem;
+  --spacing-container: min(95%, 68.75rem);
   --tracking-main: 0.125rem;
 }
 
@@ -22,9 +24,10 @@ body {
 }
 
 .hero-img {
-  background-image: url('./assets/image-hero.jpg');
+  background-image: url('./assets/desktop/image-hero.jpg');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   height: 95vh;
   display: flex;
   justify-content: center;
@@ -32,4 +35,74 @@ body {
   position: absolute;
   inset: 0;
   z-index: -1;
+  background-position-x: 50%;
+}
+
+.circle-pattern::before {
+  content: '';
+  background-image: url('./assets/pattern-circles.svg');
+  background-size: fill;
+  background-position: -145px -30px;
+  background-repeat: no-repeat;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  z-index: 0;
+}
+
+.z7speaker {
+  background-image: url('./assets/desktop/image-speaker-zx7.jpg');
+}
+
+.earphones {
+  background-image: url('./assets/desktop/image-earphones-yx1.jpg');
+}
+
+@media screen and (max-width: 768px) {
+  .hero-img {
+    background-image: url('./assets/tablet/image-header.jpg');
+    height: 77vh;
+  }
+  .z7speaker {
+    background-image: url('./assets/tablet/image-speaker-zx7.jpg');
+  }
+}
+@media screen and (max-width: 600px) {
+  .hero-img {
+    background-image: url('./assets/mobile/image-header.jpg');
+    height: 70vh;
+  }
+  .z7speaker {
+    background-position-x: 50%;
+    background-position-y: 100%;
+
+    background-image: url('./assets/mobile/image-speaker-zx7.jpg');
+  }
+}
+
+.social-icon:hover {
+  filter: brightness(0) saturate(100%) invert(56%) sepia(57%) saturate(514%)
+    hue-rotate(336deg) brightness(89%) contrast(89%);
+}
+
+/* min-height: 100%;
+min-width: 100%;
+max-height: 100vh;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+z-index: -1;
+transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+object-fit: cover;
+background-repeat: none; */
+
+* {
+  box-sizing: border-box;
+}
+*::selection {
+  background-color: var(--color-accent);
+  color: var(--color-body);
+  opacity: 1;
 }
