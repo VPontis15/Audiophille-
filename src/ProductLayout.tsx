@@ -1,25 +1,28 @@
-import Hero from '../components/Homepage/Hero';
-import headphones from '../assets/image-category-thumbnail-headphones.png';
-import earphones from '../assets/image-category-thumbnail-earphones.png';
-import speakers from '../assets/image-category-thumbnail-speakers.png';
-import Category from '../components/utils/Category';
-import ProductsShowcase from '../components/Homepage/ProductsShowcase';
-import bestGearDesktop from '../assets/desktop/image-best-gear.jpg';
-import bestGearTablet from '../assets/tablet/image-best-gear.jpg';
-import bestGearMobile from '../assets/mobile/image-best-gear.jpg';
+import BreadCrumps from './components/utils/BreadCrumps';
+import headphones from './assets/image-category-thumbnail-headphones.png';
+import Category from './components/utils/Category';
+import bestGearDesktop from './assets/desktop/image-best-gear.jpg';
+import bestGearTablet from './assets/tablet/image-best-gear.jpg';
+import bestGearMobile from './assets/mobile/image-best-gear.jpg';
+import earphones from './assets/image-category-thumbnail-earphones.png';
+import speakers from './assets/image-category-thumbnail-speakers.png';
+import { ReactNode } from 'react';
 
-export default function Homepage(): React.ReactElement {
+export default function ProductLayout({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement {
   return (
-    <main>
-      <Hero />
-      {/* Categories */}
+    <div className="max-w-container mx-auto space-y-40">
+      <BreadCrumps />
+      {children}
       <section className="py-8 max-w-container mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />
         <Category img={speakers} title="Earphones" to="earphones" />
         <Category img={earphones} title="Speakers" to="speakers" />
       </section>
-      <ProductsShowcase />
-      <section className="grid md:grid-cols-2 gap-16 lg:gap-33 max-w-container mx-auto mb-24 object-cover">
+      <section className="  grid md:grid-cols-2 gap-16 lg:gap-33 max-w-container mx-auto mb-24 object-cover">
         <div className=" flex flex-col md:row-start-1 lg:row-start-1  h-full items-start justify-center gap-8  ">
           <h2 className="text-h2  uppercase font-bold leading-[1.2] max-w-[14ch]">
             Bringing you the <span className="text-accent">best</span> audio
@@ -42,6 +45,6 @@ export default function Homepage(): React.ReactElement {
           alt="ZX9 speaker"
         />
       </section>
-    </main>
+    </div>
   );
 }

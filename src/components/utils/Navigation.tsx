@@ -10,17 +10,17 @@ export default function Navigation(): React.ReactElement {
           </Link>
         </li>
         <li>
-          <Link className="text-white" href="/headphones">
+          <Link className="text-white" href="/products/headphones">
             Headphones
           </Link>
         </li>
         <li>
-          <Link className="text-white" href="/contact">
+          <Link className="text-white" href="/products/speakers">
             Speakers
           </Link>
         </li>
         <li>
-          <Link className="text-white" href="/contact">
+          <Link className="text-white" href="/products/earphones">
             Earphones
           </Link>
         </li>

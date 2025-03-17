@@ -5,7 +5,6 @@ export default function BreadCrumps(): React.ReactElement {
   const location = useLocation().pathname.split('/');
   const currentPath = useLocation().pathname.split('/').pop();
   let path = '';
-  console.log(currentPath);
   const breadcrumps = location.slice(1, location.length - 1);
   const breadcrumpsHtml = breadcrumps.map((breadcrump, index) => {
     path += `/${breadcrump}`;
@@ -21,7 +20,7 @@ export default function BreadCrumps(): React.ReactElement {
     );
   });
   return (
-    <div className="text-text mt-24 text-sm max-w-container mx-auto flex items-center gap-0.5">
+    <div className="text-text mb-8 mt-24 text-sm max-w-container mx-auto flex items-center gap-0.5">
       {breadcrumpsHtml}
       <span>&gt;</span>
 

@@ -23,6 +23,10 @@ body {
   font-family: var(--font-sans);
 }
 
+body:has(.product-wrapper) header {
+  background-color: #000;
+}
+
 .hero-img {
   background-image: url('./assets/desktop/image-hero.jpg');
   background-size: cover;

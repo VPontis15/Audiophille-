@@ -4,6 +4,7 @@ import Homepage from './routes/Homepage';
 import RootLayout from './RootLayout';
 import Products from './routes/Products';
 import CategoryRoute from './routes/CategoryRoute';
+import ProductRoute from './routes/ProductRoute';
 
 const router = createBrowserRouter([
   {
@@ -22,8 +23,12 @@ const router = createBrowserRouter([
             element: <Products />,
           },
           {
-            path: ':slug',
+            path: ':category',
             element: <CategoryRoute />,
+          },
+          {
+            path: ':category/:slug',
+            element: <ProductRoute />,
           },
         ],
       },
