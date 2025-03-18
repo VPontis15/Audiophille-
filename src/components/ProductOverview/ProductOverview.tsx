@@ -1,12 +1,12 @@
-import Button from '../utils/Button';
 import productImg from '../../assets/desktop/product-yx1-earphones/image-product.jpg';
 import { ProductOverviewProps } from '../../types/ProductTypes';
+import AddToCartBtn from '../utils/AddToCartBtn';
 
 export default function ProductOverview({
   product,
 }: ProductOverviewProps): React.ReactElement {
   return (
-    <div className="grid grid-cols-2 mt-20 gap-31.5">
+    <div className="grid grid-cols-2 mt-20 gap-31.5 product-wrapper">
       <img src={productImg} alt="" className="h-[560px]" />
       <div className="flex flex-col justify-center">
         {product.new && (
@@ -21,16 +21,7 @@ export default function ProductOverview({
         <span className="text-h6 inline-block font-bold mb-12">
           ${product.price}
         </span>
-        <div className="flex gap-4 items-center">
-          <div className="bg-grey">
-            <button className="p-4">&minus;</button>
-            <span className="font-bold inline-block p-4">1</span>
-            <button className="p-4">+</button>
-          </div>
-          <Button className="uppercase" primary>
-            Add to cart
-          </Button>
-        </div>
+        <AddToCartBtn product={product} />
       </div>
     </div>
   );
