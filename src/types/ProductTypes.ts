@@ -45,6 +45,15 @@ export interface ProductProps {
   img?: string; // Keeping this for backward compatibility
 }
 
+export type CartItem = {
+  price: number;
+  name: string;
+  image: string;
+  id: string | number;
+  quantity: number;
+  total: number;
+};
+
 export interface ProductOverviewProps {
   product: ProductProps;
 }
