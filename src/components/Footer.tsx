@@ -10,7 +10,9 @@ export default function Footer(): React.ReactElement {
       <div className="max-w-container mx-auto grid gap-8">
         <div className="flex flex-col sm:flex-row justify-between items-center">
           <div className=" mx-auto sm:mx-0">
-            <Logo />
+            <Link href="/">
+              <Logo />
+            </Link>
           </div>
           <nav className="flex  items-center justify-center sm:justify-start  gap-8 ">
             <ul className="flex flex-col sm:flex-row items-center   gap-8 ">
@@ -20,17 +22,17 @@ export default function Footer(): React.ReactElement {
                 </Link>
               </li>
               <li>
-                <Link className="text-white" href="/headphones">
+                <Link className="text-white" href="/products/headphones">
                   Headphones
                 </Link>
               </li>
               <li>
-                <Link className="text-white" href="/contact">
+                <Link className="text-white" href="/products/speakers">
                   Speakers
                 </Link>
               </li>
               <li>
-                <Link className="text-white" href="/contact">
+                <Link className="text-white" href="/products/earphones">
                   Earphones
                 </Link>
               </li>
