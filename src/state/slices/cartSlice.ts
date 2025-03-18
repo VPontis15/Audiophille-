@@ -56,6 +56,17 @@ const cartSlice = createSlice({
       state.changed = true;
       existingItem.quantity++;
       existingItem.total = existingItem.price * existingItem.quantity;
+      const savedOnLocalStorage = JSON.parse(
+        localStorage.getItem('cart') || '[]'
+      );
+      const updatedCart = savedOnLocalStorage.map((item: CartItem) => {
+        if (item.id === id) {
+          item.quantity++;
+          item.total = item.price * item.quantity;
+        }
+        return item;
+      });
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
     },
     decreaseQuantity(state: CartState, action: PayloadAction<string>) {
       const id = action.payload;
@@ -68,6 +79,20 @@ const cartSlice = createSlice({
         existingItem.quantity--;
         existingItem.total = existingItem.price * existingItem.quantity;
       }
+      const savedOnLocalStorage = JSON.parse(
+        localStorage.getItem('cart') || '[]'
+      ); // Get the cart from local storage
+      const updatedCart = savedOnLocalStorage
+        .map((item: CartItem) => {
+          if (item.id === id) {
+            item.quantity--;
+            item.total = item.price * item.quantity;
+          }
+          return item;
+        })
+        .filter((item: CartItem) => item.quantity > 0);
+
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
     },
   },
 });
