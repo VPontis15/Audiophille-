@@ -24,7 +24,9 @@ export default function ProductsShowcase(): React.ReactElement {
             Upgrade to premium speakers that are phenomenally built to deliver
             truly remarkable sound.
           </p>
-          <Button secondary>See Product</Button>
+          <Button to="/products/earphones/zx9-speaker" secondary>
+            See Product
+          </Button>
         </div>
       </div>
       <div className="h-[320px] rounded-xl z7speaker w-full object-cover pl-8 md:pl-24">
@@ -32,7 +34,9 @@ export default function ProductsShowcase(): React.ReactElement {
           <h4 className="text-h4  uppercase font-bold leading-[1]">
             ZX7 speaker
           </h4>
-          <Button secondary>See Product</Button>
+          <Button to="/products/earphones/zx7-speaker" secondary>
+            See Product
+          </Button>
         </div>
       </div>
       <div className="grid sm:grid-cols-2 gap-7.5">
@@ -42,7 +46,9 @@ export default function ProductsShowcase(): React.ReactElement {
             <h4 className="text-h4  uppercase font-bold leading-[1]">
               YX1 earphones
             </h4>
-            <Button secondary>See Product</Button>
+            <Button to="/products/earphones/yx1-earphones" secondary>
+              See Product
+            </Button>
           </div>
         </div>
       </div>
