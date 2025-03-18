@@ -22,12 +22,11 @@ export default function CartBtn({
       if (btnRef.current && btnRef.current.contains(clickedElement)) {
         return;
       }
-      console.log(
-        clickedElement.closest('section')?.classList.contains('cart-modal')
-      );
+
       if (
         isOpen &&
-        !clickedElement.closest('section')?.classList.contains('cart-modal')
+        clickedElement.closest('.cart-modal') === null &&
+        clickedElement.closest('.overlay') !== null
       ) {
         setIsOpen(false);
       }

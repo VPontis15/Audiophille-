@@ -1,10 +1,12 @@
 import { FormEvent, useState } from 'react';
 import Button from './Button';
-import { ProductOverviewProps } from '../../types/ProductTypes';
+import { CartItem, ProductOverviewProps } from '../../types/ProductTypes';
+import { useAppDispatch } from '../../types/hooks';
 
 export default function AddToCartBtn({
   product,
 }: ProductOverviewProps): React.ReactElement {
+  const dispatch = useAppDispatch();
   const [quantity, setQuantity] = useState<number>(1);
   const handleIncreaseQuantity = () =>
     setQuantity((quantity: number) => quantity + 1);
@@ -14,15 +16,6 @@ export default function AddToCartBtn({
   };
 
   const handleAddToCart = (e: FormEvent) => {
-    type CartItem = {
-      price: number;
-      name: string;
-      image: string;
-      id: string | number;
-      quantity: number;
-      total: number;
-    };
-
     e.preventDefault();
     const cartItem = {
       price: product.price,
@@ -40,7 +33,6 @@ export default function AddToCartBtn({
       const isInCart = cartItems.find(
         (item: CartItem) => item.id === product.id
       );
-      console.log(cartItems);
 
       if (!isInCart) cartItems.push(cartItem);
       else {
@@ -54,13 +46,14 @@ export default function AddToCartBtn({
       localStorage.setItem('cart', JSON.stringify(cartItems));
     }
     setQuantity(1);
+    dispatch({ type: 'cart/addToCart', payload: cartItem });
     // Add your cart logic here using cartItem
   };
 
   return (
-    <div className="flex gap-4 items-center">
-      <div className="bg-grey">
-        <form action="" method="post" onSubmit={handleAddToCart}>
+    <form action="" method="post" onSubmit={handleAddToCart}>
+      <div className="flex gap-4 items-center">
+        <div className="bg-grey">
           <button
             type="button"
             onClick={handleDecreaseQuantity}
@@ -77,11 +70,11 @@ export default function AddToCartBtn({
           >
             +
           </button>
-          <Button className="uppercase" primary>
-            Add to cart
-          </Button>
-        </form>
+        </div>
+        <Button className="uppercase" primary>
+          Add to cart
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

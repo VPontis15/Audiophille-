@@ -1,3 +1,4 @@
+import { useAppDispatch } from '../../types/hooks';
 import { CartItem as CartItemProp } from '../../types/ProductTypes';
 
 export default function CartItem({
@@ -5,6 +6,7 @@ export default function CartItem({
 }: {
   product: CartItemProp;
 }): React.ReactElement {
+  const dispatch = useAppDispatch();
   return (
     <div className="flex gap-4 items-center justify-between ">
       {/* <img src={product.image} alt="" /> */}
@@ -20,14 +22,26 @@ export default function CartItem({
       <form action="" method="post">
         <div className="flex gap-4 items-center">
           <div className="flex gap-2 bg-grey px-2">
-            <button type="button" className="px-2.5 py-2 cursor-pointer ">
+            <button
+              onClick={() =>
+                dispatch({ type: 'cart/decreaseQuantity', payload: product.id })
+              }
+              type="button"
+              className="px-2.5 py-2 cursor-pointer "
+            >
               &minus;
             </button>
             <input type="hidden" name="" value={product.quantity} />
             <span className="font-bold inline-block  px-2.5 py-2">
               {product.quantity}
             </span>
-            <button type="button" className="px-2.5 py-2 cursor-pointer">
+            <button
+              onClick={() =>
+                dispatch({ type: 'cart/increaseQuantity', payload: product.id })
+              }
+              type="button"
+              className="px-2.5 py-2 cursor-pointer"
+            >
               +
             </button>
           </div>
