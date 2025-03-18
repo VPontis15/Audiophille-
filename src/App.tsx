@@ -5,7 +5,8 @@ import RootLayout from './RootLayout';
 import Products from './routes/Products';
 import CategoryRoute from './routes/CategoryRoute';
 import ProductRoute from './routes/ProductRoute';
-
+import { Provider } from 'react-redux';
+import { store } from './state/store';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -36,7 +37,11 @@ const router = createBrowserRouter([
   },
 ]);
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  );
 }
 
 export default App;
