@@ -4,14 +4,14 @@ export default function Features({
   product,
 }: ProductOverviewProps): React.ReactElement {
   return (
-    <section className="flex mt-40 gap-31.5">
+    <section className="flex flex-col md:flex-row mt-40 gap-31.5">
       <div>
         <h3 className="font-bold tracking-[1.14px] uppercase text-h3 mb-8">
           Features
         </h3>
-        <p className="opacity-50 max-w-[68ch]">{product.features}</p>
+        <p className="opacity-50 md:max-w-[68ch]">{product.features}</p>
       </div>
-      <div>
+      <div className="flex flex-col sm:flex-row sm:justify-between md:flex-col md:justify-start">
         <h3 className="font-bold tracking-[1.14px] uppercase text-h3 mb-8">
           In the box
         </h3>

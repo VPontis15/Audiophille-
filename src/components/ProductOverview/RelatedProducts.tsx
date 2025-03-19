@@ -10,7 +10,7 @@ export default function RelatedProducts({
   return (
     <section className="max-w-container mx-auto font-bold">
       <h3 className="text-h3 text-center uppercase mb-16">You may also like</h3>
-      <div className="grid grid-cols-3 gap-8 mb-20 place-items-center text-center">
+      <div className="grid sm:grid-cols-3 gap-8 mb-20 place-items-center text-center">
         {product?.others?.map((relatedProgram: RelatedProductProps) => (
           <div key={relatedProgram.slug} className="flex flex-col gap-4">
             <img
