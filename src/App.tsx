@@ -7,6 +7,7 @@ import CategoryRoute from './routes/CategoryRoute';
 import ProductRoute from './routes/ProductRoute';
 import { Provider } from 'react-redux';
 import { store } from './state/store';
+import CheckoutRoute from './routes/CheckoutRoute';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
             element: <ProductRoute />,
           },
         ],
+      },
+      {
+        path: 'checkout',
+        element: <CheckoutRoute />,
+        loader: () => {
+          store.dispatch({ type: 'settings/closeCart' });
+          return null;
+        },
       },
     ],
   },
