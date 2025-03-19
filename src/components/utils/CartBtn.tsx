@@ -1,18 +1,12 @@
 import { useEffect, useRef } from 'react';
 import cartImg from '../../assets/icon-cart.svg';
-import { useAppSelector } from '../../types/hooks';
+import { useAppDispatch, useAppSelector } from '../../types/hooks';
 
-export default function CartBtn({
-  isOpen,
-  onIsOpenHandler,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
-  onIsOpenHandler: () => void;
-}): React.ReactElement {
+export default function CartBtn(): React.ReactElement {
   const cartQuantity = useAppSelector((state) => state.cart.items.length);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const isOpen = useAppSelector((state) => state.settings.isOpen);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     function handleClickOnOverlay(e: MouseEvent) {
@@ -28,7 +22,7 @@ export default function CartBtn({
         clickedElement.closest('.cart-modal') === null &&
         clickedElement.closest('.overlay') !== null
       ) {
-        setIsOpen(false);
+        dispatch({ type: 'settings/closeCart' });
       }
     }
 
@@ -43,7 +37,7 @@ export default function CartBtn({
       document.body.style.overflow = 'auto';
       document.removeEventListener('click', handleClickOnOverlay);
     };
-  }, [isOpen, setIsOpen]);
+  }, [isOpen, dispatch]);
 
   return (
     <div className="relative">
@@ -51,7 +45,7 @@ export default function CartBtn({
         ref={btnRef}
         onClick={(e) => {
           e.stopPropagation(); // Stop event from bubbling
-          onIsOpenHandler();
+          dispatch({ type: 'settings/openCart' });
         }}
         className="cursor-pointer grid place-items-center"
       >
