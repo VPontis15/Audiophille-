@@ -53,7 +53,7 @@ export default function AddToCartBtn({
   return (
     <form action="" method="post" onSubmit={handleAddToCart}>
       <div className="flex gap-4 items-center">
-        <div className="bg-grey">
+        <div className="bg-grey flex items-center">
           <button
             type="button"
             onClick={handleDecreaseQuantity}
