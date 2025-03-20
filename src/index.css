@@ -17,6 +17,7 @@
   --text-main: 0.975rem;
   --spacing-container: min(90%, 68.75rem);
   --tracking-main: 0.125rem;
+  --color-border: #cfcfcf;
 }
 
 body {
@@ -166,4 +167,9 @@ background-repeat: none; */
   .images-grid img {
     max-width: 310px;
   }
+}
+
+form {
+  caret-color: var(--color-accent);
+  caret-shape: bar;
 }
