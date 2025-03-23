@@ -3,9 +3,7 @@ import { ReactElement } from 'react';
 import Button from '../utils/Button';
 
 export default function CartFooter(): ReactElement | null {
-  const totalCartPrice = useAppSelector((state) =>
-    state.cart.items.reduce((acc, item) => acc + item.total, 0)
-  );
+  const totalCartPrice = useAppSelector((state) => state.cart.total);
   const dispatch = useAppDispatch();
   return totalCartPrice > 0 ? (
     <>
