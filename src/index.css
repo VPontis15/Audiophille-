@@ -18,6 +18,9 @@
   --spacing-container: min(90%, 68.75rem);
   --tracking-main: 0.125rem;
   --color-border: #cfcfcf;
+  --color-error: #ff0000;
+  --color-success: #00ff00;
+  --color-warning: #ffcc00;
 }
 
 body {
