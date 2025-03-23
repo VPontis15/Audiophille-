@@ -57,3 +57,10 @@ export type CartItem = {
 export interface ProductOverviewProps {
   product: ProductProps;
 }
+
+export interface ProductCheckoutItemProps {
+  name: string;
+  quantity: number;
+  price: number;
+  image: string;
+}

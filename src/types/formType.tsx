@@ -7,4 +7,10 @@ export interface FormInputProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   full?: boolean;
+  checked?: boolean;
+  onBlur?: (e: string | number | void) => void;
+}
+
+export interface FormErrors {
+  [key: string]: string;
 }
