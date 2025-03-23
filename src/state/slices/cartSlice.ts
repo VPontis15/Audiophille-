@@ -6,6 +6,9 @@ import { RootState, AppDispatch } from '../store';
 type CartState = {
   items: CartItem[];
   changed: boolean;
+  total: number;
+  vat: number;
+  shipping: number;
 };
 
 const initialState: CartState = {
@@ -13,6 +16,16 @@ const initialState: CartState = {
     ? JSON.parse(localStorage.getItem('cart') || '[]')
     : [],
   changed: false,
+  total: localStorage.getItem('cart')
+    ? JSON.parse(localStorage.getItem('cart') || '[]').reduce(
+        (acc: number, item: CartItem) => {
+          return acc + item.total;
+        },
+        0
+      )
+    : 0,
+  vat: 0.2,
+  shipping: 50,
 };
 
 const cartSlice = createSlice({
@@ -36,6 +49,8 @@ const cartSlice = createSlice({
         existingItem.quantity += newItem.quantity;
         existingItem.total += newItem.total;
       }
+      state.total = state.items.reduce((acc, item) => acc + item.total, 0);
+      localStorage.setItem('cart', JSON.stringify(state.items));
     },
     removeFromCart(state: CartState, action: PayloadAction<string>) {
       const id = action.payload;
@@ -43,11 +58,14 @@ const cartSlice = createSlice({
       if (!existingItem) return;
       state.changed = true;
       state.items = state.items.filter((item) => item.id !== id);
+      state.total = state.items.reduce((acc, item) => acc + item.total, 0);
+      localStorage.setItem('cart', JSON.stringify(state.items));
     },
     emptyCart(state: CartState) {
       state.items = [];
       state.changed = true;
       localStorage.removeItem('cart');
+      state.total = 0;
     },
     increaseQuantity(state: CartState, action: PayloadAction<string>) {
       const id = action.payload;
@@ -66,6 +84,9 @@ const cartSlice = createSlice({
         }
         return item;
       });
+      state.total = updatedCart.reduce((acc: number, item: CartItem) => {
+        return acc + item.total;
+      }, 0);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     },
     decreaseQuantity(state: CartState, action: PayloadAction<string>) {
@@ -91,7 +112,9 @@ const cartSlice = createSlice({
           return item;
         })
         .filter((item: CartItem) => item.quantity > 0);
-
+      state.total = updatedCart.reduce((acc: number, item: CartItem) => {
+        return acc + item.total;
+      }, 0);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     },
   },
