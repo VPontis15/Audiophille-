@@ -9,7 +9,7 @@ export default function Footer(): React.ReactElement {
     <footer className="bg-text py-15 text-white ">
       <div className="max-w-container mx-auto grid gap-8">
         <div className="flex flex-col sm:flex-row justify-between items-center">
-          <div className=" mx-auto sm:mx-0">
+          <div className=" mx-auto sm:mx-0 mb-12 sm:mb-0">
             <Link href="/">
               <Logo />
             </Link>
