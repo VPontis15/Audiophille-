@@ -36,7 +36,8 @@ body :where(:has(.product-wrapper), :has(.checkout-wrapper)) header {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 95vh;
+  min-height: 95vh;
+  max-height: 95vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -44,6 +45,31 @@ body :where(:has(.product-wrapper), :has(.checkout-wrapper)) header {
   inset: 0;
   z-index: -1;
   background-position-x: 50%;
+  background-size: cover;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./assets//fonts/Manrope-Regular.ttf') format('truetype');
+  font-display: swap;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./assets//fonts/Manrope-Bold.ttf') format('truetype');
+  font-display: swap;
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./assets//fonts/Manrope-Light.ttf') format('truetype');
+  font-display: swap;
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./assets//fonts/Manrope-SemiBold.ttf') format('truetype');
+  font-display: swap;
+  font-weight: 600;
 }
 
 .circle-pattern::before {
@@ -70,16 +96,17 @@ body :where(:has(.product-wrapper), :has(.checkout-wrapper)) header {
 @media screen and (max-width: 768px) {
   .hero-img {
     background-image: url('./assets/tablet/image-header.jpg');
-    height: 77vh;
   }
   .z7speaker {
     background-image: url('./assets/tablet/image-speaker-zx7.jpg');
+  }
+  .circle-pattern::before {
+    display: none;
   }
 }
 @media screen and (max-width: 600px) {
   .hero-img {
     background-image: url('./assets/mobile/image-header.jpg');
-    height: 70vh;
   }
   .z7speaker {
     background-position-x: 50%;

@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import CheckoutForm from '../components/Checkout/CheckoutForm';
 import CheckoutSummary from '../components/Checkout/CheckoutSummary';
 
@@ -17,6 +17,7 @@ export default function CheckoutRoute(): React.ReactElement {
           <CheckoutSummary />
         </section>
       </div>
+      <Outlet />
     </div>
   );
 }

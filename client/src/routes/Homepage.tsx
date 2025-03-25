@@ -12,8 +12,9 @@ export default function Homepage(): React.ReactElement {
   return (
     <main>
       <Hero />
+
       {/* Categories */}
-      <section className="py-8 max-w-container mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
+      <section className="py-8 max-w-container mx-auto mb-12 flex mt-24 md:mt-8 flex-col  sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />
         <Category img={speakers} title="Earphones" to="earphones" />
         <Category img={earphones} title="Speakers" to="speakers" />
@@ -37,6 +38,7 @@ export default function Homepage(): React.ReactElement {
         <img
           srcSet={`${bestGearMobile} 550w, ${bestGearTablet} 1024w, ${bestGearDesktop} 1280w`}
           sizes="(max-width: 550px) 100vw, (max-width: 960px) 100vw, 100vw"
+          loading="lazy"
           src={bestGearDesktop}
           className=" rounded-xl  h-[300px] md:h-[588px]  object-cover w-full row-start-1"
           alt="ZX9 speaker"

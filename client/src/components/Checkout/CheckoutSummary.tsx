@@ -11,7 +11,11 @@ export default function CheckoutSummary(): React.ReactElement {
       </h2>
       <div className="flex flex-col gap-4 mb-8">
         {products.map((product) => (
-          <CheckoutSummaryItem key={product.name} product={product} />
+          <CheckoutSummaryItem
+            imgSize={64}
+            key={product.name}
+            product={product}
+          />
         ))}
       </div>
       <CheckoutSummaryFooter />

@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import FormInput from '../utils/FormInput';
 import FormRow from '../utils/FormRow';
+import { useNavigate } from 'react-router';
 
 export default function CheckoutForm(): React.ReactElement {
   const [name, setName] = useState('');
@@ -11,6 +12,7 @@ export default function CheckoutForm(): React.ReactElement {
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
   const [payment, setPayment] = useState('cash');
+  const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -42,8 +44,9 @@ export default function CheckoutForm(): React.ReactElement {
       country,
       payment,
     };
+    const transactionId = Date.now().toString();
     console.log(data);
-
+    navigate(`/checkout/${transactionId}/success`);
     // handleResetForm();
   };
 
@@ -173,12 +176,14 @@ export default function CheckoutForm(): React.ReactElement {
                 handleChange(e, setPayment);
               }}
               required
+              checked={payment === 'stripe'}
             />
             <FormInput
               label="Viva Wallet"
               name="payment"
               type="radio"
               value="viva"
+              checked={payment === 'viva'}
               onChange={(e) => {
                 handleChange(e, setPayment);
               }}

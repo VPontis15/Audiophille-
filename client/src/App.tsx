@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css';
 import Homepage from './routes/Homepage';
 import RootLayout from './RootLayout';
@@ -8,6 +8,9 @@ import ProductRoute from './routes/ProductRoute';
 import { Provider } from 'react-redux';
 import { store } from './state/store';
 import CheckoutRoute from './routes/CheckoutRoute';
+import Modal from './components/utils/Modal';
+import { Completed } from './components/utils/Completed';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -41,6 +44,16 @@ const router = createBrowserRouter([
           store.dispatch({ type: 'settings/closeCart' });
           return null;
         },
+        children: [
+          {
+            path: ':transactionId/success',
+            element: (
+              <Modal>
+                <Completed />
+              </Modal>
+            ),
+          },
+        ],
       },
     ],
   },

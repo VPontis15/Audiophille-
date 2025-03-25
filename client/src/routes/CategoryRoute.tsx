@@ -7,22 +7,29 @@ import bestGearMobile from '../assets/mobile/image-best-gear.jpg';
 
 import data from '../data/data.json';
 import Product from '../components/utils/Product';
+import { ProductProps } from '../types/ProductTypes';
 export default function CategoryRoute(): React.ReactElement {
   const { category } = useParams<{ category: string }>();
-  const products = data.filter((product) => product.category === category);
+  const products = data.filter(
+    (product: ProductProps) => product.category === category
+  );
 
   return (
     <>
       <CategoryHeader>{category}</CategoryHeader>
       <BreadCrumps />
       <section className="max-w-container mt-30 mx-auto grid gap-40 mb-40 ">
-        {products.map((product, index) => (
-          <Product
-            key={product.slug}
-            reversed={index % 2 !== 0}
-            product={product}
-          />
-        ))}
+        {products && products.length > 0 ? (
+          products.map((product: ProductProps, index: number) => (
+            <Product
+              key={product.slug}
+              reversed={index % 2 !== 0}
+              product={product}
+            />
+          ))
+        ) : (
+          <p>No products found in this category.</p>
+        )}
       </section>
       <section className=" mt-18 grid md:grid-cols-2 gap-16 lg:gap-33 max-w-container mx-auto mb-24 object-cover">
         <div className=" flex flex-col md:row-start-1 lg:row-start-1  h-full items-start justify-center gap-8  ">
