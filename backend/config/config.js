@@ -1,4 +1,9 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config();
+const { createProductTable } = require('../models/productModel');
+const { createUserTable } = require('../models/userModel');
+const { createOrderTable } = require('../models/orderModel');
+const { createCartTable } = require('../models/cartModel');
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -10,4 +15,20 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-module.exports = pool;
+// Modify exports to include both pool and createTables
+module.exports = {
+  pool,
+  createTables: async () => {
+    try {
+      await createProductTable(pool);
+      await createUserTable(pool);
+      await createOrderTable(pool);
+      await createCartTable(pool);
+
+      console.log('All tables created successfully');
+    } catch (error) {
+      console.error('Error creating tables:', error);
+      throw error;
+    }
+  },
+};
