@@ -31,7 +31,7 @@ export default function CartBtn(): React.ReactElement {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = 'auto';
@@ -40,7 +40,7 @@ export default function CartBtn(): React.ReactElement {
   }, [isOpen, dispatch]);
 
   return (
-    <div className="relative">
+    <div className="relative pr-2">
       <button
         ref={btnRef}
         onClick={(e) => {
