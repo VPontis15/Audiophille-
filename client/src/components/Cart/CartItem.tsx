@@ -11,7 +11,7 @@ export default function CartItem({
     <div className="flex gap-4 items-center justify-between ">
       {/* <img src={product.image} alt="" /> */}
       <div className="flex gap-8 items-center">
-        <div className="w-16 h-16 bg-grey"></div>
+        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-grey"></div>
         <div className="flex flex-col gap-1  justify-center">
           <h5 className="text-base max-w-[19ch] font-bold uppercase">
             {product.name}
@@ -27,7 +27,7 @@ export default function CartItem({
                 dispatch({ type: 'cart/decreaseQuantity', payload: product.id })
               }
               type="button"
-              className="px-2.5 py-2 cursor-pointer "
+              className="px-2 sm:px-2.5 py-2 cursor-pointer "
             >
               &minus;
             </button>
@@ -40,7 +40,7 @@ export default function CartItem({
                 dispatch({ type: 'cart/increaseQuantity', payload: product.id })
               }
               type="button"
-              className="px-2.5 py-2 cursor-pointer"
+              className=" px-2 sm:px-2.5 py-2 cursor-pointer"
             >
               +
             </button>
