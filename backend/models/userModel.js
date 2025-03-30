@@ -14,7 +14,8 @@ module.exports.createUserTable = async function (pool) {
             postalCode VARCHAR(20),
             profileImage VARCHAR(255),
             isAdmin BOOLEAN DEFAULT FALSE,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )`;
 
     await pool.query(query);

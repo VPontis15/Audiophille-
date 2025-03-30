@@ -13,13 +13,14 @@ module.exports.createProductTable = async function (pool) {
         slug VARCHAR(100) NOT NULL UNIQUE,
         collection VARCHAR(100) NOT NULL,
         isFeatured BOOLEAN DEFAULT FALSE,
-        featuredImage VARCHAR(255),
+        featuredImage JSON,
         isNewArrival BOOLEAN DEFAULT FALSE,
         isBestSeller BOOLEAN DEFAULT FALSE,
         isOnSale BOOLEAN DEFAULT FALSE,
         salePrice DECIMAL(13, 2),
         saleEndDate DATE,
         relatedProducts JSON, 
+        packageContents JSON,
         numReviews INT NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
