@@ -11,6 +11,8 @@ import CheckoutRoute from './routes/CheckoutRoute';
 import Modal from './components/utils/Modal';
 import { Completed } from './components/utils/Completed';
 import DashboardLayout from './layouts/DashboardLayout';
+import { createPortal } from 'react-dom';
+import { ToastContainer } from 'react-toastify';
 
 const router = createBrowserRouter([
   {
@@ -92,6 +94,20 @@ const router = createBrowserRouter([
 function App() {
   return (
     <Provider store={store}>
+      {createPortal(
+        <ToastContainer
+          position="bottom-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />,
+        document.body
+      )}
       <RouterProvider router={router} />
     </Provider>
   );
