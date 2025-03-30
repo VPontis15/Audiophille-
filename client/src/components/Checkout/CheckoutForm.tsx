@@ -44,9 +44,12 @@ export default function CheckoutForm(): React.ReactElement {
       country,
       payment,
     };
-    const transactionId = Date.now().toString();
     console.log(data);
+    const transactionId = Date.now().toString();
     navigate(`/checkout/${transactionId}/success`);
+    // dispatch({
+    //   type: 'cart/emptyCart',
+    // });
     // handleResetForm();
   };
 
