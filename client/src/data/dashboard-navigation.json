@@ -89,34 +89,6 @@
     ]
   },
   {
-    "id": "settings",
-    "name": "Settings",
-    "path": "settings",
-    "icon": "settings",
-    "children": [
-      {
-        "id": "settings-general",
-        "name": "General Settings",
-        "path": "settings/general"
-      },
-      {
-        "id": "settings-payments",
-        "name": "Payment Settings",
-        "path": "settings/payments"
-      },
-      {
-        "id": "settings-shipping",
-        "name": "Shipping Settings",
-        "path": "settings/shipping"
-      },
-      {
-        "id": "settings-taxes",
-        "name": "Tax Settings",
-        "path": "settings/taxes"
-      }
-    ]
-  },
-  {
     "id": "analytics",
     "name": "Analytics",
     "path": "analytics",
@@ -159,6 +131,34 @@
         "id": "users-roles",
         "name": "Roles",
         "path": "users/roles"
+      }
+    ]
+  },
+  {
+    "id": "settings",
+    "name": "Settings",
+    "path": "settings",
+    "icon": "settings",
+    "children": [
+      {
+        "id": "settings-general",
+        "name": "General Settings",
+        "path": "settings/general"
+      },
+      {
+        "id": "settings-payments",
+        "name": "Payment Settings",
+        "path": "settings/payments"
+      },
+      {
+        "id": "settings-shipping",
+        "name": "Shipping Settings",
+        "path": "settings/shipping"
+      },
+      {
+        "id": "settings-taxes",
+        "name": "Tax Settings",
+        "path": "settings/taxes"
       }
     ]
   }
