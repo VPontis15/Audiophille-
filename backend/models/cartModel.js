@@ -5,6 +5,10 @@ module.exports.createCartTable = async function (pool) {
                 userId INT NOT NULL,
                 productId INT NOT NULL,
                 quantity INT NOT NULL,
+                addedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,             
+                UNIQUE (userId, productId),
+                CHECK (quantity > 0),
                 FOREIGN KEY (userId) REFERENCES users(id),
                 FOREIGN KEY (productId) REFERENCES products(id)
                 )`;

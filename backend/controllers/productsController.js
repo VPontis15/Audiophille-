@@ -1,5 +1,4 @@
-const fs = require('fs');
-const pool = require('../config/config');
+const { pool } = require('../config/config');
 
 exports.getAllProducts = async (req, res) => {
   try {
