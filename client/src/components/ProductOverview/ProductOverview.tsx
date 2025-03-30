@@ -10,6 +10,8 @@ export default function ProductOverview({
       <img
         src={productImg}
         alt=""
+        height={560}
+        width={540}
         className="md:h-[560px] w-full rounded-md md:max-w-[540px] object-cover"
       />
       <div className="flex flex-col justify-center">

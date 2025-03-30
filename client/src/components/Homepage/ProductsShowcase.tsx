@@ -19,7 +19,10 @@ export default function ProductsShowcase(): React.ReactElement {
           <picture>
             <source media="(max-width: 550px)" srcSet={ZSpeakerMobile} />
             <source media="(max-width: 850px)" srcSet={ZSpeakerTablet} />
+
             <img
+              width={410}
+              height={410}
               src={ZSpeakerDesktop}
               className=" max-w-[200px] z-10 md:max-w-[410px] object-cover md:w-full md:absolute md:-bottom-3 md:left-[20%]"
               alt="ZX9 speaker"
@@ -50,6 +53,8 @@ export default function ProductsShowcase(): React.ReactElement {
             <img
               fetchPriority="high"
               className="w-full h-full object-cover "
+              width={410}
+              height={410}
               src={zx7Speaker}
               alt="Hero background"
               aria-hidden="true"
