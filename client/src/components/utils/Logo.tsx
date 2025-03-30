@@ -2,7 +2,7 @@ import logo from '../../assets/logo.svg';
 import Link from './Link';
 
 interface LogoProps {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export default function Logo(props: LogoProps): React.ReactElement {

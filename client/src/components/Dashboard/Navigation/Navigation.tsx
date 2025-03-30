@@ -80,6 +80,7 @@ export default function Navigation(): React.ReactElement {
   }, [pathname, isPathActive]);
 
   // Prevent default link behavior for submenu items
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSubMenuItemClick = (e: React.MouseEvent, parentId: string) => {
     // Don't close the submenu when clicking a child item
     e.stopPropagation();
