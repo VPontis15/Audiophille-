@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './App.css';
 import Homepage from './routes/Homepage';
-import RootLayout from './RootLayout';
+import RootLayout from './layouts/RootLayout';
 import Products from './routes/Products';
 import CategoryRoute from './routes/CategoryRoute';
 import ProductRoute from './routes/ProductRoute';
@@ -10,6 +10,7 @@ import { store } from './state/store';
 import CheckoutRoute from './routes/CheckoutRoute';
 import Modal from './components/utils/Modal';
 import { Completed } from './components/utils/Completed';
+import DashboardLayout from './layouts/DashboardLayout';
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,36 @@ const router = createBrowserRouter([
             ),
           },
         ],
+      },
+    ],
+  },
+  {
+    path: 'admin/dashboard',
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        // element: <Dashboard />,
+      },
+      {
+        path: 'products',
+        // element: <DashboardProducts />,
+      },
+      {
+        path: 'products/:productId',
+        // element: <DashboardProduct />,
+      },
+      {
+        path: 'orders',
+        // element: <DashboardOrders />,
+      },
+      {
+        path: 'orders/:orderId',
+        // element: <DashboardOrder />,
+      },
+      {
+        path: 'settings',
+        // element: <DashboardSettings />,
       },
     ],
   },
