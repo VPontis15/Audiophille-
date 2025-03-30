@@ -39,6 +39,8 @@ export default function Homepage(): React.ReactElement {
           srcSet={`${bestGearMobile} 550w, ${bestGearTablet} 1024w, ${bestGearDesktop} 1280w`}
           sizes="(max-width: 550px) 100vw, (max-width: 960px) 100vw, 100vw"
           loading="lazy"
+          width={1920}
+          height={588}
           src={bestGearDesktop}
           className=" rounded-xl  h-[300px] md:h-[588px]  object-cover w-full row-start-1"
           alt="ZX9 speaker"
