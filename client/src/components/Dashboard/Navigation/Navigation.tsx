@@ -11,6 +11,24 @@ import { useLocation } from 'react-router';
 // Add a constant for the base path
 const BASE_PATH = '/admin/dashboard';
 
+/**
+ * Navigation component for the dashboard sidebar.
+ *
+ * This component renders a hierarchical navigation menu with expandable submenus.
+ * It handles the state of open/closed submenus and highlights active navigation items
+ * based on the current URL path.
+ *
+ * Features:
+ * - Toggle submenus open/close
+ * - Automatically expands submenus for active navigation paths
+ * - Highlights active navigation items and their parents
+ * - Maintains submenu open state when child items are selected
+ *
+ * @returns {React.ReactElement} The rendered navigation component
+ *
+ * @example
+ * <Navigation />
+ */
 export default function Navigation(): React.ReactElement {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const { pathname } = useLocation();
