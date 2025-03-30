@@ -1,0 +1,165 @@
+[
+  {
+    "id": "products",
+    "name": "Products",
+    "path": "products",
+    "icon": "shopping_cart",
+    "children": [
+      {
+        "id": "products-manage",
+        "name": "Manage Products",
+        "path": "products/manage"
+      },
+      {
+        "id": "products-create",
+        "name": "Create Product",
+        "path": "products/create"
+      },
+      {
+        "id": "products-categories",
+        "name": "Categories",
+        "path": "products/categories"
+      },
+      {
+        "id": "products-brands",
+        "name": "Brands",
+        "path": "products/brands"
+      },
+      {
+        "id": "products-attributes",
+        "name": "Attributes",
+        "path": "products/attributes"
+      },
+      {
+        "id": "products-collections",
+        "name": "Collections",
+        "path": "products/collections"
+      }
+    ]
+  },
+  {
+    "id": "orders",
+    "name": "Orders",
+    "path": "orders",
+    "icon": "receipt",
+    "children": [
+      {
+        "id": "orders-manage",
+        "name": "Manage Orders",
+        "path": "orders/manage"
+      },
+      {
+        "id": "orders-create",
+        "name": "Create Order",
+        "path": "orders/create"
+      },
+      {
+        "id": "orders-returns",
+        "name": "Returns",
+        "path": "orders/returns"
+      },
+      {
+        "id": "orders-refunds",
+        "name": "Refunds",
+        "path": "orders/refunds"
+      }
+    ]
+  },
+  {
+    "id": "customers",
+    "name": "Customers",
+    "path": "customers",
+    "icon": "people",
+    "children": [
+      {
+        "id": "customers-create",
+        "name": "Create Customer",
+        "path": "customers/create"
+      },
+      {
+        "id": "customers-manage",
+        "name": "Manage Customers",
+        "path": "customers/manage"
+      },
+      {
+        "id": "customers-groups",
+        "name": "Groups",
+        "path": "customers/groups"
+      }
+    ]
+  },
+  {
+    "id": "settings",
+    "name": "Settings",
+    "path": "settings",
+    "icon": "settings",
+    "children": [
+      {
+        "id": "settings-general",
+        "name": "General Settings",
+        "path": "settings/general"
+      },
+      {
+        "id": "settings-payments",
+        "name": "Payment Settings",
+        "path": "settings/payments"
+      },
+      {
+        "id": "settings-shipping",
+        "name": "Shipping Settings",
+        "path": "settings/shipping"
+      },
+      {
+        "id": "settings-taxes",
+        "name": "Tax Settings",
+        "path": "settings/taxes"
+      }
+    ]
+  },
+  {
+    "id": "analytics",
+    "name": "Analytics",
+    "path": "analytics",
+    "icon": "bar_chart",
+    "children": [
+      {
+        "id": "analytics-sales",
+        "name": "Sales Analytics",
+        "path": "analytics/sales"
+      },
+      {
+        "id": "analytics-customers",
+        "name": "Customer Analytics",
+        "path": "analytics/customers"
+      },
+      {
+        "id": "analytics-products",
+        "name": "Product Analytics",
+        "path": "analytics/products"
+      }
+    ]
+  },
+  {
+    "id": "users",
+    "name": "Users",
+    "path": "users",
+    "icon": "person",
+    "children": [
+      {
+        "id": "users-create",
+        "name": "Create User",
+        "path": "users/create"
+      },
+      {
+        "id": "users-manage",
+        "name": "Manage Users",
+        "path": "users/manage"
+      },
+      {
+        "id": "users-roles",
+        "name": "Roles",
+        "path": "users/roles"
+      }
+    ]
+  }
+]
