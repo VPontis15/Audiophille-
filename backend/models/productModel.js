@@ -5,6 +5,7 @@ module.exports.createProductTable = async function (pool) {
         name VARCHAR(100) NOT NULL,
         description TEXT NOT NULL,
         price DECIMAL(13, 2) NOT NULL,
+        status ENUM('published', 'draft') NOT NULL,
         gallery JSON NOT NULL,
         brand VARCHAR(100) NOT NULL,
         category VARCHAR(100) NOT NULL,

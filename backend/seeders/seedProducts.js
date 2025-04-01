@@ -648,6 +648,7 @@ async function seedProducts(count = 500) {
 
       const product = {
         name: productData.name,
+        status: 'published',
         description: productData.description,
         price: productData.price,
         gallery: JSON.stringify(gallery),
