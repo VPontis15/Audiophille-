@@ -22,6 +22,12 @@
   --color-success: #00ff00;
   --color-warning: #ffcc00;
 }
+html {
+  scroll-behavior: smooth;
+}
+* {
+  box-sizing: border-box;
+}
 
 body {
   font-family: var(--font-sans);
@@ -29,6 +35,33 @@ body {
 }
 body:has(div.opened) {
   overflow-y: hidden;
+}
+
+body::-webkit-scrollbar {
+  width: 11px;
+}
+*::selection {
+  background-color: var(--color-accent);
+  color: var(--color-body);
+  opacity: 1;
+}
+
+body {
+  scrollbar-width: 5px;
+  scroll-behavior: smooth;
+  scrollbar-color: var(--color-accent) var(--color-black);
+}
+body::-webkit-scrollbar-track {
+  background: var(--scrollbarBG);
+}
+body::-webkit-scrollbar-thumb {
+  background-color: var(--color-accent);
+  border-radius: 6px;
+  border: 3px solid var(--color-accent);
+}
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
 body

@@ -13,6 +13,7 @@ import { Completed } from './components/utils/Completed';
 import DashboardLayout from './layouts/DashboardLayout';
 import { createPortal } from 'react-dom';
 import { ToastContainer } from 'react-toastify';
+import DashboardManageProducts from './components/Dashboard/Products/ManageProducts/DashboardManageProducts';
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,46 @@ const router = createBrowserRouter([
       {
         path: 'products',
         // element: <DashboardProducts />,
+        children: [
+          {
+            index: true,
+            // element: <DashboardProducts />,
+          },
+          {
+            path: 'manage',
+            element: <DashboardManageProducts />,
+          },
+          {
+            path: 'create',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Create</h1>,
+          },
+          {
+            path: 'categories',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Categories</h1>,
+          },
+          {
+            path: 'brands',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Brands</h1>,
+          },
+          {
+            path: 'collections',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Collections</h1>,
+          },
+          {
+            path: 'attributes',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Attributes</h1>,
+          },
+          {
+            path: 'collections',
+            // element: <DashboardCreateProduct />,
+            element: <h1>Collections</h1>,
+          },
+        ],
       },
       {
         path: 'products/:productId',
