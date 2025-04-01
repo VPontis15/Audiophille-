@@ -26,17 +26,21 @@ const Button: FunctionComponent<ButtonProps> = ({
   primary,
   secondary,
   transparent,
+
   to = '',
+
   ...rest
 }) => {
   const classes = className(
-    ' py-3 px-8 md:py-4 font-bold md:px-8 border uppercase tracking-[1px] text-[13px] transition duration-300 ease-in-out cursor-pointer',
+    '  border py-3 px-8 md:py-4  md:px-8 font-bold uppercase tracking-[1px]  transition duration-300 ease-in-out cursor-pointer',
     rest.className, // Add custom classes directly as a separate argument
     {
-      'bg-accent text-white hover:bg-hover border-accent hover:border-hover hover:text-white ':
+      ' bg-accent text-white hover:bg-hover border-accent text-[13px] hover:border-hover hover:text-white ':
         primary,
-      'border-text text-text hover:bg-text hover:text-white': secondary,
-      'border-none bg-none text-text hover:text-accent': transparent,
+      '  border-text text-text hover:bg-text hover:text-white text-[13px]':
+        secondary,
+      ' border-none bg-none text-text hover:text-accent text-[13px]':
+        transparent,
     }
   );
   if (to) {
