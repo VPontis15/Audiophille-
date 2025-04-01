@@ -105,81 +105,77 @@ export default function Navigation(): React.ReactElement {
   };
 
   return (
-    <>
-      <nav className="bg-black text-white w-full grid min-h-screen p-4">
-        <Logo />
-        <ul className="grid h-full text-center items-center">
-          {dataNavigation.map((item, i: number) => {
-            // Check if this item or any of its children is active
-            const isItemActive = isPathActive(item.path);
+    <nav className="bg-black admin-navbar text-white h-screen sticky top-0 left-0 overflow-y-auto scrollbar p-4">
+      <Logo />
+      <ul className="grid gap-2 mt-4">
+        {dataNavigation.map((item, i: number) => {
+          // Check if this item or any of its children is active
+          const isItemActive = isPathActive(item.path);
 
-            return (
-              <NavItem
-                className={`text-white group group-hover:text-accent ${
-                  isItemActive ? 'text-accent' : ''
-                }`}
-                onClick={() => handleToggleSubmenu(item.id)}
-                id={item.id}
-                key={i}
-              >
-                <div className="flex items-center ">
-                  <NavigationIcon
+          return (
+            <NavItem
+              className={`text-white group group-hover:text-accent ${
+                isItemActive ? 'text-accent' : ''
+              }`}
+              onClick={() => handleToggleSubmenu(item.id)}
+              id={item.id}
+              key={i}
+            >
+              <div className="flex items-center ">
+                <NavigationIcon
+                  widths={20}
+                  height={20}
+                  name={item.icon}
+                  className="w-5 h-5 cursor-pointer"
+                />
+                <NavigationLink
+                  className={`text-white ${isItemActive ? 'text-accent' : ''}`}
+                  id={item.id}
+                  to={`${item.children[0]?.path}`}
+                >
+                  {item.name}
+                </NavigationLink>
+                {openMenus[item.id] ? (
+                  <MdOutlineArrowRight
                     widths={20}
                     height={20}
-                    name={item.icon}
-                    className="w-5 h-5 cursor-pointer"
+                    className="rotate-90 cursor-pointer transition-transform duration-300 h-5 w-5"
                   />
-                  <NavigationLink
-                    className={`text-white ${
-                      isItemActive ? 'text-accent' : ''
-                    }`}
-                    id={item.id}
-                    to={`${item.children[0]?.path}`}
-                  >
-                    {item.name}
-                  </NavigationLink>
-                  {openMenus[item.id] ? (
-                    <MdOutlineArrowRight
-                      widths={20}
-                      height={20}
-                      className="rotate-90 cursor-pointer transition-transform duration-300 h-5 w-5"
-                    />
-                  ) : (
-                    <MdOutlineArrowRight
-                      widths={20}
-                      height={20}
-                      className="transition-transform duration-300 h-5 w-5 cursor-pointer"
-                    />
-                  )}
-                </div>
-                <NavSubMenu isOpen={!!openMenus[item.id]} parentId={item.id}>
-                  {item.children.map((child, id: number) => {
-                    const isChildActive = isPathActive(child.path);
-                    return (
-                      <NavItem
+                ) : (
+                  <MdOutlineArrowRight
+                    widths={20}
+                    height={20}
+                    className="transition-transform duration-300 h-5 w-5 cursor-pointer"
+                  />
+                )}
+              </div>
+              <NavSubMenu isOpen={!!openMenus[item.id]} parentId={item.id}>
+                {item.children.map((child, id: number) => {
+                  const isChildActive = isPathActive(child.path);
+                  return (
+                    <NavItem
+                      id={child.id}
+                      key={id}
+                      className={isChildActive ? 'text-accent' : ''}
+                      onClick={(e) => handleSubMenuItemClick(e, item.id)}
+                    >
+                      <NavigationLink
+                        className={`text-white ${
+                          isChildActive ? '!text-accent font-bold' : ''
+                        }`}
                         id={child.id}
-                        key={id}
-                        className={isChildActive ? 'text-accent' : ''}
-                        onClick={(e) => handleSubMenuItemClick(e, item.id)}
+                        to={`${child.path}`}
                       >
-                        <NavigationLink
-                          className={`text-white ${
-                            isChildActive ? '!text-accent font-bold' : ''
-                          }`}
-                          id={child.id}
-                          to={`${child.path}`}
-                        >
-                          {child.name}
-                        </NavigationLink>
-                      </NavItem>
-                    );
-                  })}
-                </NavSubMenu>
-              </NavItem>
-            );
-          })}
-        </ul>
-      </nav>
-    </>
+                        {child.name}
+                      </NavigationLink>
+                    </NavItem>
+                  );
+                })}
+              </NavSubMenu>
+            </NavItem>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
