@@ -1,34 +1,15 @@
 import type { FunctionComponent } from 'react';
 import className from 'classnames';
 import Link from './Link';
-
-type ExcludeFromTuple<T extends any[], U> = {
-  [K in keyof T]: T[K] extends U ? never : T[K];
-}[number];
-
-type Exclusive<T extends PropertyKey[], U = any> = T[number] extends infer E
-  ? E extends string
-    ? Record<E, U> & { [k in ExcludeFromTuple<T, E>]?: never }
-    : never
-  : never & {};
-
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  Partial<{
-    outline?: boolean;
-    rounded?: boolean;
-    to?: string;
-    children: React.ReactNode;
-  }> &
-  Exclusive<['primary', 'secondary', 'transparent'], boolean> &
-  Exclusive<['sm', 'lg'], boolean>; // Note: md is omitted as it's the default
+import { ButtonProps } from '../../types/genericTypes';
 
 const Button: FunctionComponent<ButtonProps> = ({
   children,
   primary,
   secondary,
   transparent,
-  sm,
-  lg,
+  sm = false,
+  lg = false,
   to = '',
   ...rest
 }) => {
