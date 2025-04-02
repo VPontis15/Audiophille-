@@ -15,6 +15,7 @@ import { createPortal } from 'react-dom';
 import { ToastContainer } from 'react-toastify';
 import DashboardManageProducts from './components/Dashboard/Products/ManageProducts/DashboardManageProducts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import DashboardSingleProduct from './components/Dashboard/Products/ManageProducts/DashboardSingleProduct';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -115,7 +116,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'products/:productId',
-        // element: <DashboardProduct />,
+        element: <DashboardSingleProduct />,
       },
       {
         path: 'orders',
