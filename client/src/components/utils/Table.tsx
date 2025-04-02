@@ -19,7 +19,7 @@ export default function Table({
     <table className="min-w-full overflow-y-auto divide-y pl-120 divide-gray-200 table-fixed">
       <thead className="bg-gray-50">
         <tr>
-          <TableHeadTitles isLoading={isLoading ?? false} config={config} />
+          <TableHeadTitles config={config} />
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
