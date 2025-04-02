@@ -713,7 +713,7 @@ async function seedProducts(count = 500) {
         gallery: JSON.stringify(gallery),
         brand: productData.name.split(' ')[0], // Extract brand from name
         category: productData.category,
-        countInStock: faker.number.int({ min: 10, max: 50 }),
+        quantity: faker.number.int({ min: 10, max: 50 }),
         rating: parseFloat(
           faker.number.float({ min: 4.0, max: 5.0, precision: 0.1 })
         ),
@@ -812,7 +812,7 @@ async function seedProducts(count = 500) {
           gallery: JSON.stringify(galleryImages),
           brand: brand,
           category: category,
-          countInStock: faker.number.int({ min: 0, max: 100 }),
+          quantity: faker.number.int({ min: 0, max: 100 }),
           rating: parseFloat(
             faker.number.float({ min: 1, max: 5, precision: 0.1 })
           ),
