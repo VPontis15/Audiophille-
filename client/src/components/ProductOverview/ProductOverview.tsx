@@ -1,6 +1,6 @@
 import productImg from '../../assets/desktop/product-yx1-earphones/image-product.jpg';
 import { ProductOverviewProps } from '../../types/ProductTypes';
-import AddToCartBtn from '../utils/AddToCartBtn';
+import AddToCartBtn from '../components/ui/AddToCartBtn';
 
 export default function ProductOverview({
   product,

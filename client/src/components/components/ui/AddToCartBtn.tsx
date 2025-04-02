@@ -2,9 +2,9 @@ import { FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FaCartArrowDown } from 'react-icons/fa6';
 
-import Button from './Button';
-import { CartItem, ProductOverviewProps } from '../../types/ProductTypes';
-import { useAppDispatch } from '../../types/hooks';
+import Button from '../../utils/Button';
+import { CartItem, ProductOverviewProps } from '../../../types/ProductTypes';
+import { useAppDispatch } from '../../../types/hooks';
 
 export default function AddToCartBtn({
   product,

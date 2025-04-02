@@ -14,7 +14,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import { createPortal } from 'react-dom';
 import { ToastContainer } from 'react-toastify';
 import DashboardManageProducts from './components/Dashboard/Products/ManageProducts/DashboardManageProducts';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -132,25 +132,29 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
+const queryClient = new QueryClient();
 function App() {
   return (
-    <Provider store={store}>
-      {createPortal(
-        <ToastContainer
-          position="bottom-center"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />,
-        document.body
-      )}
-      <RouterProvider router={router} />
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        {createPortal(
+          <ToastContainer
+            position="bottom-center"
+            autoClose={2000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />,
+          document.body
+        )}
+        <RouterProvider router={router} />
+      </Provider>
+    </QueryClientProvider>
   );
 }
 

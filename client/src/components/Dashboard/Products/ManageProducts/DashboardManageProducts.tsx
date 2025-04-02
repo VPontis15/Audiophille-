@@ -1,147 +1,17 @@
 import Button from '../../../utils/Button';
 import Table from '../../../utils/Table';
-import { SlOptionsVertical } from 'react-icons/sl';
+import API from '../../../../api/API';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router';
+import {
+  AdminProductProps,
+  APIResponse,
+  Column,
+  QueryParams,
+} from '../../../../types/Dashboard/types';
+import { Skeleton } from '../../../utils/skeleton';
 
 export default function DashboardManageProducts(): React.ReactElement {
-  const data = [
-    {
-      id: 1,
-      status: 'published',
-      label: 'Product 1',
-      quantity: 10,
-      price: 100,
-      brand: 'Brand B',
-      category: 'Category C',
-    },
-    {
-      id: 2,
-      status: 'draft',
-      label: 'Product 2',
-      quantity: 20,
-      price: 200,
-      brand: 'Brand A',
-      category: 'Category A',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    {
-      id: 3,
-      status: 'published',
-      label: 'Product 3',
-      quantity: 30,
-      price: 300,
-      brand: 'Brand C',
-      category: 'Category B',
-    },
-    // Keep other products...
-  ];
-
   const keyfn = (item: unknown) => {
     // Use ID if available, otherwise fall back to label
     if (typeof item === 'object' && item !== null && 'id' in item) {
@@ -155,79 +25,198 @@ export default function DashboardManageProducts(): React.ReactElement {
     }
     return String(item);
   };
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('s') || '';
 
-  const config = [
+  const page = searchParams.get('page') || 1;
+  const limit = searchParams.get('limit') || 10;
+  const sort = searchParams.get('sort') || 'price';
+
+  // Get fields from searchParams
+
+  const config: Column[] = [
     {
       label: 'id',
-      render: (column: unknown) => column.id,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return column.id;
+      },
+      skeleton: { type: 'number' },
     },
     {
       label: 'status',
-      render: (column: unknown) => (
-        <span
-          className={`min-w-25 rounded-md text-xs px-5 py-3 inline-block ${
-            column.status === 'published'
-              ? 'bg-green-100 text-green-800 '
-              : 'bg-yellow-100 text-yellow-800 '
-          }`}
-        >
-          {column.status}
-        </span>
-      ),
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return (
+          <span
+            className={`min-w-25 rounded-md text-xs px-5 py-3 inline-block ${
+              column.status === 'published'
+                ? 'bg-green-100 text-green-800 '
+                : 'bg-yellow-100 text-yellow-800 '
+            }`}
+          >
+            {column.status}
+          </span>
+        );
+      },
+      skeleton: { type: 'status' },
     },
     {
       label: 'image',
-      render: (column: unknown) =>
-        column.image ? (
-          <img
-            className="w-14 h-14 rounded-full object-cover mx-auto"
-            src={column.src}
-            alt={column.image}
-          />
-        ) : (
-          <div className="w-14 h-14 rounded-full bg-amber-200 mx-auto"></div>
-        ),
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        if (!column.featuredImage) {
+          return (
+            <Skeleton className="w-14.5 h-14.5 rounded-md object-cover mx-auto" />
+          );
+        }
+
+        try {
+          const src = JSON.parse(column.featuredImage);
+          return (
+            <img
+              width={58}
+              height={58}
+              loading="lazy"
+              className="w-14.5 h-14.5 rounded-md object-cover mx-auto"
+              src={src.thumbnail.url}
+              alt={column.name}
+            />
+          );
+        } catch (error) {
+          console.error('Error parsing featuredImage JSON:', error);
+          return (
+            <Skeleton className="w-14.5 h-14.5 rounded-md object-cover mx-auto" />
+          );
+        }
+      },
+      skeleton: { type: 'image' },
     },
     {
       label: 'name',
-      render: (column: unknown) => column.label,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return column.name;
+      },
+      skeleton: { type: 'text' },
     },
     {
       label: 'quantity',
-      render: (column: unknown) => column.quantity,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return column.countInStock;
+      },
+      skeleton: { type: 'number' },
     },
     {
       label: 'price',
-      render: (column: unknown) => `$${column.price.toFixed(2)}`,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return `$${column.price}`;
+      },
+      skeleton: { type: 'number' },
     },
     {
       label: 'category',
-      render: (column: unknown) => column.category,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return column.category;
+      },
+      skeleton: { type: 'text' },
     },
     {
       label: 'brand',
-      render: (column: unknown) => column.brand,
+      render: (item: unknown) => {
+        const column = item as AdminProductProps;
+        return column.brand;
+      },
+      skeleton: { type: 'text' },
     },
     {
       label: 'actions',
-      render: (column: unknown) => (
-        // <SlOptionsVertical className="text-gray-900 text-center mx-auto cursor-pointer" />
-
+      render: () => (
         <div className="flex gap-2 justify-center">
-          <Button primary>View</Button>
-          <Button secondary>Delete</Button>
+          <Button sm primary>
+            View
+          </Button>
+          <Button sm secondary>
+            Delete
+          </Button>
         </div>
       ),
+      skeleton: { type: 'action' },
     },
   ];
 
+  const fields = Object.keys({
+    id: true,
+    name: true,
+    price: true,
+    status: true,
+    countInStock: true,
+    brand: true,
+    category: true,
+    featuredImage: true,
+  }).join(',');
+
+  const queryParams: QueryParams = {
+    limit: limit,
+    page: page,
+    sort: sort,
+    fields: fields,
+  };
+
+  // Only add search parameter if a search term exists
+  if (searchTerm) {
+    queryParams.name = { like: searchTerm };
+  }
+
+  const api = new API();
+  const queryKey = ['products', page, limit, sort, fields, searchTerm];
+
+  const {
+    data: {
+      products = [],
+      results = 0,
+      totalPages = 0,
+      currentPage = 1,
+      error = '',
+    } = {},
+    isLoading,
+  } = useQuery<APIResponse>({
+    queryKey: queryKey,
+    queryFn: async () => {
+      try {
+        const response = await api.fetchAll<APIResponse>(
+          'products',
+          queryParams
+        );
+        return response;
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        throw error; // Rethrow the error to handle it in the component
+      }
+    },
+  });
+  console.log(totalPages, currentPage, results, products);
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-h3 font-bold mb-6">Manage Products</h1>
 
-      <div className="w-full bg-white rounded-lg shadow">
+      <div className="w-full bg-white px-6 rounded-lg ">
         <div className="overflow-x-auto">
-          <Table keyfn={keyfn} data={data} config={config} />
+          {!isLoading && (
+            <span className="text-right inline-block w-full">
+              Results: {results}
+            </span>
+          )}
+          <Table
+            isLoading={isLoading}
+            error={error}
+            keyfn={keyfn}
+            data={products}
+            config={config}
+          />
         </div>
       </div>
     </div>

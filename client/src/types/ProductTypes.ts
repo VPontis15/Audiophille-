@@ -1,3 +1,44 @@
+export interface ImageVariant {
+  url: string;
+  alt?: string;
+}
+
+// Image type with all variants including new thumbnail
+export interface ImageSet {
+  desktop: ImageVariant;
+  tablet: ImageVariant;
+  mobile: ImageVariant;
+  thumbnail: ImageVariant; // New thumbnail variant
+}
+
+// For gallery items
+export interface GalleryItem {
+  desktop: ImageVariant;
+  tablet: ImageVariant;
+  mobile: ImageVariant;
+  thumbnail: ImageVariant; // New thumbnail variant
+}
+
+// Gallery type
+export interface GalleryJSON {
+  [index: number]: GalleryItem;
+}
+
+// For related products
+export interface RelatedProductJSON {
+  slug: string;
+  name: string;
+  image: ImageSet;
+}
+
+// For package contents
+export interface PackageContentJSON {
+  quantity: number;
+  item: string;
+}
+
+// Updated AdminProductProps with thumbnail support
+
 export interface RelatedProductProps {
   name: string;
   img?: string;
