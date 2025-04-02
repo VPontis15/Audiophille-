@@ -27,6 +27,7 @@ const fields = [
   'featuredImage',
   'slug',
   'createdAt',
+  'salePrice',
 ].join(',');
 
 export default function DashboardManageProducts(): React.ReactElement {

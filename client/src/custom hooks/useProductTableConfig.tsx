@@ -85,7 +85,6 @@ export function useProductTableConfig() {
               {column.quantity
                 ? `in stock(${column.quantity})`
                 : 'Out of stock'}
-              ;
             </span>
           );
         },
@@ -96,7 +95,14 @@ export function useProductTableConfig() {
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
-          return `$${column.price}`;
+          return column.salePrice ? (
+            <div className="flex flex-col gap-1">
+              <span className=" line-through text-xs">{`$${column.price}`}</span>
+              <span className="">${column.salePrice}</span>
+            </div>
+          ) : (
+            `€${column.price}`
+          );
         },
         skeleton: { type: 'number' },
       },

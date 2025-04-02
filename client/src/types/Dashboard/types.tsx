@@ -49,6 +49,7 @@ export interface AdminProductProps {
   createdAt: string;
   thumbnail?: ImageVariant; // New thumbnail variant
   slug?: string;
+  salePrice?: number;
 }
 
 export type APIResponse = {
