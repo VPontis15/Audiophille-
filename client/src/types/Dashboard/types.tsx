@@ -42,12 +42,13 @@ export interface AdminProductProps {
   name: string;
   status: string;
   price: number;
-  countInStock: number;
+  quantity: number;
   brand: string;
   category: string;
   featuredImage: string;
   createdAt: string;
   thumbnail?: ImageVariant; // New thumbnail variant
+  slug?: string;
 }
 
 export type APIResponse = {
@@ -85,6 +86,7 @@ export interface TableHeaderProps {
 
 export interface Column {
   label: string;
+  sortable?: boolean;
   render: (item: unknown) => React.ReactNode;
   skeleton?: {
     type?: 'number' | 'image' | 'text' | 'action' | 'status';
@@ -95,8 +97,8 @@ export interface Column {
 }
 
 export interface TableHeadTitlesProps {
-  isLoading: boolean;
   config: Column[];
+  sortable?: boolean;
 }
 
 export interface TableRowsProps {
