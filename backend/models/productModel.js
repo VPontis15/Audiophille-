@@ -9,7 +9,7 @@ module.exports.createProductTable = async function (pool) {
         gallery JSON NOT NULL,
         brand VARCHAR(100) NOT NULL,
         category VARCHAR(100) NOT NULL,
-        countInStock INT NOT NULL,
+        quantity INT NOT NULL,
         rating DECIMAL(2, 1) NOT NULL,
         slug VARCHAR(100) NOT NULL UNIQUE,
         collection VARCHAR(100) NOT NULL,
