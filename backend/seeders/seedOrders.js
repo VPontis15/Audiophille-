@@ -5,65 +5,87 @@ async function seedOrders(count = 100) {
   try {
     console.log(`Seeding ${count} orders...`);
 
-    // First, get all users from the database
-    const [users] = await pool.query('SELECT id FROM users LIMIT 100');
+    // Get users that actually exist in the database
+    const [users] = await pool.query('SELECT id FROM users ORDER BY id');
+    if (users.length === 0) {
+      throw new Error(
+        'No users found in the database. Please run the user seeder first.'
+      );
+    }
+    console.log(`Found ${users.length} users to create orders for`);
 
-    // Then, get all products from the database
+    // Get products that actually exist in the database
     const [products] = await pool.query(
-      'SELECT id, price FROM products LIMIT 500'
+      'SELECT id, name, price, featuredImage FROM products'
+    );
+    if (products.length === 0) {
+      throw new Error(
+        'No products found in the database. Please run the product seeder first.'
+      );
+    }
+    console.log(`Found ${products.length} products to add to orders`);
+
+    // Check the structure of orders table to see what columns it has
+    const [orderColumns] = await pool.query(`
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'orders'
+    `);
+
+    const orderColumnNames = orderColumns.map((col) =>
+      col.COLUMN_NAME.toLowerCase()
+    );
+    console.log('Detected order columns:', orderColumnNames.join(', '));
+
+    // Check if orderItems table exists
+    const [orderItemsTable] = await pool.query(`
+      SELECT 1 FROM information_schema.tables 
+      WHERE table_schema = DATABASE() AND table_name = 'orderItems'
+    `);
+    const orderItemsTableExists = orderItemsTable.length > 0;
+    console.log(
+      `OrderItems table ${orderItemsTableExists ? 'exists' : 'does not exist'}`
     );
 
-    if (users.length === 0 || products.length === 0) {
-      throw new Error('You need to seed users and products first');
-    }
-
-    // Order status options
-    const orderStatuses = [
-      'pending',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled',
-    ];
-
-    // Payment methods - replace credit_card with viva
-    const paymentMethods = [
-      'viva',
-      'paypal',
-      'stripe',
-      'credit_card',
-      'bank_transfer',
-      'cash_on_delivery',
-    ];
-
-    // Create random orders
+    // Generate and insert orders
     for (let i = 0; i < count; i++) {
-      const userId =
-        users[faker.number.int({ min: 0, max: users.length - 1 })].id;
+      // Select a random user
+      const randomUserIndex = faker.number.int({
+        min: 0,
+        max: users.length - 1,
+      });
+      const userId = users[randomUserIndex].id;
 
-      // Generate a random number of products for this order (1-5)
-      const numProducts = faker.number.int({ min: 1, max: 5 });
-      let orderItems = [];
-      let totalPrice = 0;
+      // Generate between 1 and 5 order items
+      const numItems = faker.number.int({ min: 1, max: 5 });
+      const orderItems = [];
+      let itemsPrice = 0;
 
-      // Generate order items
-      for (let j = 0; j < numProducts; j++) {
-        const product =
-          products[faker.number.int({ min: 0, max: products.length - 1 })];
-        const quantity = faker.number.int({ min: 1, max: 3 });
-        const itemPrice = product.price;
-        const itemTotal = itemPrice * quantity;
+      // Generate random order items
+      for (let j = 0; j < numItems; j++) {
+        const randomProductIndex = faker.number.int({
+          min: 0,
+          max: products.length - 1,
+        });
+        const product = products[randomProductIndex];
+        const quantity = faker.number.int({ min: 1, max: 5 });
+        const price = parseFloat(product.price);
 
         orderItems.push({
           productId: product.id,
+          name: product.name,
           quantity,
-          price: itemPrice,
+          price,
         });
 
-        totalPrice += itemTotal;
+        itemsPrice += price * quantity;
       }
 
-      // Create shipping address
+      // Round itemsPrice to 2 decimal places
+      itemsPrice = parseFloat(itemsPrice.toFixed(2));
+
+      // Generate shipping address
       const shippingAddress = {
         name: faker.person.fullName(),
         address: faker.location.streetAddress(),
@@ -74,83 +96,142 @@ async function seedOrders(count = 100) {
         phone: faker.phone.number(),
       };
 
-      // Calculate additional costs
-      const shippingPrice = faker.number.float({
-        min: 5,
-        max: 25,
-        precision: 0.01,
-      });
-      const taxPrice = totalPrice * 0.1; // 10% tax
-      const finalTotal = totalPrice + shippingPrice + taxPrice;
+      // Calculate order totals
+      const shippingPrice = parseFloat((itemsPrice * 0.005).toFixed(2)); // 0.5% of items total
+      const taxPrice = parseFloat((itemsPrice * 0.1).toFixed(2)); // 10% tax
+      const totalPrice = parseFloat(
+        (itemsPrice + shippingPrice + taxPrice).toFixed(2)
+      );
 
-      // Create order
-      const order = {
+      // Choose payment method
+      const paymentMethod = faker.helpers.arrayElement([
+        'paypal',
+        'stripe',
+        'credit_card',
+        'cash_on_delivery',
+      ]);
+
+      // Order status and dates
+      const statusOptions = [
+        'pending',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled',
+      ];
+      const status = faker.helpers.arrayElement(statusOptions);
+
+      const createdAt = faker.date.past({ days: 60 });
+      const isPaid = status !== 'pending' && faker.datatype.boolean(0.8);
+
+      let paidAt = null;
+      if (isPaid) {
+        paidAt = new Date(
+          createdAt.getTime() +
+            faker.number.int({ min: 1, max: 48 }) * 60 * 60 * 1000
+        ); // 1-48 hours after order
+      }
+
+      let deliveredAt = null;
+      if (status === 'delivered') {
+        deliveredAt = new Date(
+          createdAt.getTime() +
+            faker.number.int({ min: 48, max: 240 }) * 60 * 60 * 1000
+        ); // 2-10 days after order
+      }
+
+      const updatedAt = new Date();
+
+      // Create order object without orderItems field
+      const orderData = {
         userId,
-        orderItems: JSON.stringify(orderItems),
         shippingAddress: JSON.stringify(shippingAddress),
-        paymentMethod: faker.helpers.arrayElement(paymentMethods),
-        itemsPrice: totalPrice.toFixed(2),
-        shippingPrice: shippingPrice.toFixed(2),
-        taxPrice: taxPrice.toFixed(2),
-        totalPrice: finalTotal.toFixed(2),
-        isPaid: faker.datatype.boolean(0.7), // 70% of orders are paid
-        paidAt: null,
-        status: faker.helpers.arrayElement(orderStatuses),
-        deliveredAt: null,
-        createdAt: faker.date.past({ years: 1 }),
-        updatedAt: faker.date.recent(),
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+        isPaid,
+        paidAt,
+        status,
+        deliveredAt,
+        createdAt,
+        updatedAt,
       };
 
-      // Set paid date if order is paid
-      if (order.isPaid) {
-        order.paidAt = new Date(
-          faker.date.between({
-            from: order.createdAt,
-            to: new Date(order.createdAt.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days after order creation
-          })
-        );
+      // Remove any properties that don't exist in the orders table
+      for (const key in orderData) {
+        if (!orderColumnNames.includes(key.toLowerCase())) {
+          delete orderData[key];
+          console.log(`Removed non-existent column '${key}' from order data`);
+        }
       }
 
-      // Set delivered date if order is delivered
-      if (order.status === 'delivered') {
-        const deliveryDate = order.isPaid ? order.paidAt : order.createdAt;
-
-        order.deliveredAt = new Date(
-          faker.date.between({
-            from: deliveryDate,
-            to: new Date(deliveryDate.getTime() + 7 * 24 * 60 * 60 * 1000), // Up to 7 days after payment/creation
-          })
+      try {
+        // Insert order
+        const [orderResult] = await pool.query(
+          'INSERT INTO orders SET ?',
+          orderData
         );
-      }
+        const orderId = orderResult.insertId;
+        console.log(`Created order #${orderId} for user #${userId}`);
 
-      // Insert order into database
-      const [orderResult] = await pool.query('INSERT INTO orders SET ?', order);
-      const orderId = orderResult.insertId;
+        // If orderItems table exists, insert items there
+        if (orderItemsTableExists) {
+          console.log(`Adding ${orderItems.length} items to order #${orderId}`);
+          for (const item of orderItems) {
+            // Get product image
+            const product = products.find((p) => p.id === item.productId);
+            let image = '';
 
-      // Insert individual order items
-      for (const item of orderItems) {
-        await pool.query(
-          'INSERT INTO orderItems (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)',
-          [orderId, item.productId, item.quantity, item.price]
-        );
-      }
+            if (product && product.featuredImage) {
+              try {
+                const featuredImage = JSON.parse(product.featuredImage);
+                if (featuredImage.thumbnail && featuredImage.thumbnail.url) {
+                  image = featuredImage.thumbnail.url;
+                } else if (featuredImage.mobile && featuredImage.mobile.url) {
+                  image = featuredImage.mobile.url;
+                }
+              } catch (e) {
+                console.warn(
+                  `Could not parse featuredImage for product ${product.id}`
+                );
+              }
+            }
 
-      if ((i + 1) % 10 === 0) {
-        console.log(`Created ${i + 1} orders so far...`);
+            await pool.query('INSERT INTO orderItems SET ?', {
+              orderId,
+              productId: item.productId,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              image,
+            });
+          }
+        }
+
+        if ((i + 1) % 10 === 0 || i === count - 1) {
+          console.log(`Added ${i + 1}/${count} orders`);
+        }
+      } catch (error) {
+        console.error(`Error creating order ${i + 1}:`, error.message);
+        // Continue with next order
       }
     }
 
-    console.log(`${count} orders seeded successfully`);
+    console.log('Order seeding completed successfully');
   } catch (error) {
     console.error('Error seeding orders:', error);
+    throw error;
   } finally {
+    console.log('Closing database connection');
     await pool.end();
   }
 }
 
 // Run the seeder with default or specified count
 seedOrders(process.argv[2] || 100)
-  .then(() => console.log('Order seeding completed'))
+  .then(() => console.log('Order seeding process finished'))
   .catch((err) => {
     console.error('Order seeding failed:', err);
     process.exit(1);

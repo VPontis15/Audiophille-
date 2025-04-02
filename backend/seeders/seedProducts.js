@@ -1,5 +1,4 @@
 const { faker } = require('@faker-js/faker');
-const mysql = require('mysql2/promise');
 const { pool } = require('../config/config');
 const fs = require('fs');
 const path = require('path');
@@ -98,7 +97,25 @@ const audioBrands = [
   'AcousticEdge',
 ];
 
-// Replace the getCategoryImages function with this curated version
+// Update the generateThumbnailUrl function to use 80x80 instead of 56x56
+function generateThumbnailUrl(imageUrl, alt) {
+  // Extract the base URL without query parameters
+  const baseUrl = imageUrl.split('?')[0];
+
+  // For picsum.photos, create a specific 80x80 thumbnail (increased from 56x56)
+  if (baseUrl.includes('picsum.photos')) {
+    const urlParts = baseUrl.split('/');
+    const imageId = urlParts[urlParts.indexOf('id') + 1];
+    // Add a cache buster to ensure unique thumbnails
+    const cacheBuster = Date.now() + Math.floor(Math.random() * 1000);
+    return `https://picsum.photos/id/${imageId}/80/80?${cacheBuster}`;
+  }
+
+  // This is a simple fallback
+  return baseUrl.replace(/\/([^\/]+)$/, '/thumbnail-$1');
+}
+
+// Update the getCategoryImages function to use 80x80 for thumbnails
 function getCategoryImages(category, identifier = '') {
   // Curated lists of image IDs that look like tech/audio products
   const headphoneImageIds = [
@@ -143,6 +160,7 @@ function getCategoryImages(category, identifier = '') {
     desktopUrl: `https://picsum.photos/id/${imageId}/1980/1080?${cacheBuster}`,
     tabletUrl: `https://picsum.photos/id/${imageId}/1378/704?${cacheBuster}`,
     mobileUrl: `https://picsum.photos/id/${imageId}/654/736?${cacheBuster}`,
+    thumbnailUrl: `https://picsum.photos/id/${imageId}/80/80?${cacheBuster}`,
     keyword: category,
   };
 }
@@ -603,6 +621,13 @@ async function seedProducts(count = 500) {
             url: productData.gallery.first.mobile,
             alt: `${productData.name} gallery image 1 - mobile`,
           },
+          thumbnail: {
+            url: generateThumbnailUrl(
+              productData.gallery.first.mobile,
+              productData.name
+            ),
+            alt: `${productData.name} gallery image 1 - thumbnail`,
+          },
         },
         {
           desktop: {
@@ -616,6 +641,13 @@ async function seedProducts(count = 500) {
           mobile: {
             url: productData.gallery.second.mobile,
             alt: `${productData.name} gallery image 2 - mobile`,
+          },
+          thumbnail: {
+            url: generateThumbnailUrl(
+              productData.gallery.second.mobile,
+              productData.name
+            ),
+            alt: `${productData.name} gallery image 2 - thumbnail`,
           },
         },
         {
@@ -631,8 +663,35 @@ async function seedProducts(count = 500) {
             url: productData.gallery.third.mobile,
             alt: `${productData.name} gallery image 3 - mobile`,
           },
+          thumbnail: {
+            url: generateThumbnailUrl(
+              productData.gallery.third.mobile,
+              productData.name
+            ),
+            alt: `${productData.name} gallery image 3 - thumbnail`,
+          },
         },
       ];
+
+      // Add thumbnail to featured image
+      const featuredImage = {
+        desktop: {
+          url: productData.image.desktop,
+          alt: `${productData.name} - desktop`,
+        },
+        tablet: {
+          url: productData.image.tablet,
+          alt: `${productData.name} - tablet`,
+        },
+        mobile: {
+          url: productData.image.mobile,
+          alt: `${productData.name} - mobile`,
+        },
+        thumbnail: {
+          url: generateThumbnailUrl(productData.image.mobile, productData.name),
+          alt: `${productData.name} - thumbnail`,
+        },
+      };
 
       // Convert package contents
       const packageContents = productData.includes.map(
@@ -665,20 +724,7 @@ async function seedProducts(count = 500) {
           'budget',
         ]),
         isFeatured: productData.new,
-        featuredImage: JSON.stringify({
-          desktop: {
-            url: productData.image.desktop,
-            alt: `${productData.name} - desktop`,
-          },
-          tablet: {
-            url: productData.image.tablet,
-            alt: `${productData.name} - tablet`,
-          },
-          mobile: {
-            url: productData.image.mobile,
-            alt: `${productData.name} - mobile`,
-          },
-        }),
+        featuredImage: JSON.stringify(featuredImage),
         isNewArrival: productData.new,
         isBestSeller: faker.datatype.boolean(0.3),
         isOnSale: faker.datatype.boolean(0.3),
@@ -711,7 +757,7 @@ async function seedProducts(count = 500) {
           'earphones',
         ]);
 
-        // Get category-specific image URLs for the featured image
+        // Get category-specific image URLs for the featured image with thumbnails
         const featuredImageData = getCategoryImages(category, 'featured-');
         const featuredImageSet = {
           desktop: {
@@ -726,10 +772,14 @@ async function seedProducts(count = 500) {
             url: featuredImageData.mobileUrl,
             alt: `Featured ${category} - mobile`,
           },
+          thumbnail: {
+            url: featuredImageData.thumbnailUrl,
+            alt: `Featured ${category} - thumbnail`,
+          },
         };
 
         const galleryImages = [];
-        // Create 3 gallery images with different views
+        // Create 3 gallery images with different views, including thumbnails
         for (let view = 1; view <= 3; view++) {
           const galleryImageData = getCategoryImages(category, `view${view}-`);
           galleryImages.push({
@@ -744,6 +794,10 @@ async function seedProducts(count = 500) {
             mobile: {
               url: galleryImageData.mobileUrl,
               alt: `${category} view ${view} - mobile`,
+            },
+            thumbnail: {
+              url: galleryImageData.thumbnailUrl,
+              alt: `${category} view ${view} - thumbnail`,
             },
           });
         }

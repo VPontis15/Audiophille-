@@ -24,6 +24,12 @@ module.exports.createProductTable = async function (pool) {
         packageContents JSON,
         numReviews INT NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX (name),
+        INDEX (category),
+        INDEX (brand),
+        INDEX (slug)
         )`;
 
     await pool.query(query);
