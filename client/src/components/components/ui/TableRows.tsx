@@ -9,7 +9,6 @@ export default function TableRows({
 }: TableRowsProps): React.ReactElement {
   if (isLoading) {
     const skeletonCount = data.length || 5;
-    console.log('skeletonCount', skeletonCount);
     if (skeletonCount) {
       return (
         <>

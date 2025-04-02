@@ -34,11 +34,14 @@ export default function TableHeadTitles({
         // Get the current sort direction for this column
         const sortDirection = getSortDirection(column.label, sortFields);
 
+        // Determine if this column is actively being sorted
+        const isActiveSortColumn = sortDirection !== null;
+
         return (
           <th
-            className={`capitalize py-3 px-4 text-lg font-medium text-text text-center border-b ${
-              isColumnSortable ? 'cursor-pointer hover:bg-gray-50' : ''
-            }`}
+            className={`capitalize py-3 px-4 text-lg transition duration-300 text-text text-center border-b ${
+              isColumnSortable ? 'cursor-pointer hover:bg-gray-100' : ''
+            } ${isActiveSortColumn ? 'font-bold' : 'font-medium'}`}
             key={`header-${columnIndex}-${column.label}`}
             onClick={
               isColumnSortable
