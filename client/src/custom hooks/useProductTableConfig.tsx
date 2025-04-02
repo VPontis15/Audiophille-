@@ -76,7 +76,18 @@ export function useProductTableConfig() {
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
-          return column.quantity;
+          return (
+            <span
+              className={`font-bold ${
+                column.quantity ? 'text-green-500' : 'text-error'
+              }`}
+            >
+              {column.quantity
+                ? `in stock(${column.quantity})`
+                : 'Out of stock'}
+              ;
+            </span>
+          );
         },
         skeleton: { type: 'number' },
       },
