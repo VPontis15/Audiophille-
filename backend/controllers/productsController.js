@@ -287,8 +287,8 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const [result] = await pool.execute('DELETE FROM products WHERE id = ?', [
-      req.params.id,
+    const [result] = await pool.execute('DELETE FROM products WHERE slug = ?', [
+      req.params.slug,
     ]);
 
     // Check if any rows were affected
