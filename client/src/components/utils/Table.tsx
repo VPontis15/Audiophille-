@@ -16,8 +16,8 @@ export default function Table({
   config: Column[];
 }): React.ReactElement {
   return (
-    <table className="min-w-full overflow-y-auto divide-y pl-120 divide-gray-200 table-fixed">
-      <thead className="bg-gray-50">
+    <table className="min-w-full rounded-t-lg overflow-y-auto divide-y pl-120 divide-gray-200 table-fixed">
+      <thead className="bg-gray-100  ">
         <tr>
           <TableHeadTitles config={config} />
         </tr>
