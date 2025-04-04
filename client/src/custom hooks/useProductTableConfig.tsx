@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
-import Button from '../components/utils/Button';
 import { AdminProductProps, Column } from '../types/Dashboard/types';
 import { Skeleton } from '../components/utils/skeleton';
+import { FaEdit } from 'react-icons/fa';
+import { Link } from 'react-router';
+import { MdDeleteForever } from 'react-icons/md';
+
 export function useProductTableConfig() {
   return useMemo<Column[]>(
     () => [
@@ -131,16 +134,16 @@ export function useProductTableConfig() {
           const column = item as AdminProductProps;
           return (
             <div className="flex gap-2 justify-center">
-              <Button
-                to={`/admin/dashboard/products/${column.slug}`}
-                sm
-                primary
+              <Link to={`/admin/dashboard/products/${column.slug}`}>
+                <FaEdit className="text-text w-5 h-5" />
+              </Link>
+              <Link
+                to={`/admin/dashboard/products/manage/${column.slug}/delete`}
+                className=" text-red-600 hover:text-red-800"
+                title="Delete product"
               >
-                View
-              </Button>
-              <Button sm secondary>
-                Delete
-              </Button>
+                <MdDeleteForever size={20} />
+              </Link>
             </div>
           );
         },
