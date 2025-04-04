@@ -16,6 +16,7 @@ import { ToastContainer } from 'react-toastify';
 import DashboardManageProducts from './components/Dashboard/Products/ManageProducts/DashboardManageProducts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardSingleProduct from './components/Dashboard/Products/ManageProducts/DashboardSingleProduct';
+import DeleteProductConfirmation from './components/components/ui/DeleteProductConfirmation ';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -81,6 +82,16 @@ const router = createBrowserRouter([
           {
             path: 'manage',
             element: <DashboardManageProducts />,
+            children: [
+              {
+                path: ':slug/delete',
+                element: (
+                  <Modal>
+                    <DeleteProductConfirmation />
+                  </Modal>
+                ),
+              },
+            ],
           },
           {
             path: 'create',
