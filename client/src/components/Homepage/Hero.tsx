@@ -40,7 +40,7 @@ export default function Hero(): React.ReactElement {
             Experience natural, lifelike audio and exceptional build quality
             made for the passionate music enthusiast.
           </p>
-          <Button className="justify-self-start" primary>
+          <Button lg className="justify-self-start" primary>
             See Product
           </Button>
         </div>

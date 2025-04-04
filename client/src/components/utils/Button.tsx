@@ -27,7 +27,7 @@ const Button: FunctionComponent<ButtonProps> = ({
 
       // Size variants
       'py-2 px-4 text-xs': sm,
-      'py-3 px-8 md:py-4 md:px-8 text-[13px]': !sm && !lg, // md is default
+      'py-3 bg-accent px-8 md:py-4 md:px-8 text-[13px]': !sm && !lg, // md is default
       'py-4 px-10 md:py-5 md:px-12 text-sm': lg,
     }
   );

@@ -1,11 +1,12 @@
 import { useMemo, useRef, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'react-router';
+import { Outlet, useSearchParams } from 'react-router';
 import Table from '../../../utils/Table';
 import { QueryParams } from '../../../../types/Dashboard/types';
 import { useProductTableConfig } from '../../../../custom hooks/useProductTableConfig';
 import useProductData from '../../../../custom hooks/useProductData';
 import TableControls from '../../../components/TableControls';
 import { Pagination } from '../../../components/Pagination';
+import { createPortal } from 'react-dom';
 
 // Options for limit select
 const LIMITOPTIONS = [
@@ -146,7 +147,7 @@ export default function DashboardManageProducts(): React.ReactElement {
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4 ">
       <h1 className="text-h3 font-bold mb-6">Manage Products</h1>
 
       <div className="w-full bg-white pl-6 pr-2 rounded-lg">
@@ -166,7 +167,7 @@ export default function DashboardManageProducts(): React.ReactElement {
         />
 
         {/* Main data table */}
-        <div className="overflow-x-auto max-h-115 overflow-auto ">
+        <div className="overflow-x-auto max-h-115 overflow-auto rounded-t-lg">
           <Table
             isLoading={isLoading}
             error={error}
@@ -188,6 +189,7 @@ export default function DashboardManageProducts(): React.ReactElement {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+      {createPortal(<Outlet />, document.body)}
     </div>
   );
 }
