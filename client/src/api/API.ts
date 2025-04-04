@@ -23,4 +23,11 @@ export default class API {
     const response = await axios.get<T>(`${this.baseUrl}/${endpoint}/${id}`);
     return response.data;
   }
+
+  async deleteOne<T>(endpoint: string, slug: string): Promise<T> {
+    const response = await axios.delete<T>(
+      `${this.baseUrl}/${endpoint}/${slug}`
+    );
+    return response.data;
+  }
 }
