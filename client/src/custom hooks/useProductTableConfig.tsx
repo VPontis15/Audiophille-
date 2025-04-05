@@ -10,6 +10,7 @@ export function useProductTableConfig() {
     () => [
       {
         label: 'id',
+        value: 'id',
         render: (item: unknown) => {
           const column = item as AdminProductProps;
           return column.id;
@@ -18,6 +19,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'status',
+        value: 'status',
         render: (item: unknown) => {
           const column = item as AdminProductProps;
           return (
@@ -36,6 +38,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'image',
+        value: 'featuredImage',
         sortable: false,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
@@ -68,6 +71,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'name',
+        value: 'name',
         render: (item: unknown) => {
           const column = item as AdminProductProps;
           return column.name;
@@ -76,6 +80,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'quantity',
+        value: 'quantity',
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
@@ -95,6 +100,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'price',
+        value: 'price',
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
@@ -111,6 +117,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'category',
+        value: 'category',
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
@@ -120,6 +127,7 @@ export function useProductTableConfig() {
       },
       {
         label: 'brand',
+        value: 'brand',
         sortable: true,
         render: (item: unknown) => {
           const column = item as AdminProductProps;
