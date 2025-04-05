@@ -65,7 +65,7 @@ export default function ProductsShowcase(): React.ReactElement {
           <h4 className="text-h4  uppercase font-bold leading-[1]">
             ZX7 speaker
           </h4>
-          <Button to="/products/earphones/zx7-speaker" secondary>
+          <Button secondary to="/products/earphones/zx7-speaker">
             See Product
           </Button>
         </div>
@@ -77,7 +77,7 @@ export default function ProductsShowcase(): React.ReactElement {
             <h4 className="text-h4  uppercase font-bold leading-[1]">
               YX1 earphones
             </h4>
-            <Button to="/products/earphones/yx1-earphones" secondary>
+            <Button secondary to="/products/earphones/yx1-earphones">
               See Product
             </Button>
           </div>

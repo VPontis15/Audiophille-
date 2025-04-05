@@ -25,9 +25,7 @@
   --color-success: #00ff00;
   --color-warning: #ffcc00;
 }
-html {
-  scroll-behavior: smooth;
-}
+
 * {
   box-sizing: border-box;
 }
@@ -51,7 +49,7 @@ body::-webkit-scrollbar {
 
 body {
   scrollbar-width: 5px;
-  scroll-behavior: smooth;
+
   scrollbar-color: var(--color-accent) var(--color-black);
   scrollbar-width: 10px;
 }
