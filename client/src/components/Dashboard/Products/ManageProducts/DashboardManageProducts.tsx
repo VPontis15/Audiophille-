@@ -1,8 +1,9 @@
-import { useMemo, useEffect, useState } from 'react';
-import { Outlet, useSearchParams } from 'react-router';
-import { QueryParams } from '../../../../types/Dashboard/types';
-import { useProductTableConfig } from '../../../../custom hooks/useProductTableConfig';
-import useProductData from '../../../../custom hooks/useProductData';
+import { Link, Outlet } from 'react-router';
+import {
+  AdminOrderProps,
+  AdminProductProps,
+  Column,
+} from '../../../../types/Dashboard/types';
 
 import { createPortal } from 'react-dom';
 import AdminTable from '../../../components/ui/AdminTable';
@@ -10,16 +11,163 @@ import { Pagination } from '../../../components/Pagination';
 import TableContent from '../../../utils/TableContent';
 import TableControls from '../../../components/TableControls';
 import AdminContentWrapper from '../../AdminContentWrapper';
-import { useDebounce } from '../../../../custom hooks/useDebounce';
 import { keyfn } from '../../../../helpers/helper';
-// Options for limit select
-const LIMITOPTIONS = [
-  { value: '10', label: '10' },
-  { value: '20', label: '20' },
-  { value: '50', label: '50' },
-  { value: '100', label: '100' },
-  { value: '200', label: '200' },
+import useDataFetching from '../../../../custom hooks/useDataFetching';
+import { FaEdit } from 'react-icons/fa';
+import { MdDeleteForever } from 'react-icons/md';
+import { Skeleton } from '../../../utils/skeleton';
+
+const config: Column[] = [
+  {
+    label: 'id',
+    value: 'id',
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return column.id;
+    },
+    skeleton: { type: 'number' },
+  },
+  {
+    label: 'status',
+    value: 'status',
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return (
+        <span
+          className={`min-w-25 rounded-md text-xs px-5 py-3 inline-block ${
+            column.status === 'published'
+              ? 'bg-green-100 text-green-800 '
+              : 'bg-yellow-100 text-yellow-800 '
+          }`}
+        >
+          {column.status}
+        </span>
+      );
+    },
+    skeleton: { type: 'status' },
+  },
+  {
+    label: 'image',
+    value: 'featuredImage',
+    sortable: false,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      if (!column.featuredImage) {
+        return (
+          <Skeleton className="w-14.5 h-14.5 rounded-md object-cover mx-auto" />
+        );
+      }
+
+      try {
+        const src = JSON.parse(column.featuredImage);
+        return (
+          <img
+            width={58}
+            height={58}
+            loading="lazy"
+            className="w-14.5 h-14.5 rounded-md object-cover mx-auto"
+            src={src.thumbnail.url}
+            alt={column.name}
+          />
+        );
+      } catch (error) {
+        console.error('Error parsing featuredImage JSON:', error);
+        return (
+          <Skeleton className="w-14.5 h-14.5 rounded-md object-cover mx-auto" />
+        );
+      }
+    },
+    skeleton: { type: 'image' },
+  },
+  {
+    label: 'name',
+    value: 'name',
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return column.name;
+    },
+    skeleton: { type: 'text' },
+  },
+  {
+    label: 'quantity',
+    value: 'quantity',
+    sortable: true,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return (
+        <span
+          className={`font-bold ${
+            column.quantity ? 'text-green-500' : 'text-error'
+          }`}
+        >
+          {column.quantity ? `in stock(${column.quantity})` : 'Out of stock'}
+        </span>
+      );
+    },
+    skeleton: { type: 'number' },
+  },
+  {
+    label: 'price',
+    value: 'price',
+    sortable: true,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return column.salePrice ? (
+        <div className="flex flex-col gap-1">
+          <span className=" line-through text-xs">{`$${column.price}`}</span>
+          <span className="">${column.salePrice}</span>
+        </div>
+      ) : (
+        `€${column.price}`
+      );
+    },
+    skeleton: { type: 'number' },
+  },
+  {
+    label: 'category',
+    value: 'category',
+    sortable: true,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return column.category;
+    },
+    skeleton: { type: 'text' },
+  },
+  {
+    label: 'brand',
+    value: 'brand',
+    sortable: true,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return column.brand;
+    },
+    skeleton: { type: 'text' },
+  },
+  {
+    label: 'actions',
+    sortable: false,
+    render: (item: unknown) => {
+      const column = item as AdminProductProps;
+      return (
+        <div className="flex gap-2 justify-center">
+          <Link to={`/admin/dashboard/products/${column.slug}`}>
+            <FaEdit className="text-text w-5 h-5" />
+          </Link>
+          <Link
+            to={`/admin/dashboard/products/manage/${column.slug}/delete`}
+            className=" text-red-600 hover:text-red-800"
+            title="Delete product"
+          >
+            <MdDeleteForever size={20} />
+          </Link>
+        </div>
+      );
+    },
+    skeleton: { type: 'action' },
+  },
 ];
+
+// Options for limit select
 
 const PRODUCT_FIELDS = [
   'id',
@@ -36,95 +184,24 @@ const PRODUCT_FIELDS = [
 ].join(',');
 
 export default function DashboardManageProducts(): React.ReactElement {
-  // Get URL parameters
-  const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '10');
-  const sort = searchParams.get('sort') || 'price';
-  const initialSearchTerm = searchParams.get('s') || '';
-
-  const [searchInput, setSearchInput] = useState(initialSearchTerm);
-  const debouncedSearch = useDebounce(searchInput, 500);
-
-  // Effect to update URL when debounced search changes
-  useEffect(() => {
-    if (debouncedSearch !== initialSearchTerm) {
-      const params = new URLSearchParams(searchParams);
-
-      if (!debouncedSearch) {
-        params.delete('s');
-      } else {
-        params.set('s', debouncedSearch);
-      }
-
-      params.set('page', '1');
-      setSearchParams(params);
-    }
-  }, [debouncedSearch, initialSearchTerm, searchParams, setSearchParams]);
-  const config = useProductTableConfig();
-  // Handler for search input
-  const handleSearchChange = useMemo(
-    () => (newSearch: string) => {
-      setSearchInput(newSearch);
-    },
-    []
-  );
-
-  // Handler for changing page
-  const handlePageChange = useMemo(
-    () => (newPage: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(newPage));
-      setSearchParams(params);
-    },
-    [searchParams, setSearchParams]
-  );
-
-  // Get table config from custom hook
-
-  // Handler for changing limit
-  const handleLimitChange = (newLimit: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('limit', newLimit);
-    // Reset to first page when changing limit
-    params.set('page', '1');
-    setSearchParams(params);
-  };
-
-  // Memoize query parameters
-  const queryParams = useMemo<QueryParams>(() => {
-    const params: QueryParams = {
-      limit,
-      page,
-      sort,
-      fields: PRODUCT_FIELDS,
-    };
-
-    // Handle search term
-    if (debouncedSearch) {
-      params.name = { like: debouncedSearch };
-    }
-
-    // Add additional filter parameters
-    searchParams.forEach((value, key) => {
-      if (!['limit', 'page', 'sort', 'fields', 's'].includes(key)) {
-        params[key] = value;
-      }
-    });
-
-    return params;
-  }, [limit, page, sort, debouncedSearch, searchParams]);
-
-  // Fetch data with custom hook
-  const { data, isLoading } = useProductData(queryParams);
-
   const {
-    products = [],
-    results = 0,
-    totalPages = 0,
-    currentPage = 1,
+    items: products,
+    LIMIT_OPTIONS: LIMITOPTIONS,
+    currentPage,
     error,
-  } = data || {}; // Default empty object for data if it's undefined
+    limit,
+    handleLimitChange,
+    handlePageChange,
+    handleSearchChange,
+    isLoading,
+    results,
+    totalPages,
+  } = useDataFetching<AdminOrderProps>({
+    endpoint: 'products',
+    fields: PRODUCT_FIELDS,
+    queryKey: 'products',
+    initialConfig: config,
+  });
 
   return (
     <AdminContentWrapper heading="Manage Products">
