@@ -6,6 +6,8 @@ import CartBtn from './utils/CartBtn';
 import Cart from './Cart/Cart';
 import { useAppSelector } from '../types/hooks';
 import MobileButton from './utils/MobileButton';
+import { SiAdminer } from 'react-icons/si';
+import { Link } from 'react-router';
 
 export default function Header(): React.ReactElement {
   const isOpen = useAppSelector((state) => state.settings.isOpen);
@@ -17,7 +19,12 @@ export default function Header(): React.ReactElement {
           <Logo />{' '}
         </div>
         <Navigation />
-        <CartBtn />
+        <div className="flex items-center gap-6">
+          <CartBtn />
+          <Link to={'/admin/dashboard'}>
+            <SiAdminer className="text-white w-7.5 h-7.5 " />
+          </Link>
+        </div>
         {isOpen && <Cart />}
       </div>
     </header>
