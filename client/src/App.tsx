@@ -17,6 +17,7 @@ import DashboardManageProducts from './components/Dashboard/Products/ManageProdu
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardSingleProduct from './components/Dashboard/Products/ManageProducts/DashboardSingleProduct';
 import DeleteProductConfirmation from './components/components/ui/DeleteProductConfirmation ';
+import DashboardManageOrders from './components/Dashboard/Orders/DashboardManageOrders';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -73,7 +74,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'products',
-        // element: <DashboardProducts />,
+
         children: [
           {
             index: true,
@@ -87,7 +88,13 @@ const router = createBrowserRouter([
                 path: ':slug/delete',
                 element: (
                   <Modal>
-                    <DeleteProductConfirmation />
+                    <DeleteProductConfirmation
+                      promptTitle="Delete Product"
+                      promptSubTitle="Are you sure you want to delete this product?"
+                      endpoint="products"
+                      deleteId="slug"
+                      message="Product deleted successfully"
+                    />
                   </Modal>
                 ),
               },
@@ -131,7 +138,31 @@ const router = createBrowserRouter([
       },
       {
         path: 'orders',
-        // element: <DashboardOrders />,
+        children: [
+          {
+            index: true,
+          },
+          {
+            path: 'manage',
+            element: <DashboardManageOrders />,
+            children: [
+              {
+                path: ':id/delete',
+                element: (
+                  <Modal>
+                    <DeleteProductConfirmation
+                      promptTitle="Delete Order"
+                      promptSubTitle="Are you sure you want to delete this order?"
+                      endpoint="orders"
+                      deleteId="id"
+                      message="Order deleted successfully"
+                    />
+                  </Modal>
+                ),
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'orders/:orderId',
