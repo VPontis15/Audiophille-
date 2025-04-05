@@ -3,7 +3,7 @@ import TableRows from '../components/ui/TableRows';
 
 import { Column } from '../../types/Dashboard/types';
 
-export default function Table({
+export default function TableContent({
   data,
   isLoading,
   config,

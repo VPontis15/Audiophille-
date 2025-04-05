@@ -1,12 +1,6 @@
+import { TableControlsProps } from '../../types/Dashboard/types';
 import SelectInput from './ui/SelectInput';
 import { IoMdSearch } from 'react-icons/io';
-
-interface TableControlsProps {
-  options: Array<{ value: string; label: string }>;
-  currentLimit: string | number;
-  onLimitChange: (limit: string) => void;
-  onSearchChange: (search: string) => void;
-}
 
 export default function TableControls({
   options,

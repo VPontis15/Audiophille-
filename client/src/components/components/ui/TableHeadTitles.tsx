@@ -4,8 +4,6 @@ import { useSearchParams } from 'react-router';
 import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 import { getSortDirection, handleSort } from '../../../helpers/helper';
 
-// Define a mapping function to handle field name transformations if needed
-
 export default function TableHeadTitles({
   config,
   sortable = true,
@@ -31,8 +29,12 @@ export default function TableHeadTitles({
         // Check if this column is sortable
         const isColumnSortable = column.sortable !== false && sortable;
 
+        // Use value instead of label for sorting
+        const columnValue = column.value || column.label.toLowerCase();
+
         // Get the current sort direction for this column
-        const sortDirection = getSortDirection(column.label, sortFields);
+        // Update this to use value instead of label
+        const sortDirection = getSortDirection(columnValue, sortFields);
 
         // Determine if this column is actively being sorted
         const isActiveSortColumn = sortDirection !== null;
@@ -47,7 +49,7 @@ export default function TableHeadTitles({
               isColumnSortable
                 ? () =>
                     handleSort(
-                      column.label,
+                      columnValue, // Use columnValue here
                       sortFields,
                       searchParams,
                       setSearchParams,

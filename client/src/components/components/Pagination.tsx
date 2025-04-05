@@ -6,12 +6,18 @@ interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  isLoading?: boolean;
+  results?: number;
+  data?: unknown[];
 }
 
 export function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  isLoading = false,
+  results = 0,
+  data = [],
 }: PaginationProps) {
   // No need to render pagination if there's only one page
   if (totalPages <= 1) return null;
@@ -20,6 +26,11 @@ export function Pagination({
 
   return (
     <div className="flex justify-between items-center py-4">
+      {!isLoading && results > 0 && (
+        <div className=" text-sm text-gray-600">
+          Showing {data.length} of {results} items
+        </div>
+      )}
       <div>
         <p className="text-sm text-gray-600">
           Page {currentPage} of {totalPages}
