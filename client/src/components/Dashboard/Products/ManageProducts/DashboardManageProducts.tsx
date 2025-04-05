@@ -1,13 +1,17 @@
-import { useMemo, useRef, useCallback, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router';
-import Table from '../../../utils/Table';
 import { QueryParams } from '../../../../types/Dashboard/types';
 import { useProductTableConfig } from '../../../../custom hooks/useProductTableConfig';
 import useProductData from '../../../../custom hooks/useProductData';
-import TableControls from '../../../components/TableControls';
-import { Pagination } from '../../../components/Pagination';
-import { createPortal } from 'react-dom';
 
+import { createPortal } from 'react-dom';
+import AdminTable from '../../../components/ui/AdminTable';
+import { Pagination } from '../../../components/Pagination';
+import TableContent from '../../../utils/TableContent';
+import TableControls from '../../../components/TableControls';
+import AdminContentWrapper from '../../AdminContentWrapper';
+import { useDebounce } from '../../../../custom hooks/useDebounce';
+import { keyfn } from '../../../../helpers/helper';
 // Options for limit select
 const LIMITOPTIONS = [
   { value: '10', label: '10' },
@@ -17,7 +21,7 @@ const LIMITOPTIONS = [
   { value: '200', label: '200' },
 ];
 
-const fields = [
+const PRODUCT_FIELDS = [
   'id',
   'name',
   'price',
@@ -34,59 +38,49 @@ const fields = [
 export default function DashboardManageProducts(): React.ReactElement {
   // Get URL parameters
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchTerm = searchParams.get('s') || '';
   const page = Number(searchParams.get('page') || '1');
   const limit = Number(searchParams.get('limit') || '10');
   const sort = searchParams.get('sort') || 'price';
+  const initialSearchTerm = searchParams.get('s') || '';
 
-  // Create a ref to store the timeout ID
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [searchInput, setSearchInput] = useState(initialSearchTerm);
+  const debouncedSearch = useDebounce(searchInput, 500);
 
-  // Debounced search handler
-  const handleSearchChange = useCallback(
-    (newSearch: string) => {
-      // Clear any existing timeout
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+  // Effect to update URL when debounced search changes
+  useEffect(() => {
+    if (debouncedSearch !== initialSearchTerm) {
+      const params = new URLSearchParams(searchParams);
+
+      if (!debouncedSearch) {
+        params.delete('s');
+      } else {
+        params.set('s', debouncedSearch);
       }
 
-      // Set a new timeout to update search params after typing stops
-      searchTimeoutRef.current = setTimeout(() => {
-        const params = new URLSearchParams(searchParams);
+      params.set('page', '1');
+      setSearchParams(params);
+    }
+  }, [debouncedSearch, initialSearchTerm, searchParams, setSearchParams]);
+  const config = useProductTableConfig();
+  // Handler for search input
+  const handleSearchChange = useMemo(
+    () => (newSearch: string) => {
+      setSearchInput(newSearch);
+    },
+    []
+  );
 
-        if (!newSearch || newSearch.trim() === '') {
-          params.delete('s');
-        } else {
-          params.set('s', newSearch.trim());
-        }
-
-        // Reset to first page when changing search
-        params.set('page', '1');
-
-        setSearchParams(params);
-      }, 500); // 500ms debounce delay
+  // Handler for changing page
+  const handlePageChange = useMemo(
+    () => (newPage: number) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('page', String(newPage));
+      setSearchParams(params);
     },
     [searchParams, setSearchParams]
   );
 
-  // Handler for changing page
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('page', String(newPage));
-    setSearchParams(params);
-  };
-
-  // Clean up the timeout when component unmounts
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Get table config from custom hook
-  const config = useProductTableConfig();
 
   // Handler for changing limit
   const handleLimitChange = (newLimit: string) => {
@@ -103,72 +97,51 @@ export default function DashboardManageProducts(): React.ReactElement {
       limit,
       page,
       sort,
-      fields,
+      fields: PRODUCT_FIELDS,
     };
 
     // Handle search term
-    if (searchTerm) {
-      params.name = { like: searchTerm };
+    if (debouncedSearch) {
+      params.name = { like: debouncedSearch };
     }
 
-    // Add any additional filter parameters from the URL
-    // This will handle category=headphones and similar filters
+    // Add additional filter parameters
     searchParams.forEach((value, key) => {
-      // Skip parameters we've already handled
-      if (['limit', 'page', 'sort', 'fields', 's'].includes(key)) {
-        return;
+      if (!['limit', 'page', 'sort', 'fields', 's'].includes(key)) {
+        params[key] = value;
       }
-
-      // Add the parameter to our query
-      params[key] = value;
     });
 
     return params;
-  }, [limit, page, sort, searchTerm, searchParams]);
+  }, [limit, page, sort, debouncedSearch, searchParams]);
 
   // Fetch data with custom hook
-  const {
-    data: {
-      products = [],
-      results = 0,
-      totalPages = 0,
-      currentPage = 1,
-      error = '',
-    } = {},
-    isLoading,
-  } = useProductData(queryParams);
+  const { data, isLoading } = useProductData(queryParams);
 
-  // Key function for table
-  const keyfn = (item: unknown) => {
-    if (typeof item === 'object' && item !== null && 'id' in item) {
-      return `item-${(item as { id: number }).id}`;
-    }
-    return String(Math.random());
-  };
+  const {
+    products = [],
+    results = 0,
+    totalPages = 0,
+    currentPage = 1,
+    error,
+  } = data || {}; // Default empty object for data if it's undefined
 
   return (
-    <div className="p-4 space-y-4 ">
-      <h1 className="text-h3 font-bold mb-6">Manage Products</h1>
-
-      <div className="w-full bg-white pl-6 pr-2 rounded-lg">
-        {/* Show error if any */}
-        {error && (
-          <div className="bg-red-100 text-red-800 p-3 my-3 rounded-md">
-            {error}
-          </div>
-        )}
-
-        {/* Table controls - limit selector, search, etc. */}
+    <AdminContentWrapper heading="Manage Products">
+      <AdminTable
+        error={error as string}
+        data={products}
+        isLoading={isLoading}
+        results={results}
+      >
         <TableControls
           options={LIMITOPTIONS}
           currentLimit={limit}
           onLimitChange={handleLimitChange}
           onSearchChange={handleSearchChange}
         />
-
-        {/* Main data table */}
         <div className="overflow-x-auto max-h-115 overflow-auto rounded-t-lg">
-          <Table
+          <TableContent
             isLoading={isLoading}
             error={error}
             keyfn={keyfn}
@@ -176,20 +149,16 @@ export default function DashboardManageProducts(): React.ReactElement {
             config={config}
           />
         </div>
-
-        {/* Results summary */}
-        {!isLoading && results > 0 && (
-          <div className="mt-4 text-sm text-gray-600">
-            Showing {products.length} of {results} items
-          </div>
-        )}
-      </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          isLoading={isLoading}
+          results={results}
+          data={products}
+          onPageChange={handlePageChange}
+        />
+      </AdminTable>
       {createPortal(<Outlet />, document.body)}
-    </div>
+    </AdminContentWrapper>
   );
 }
