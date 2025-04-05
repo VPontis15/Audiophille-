@@ -4,19 +4,32 @@ import API from '../../../api/API';
 import { toast } from 'react-toastify';
 import Button from '../../utils/Button';
 
-export default function DeleteProductConfirmation(): React.ReactElement {
-  const { slug } = useParams<{ slug: string }>();
+export default function DeleteProductConfirmation({
+  endpoint,
+  deleteId,
+  message,
+  promptTitle,
+  promptSubTitle,
+}: {
+  endpoint: string;
+  deleteId: string;
+  message: string;
+  promptTitle: string;
+  promptSubTitle: string;
+}): React.ReactElement {
+  const params = useParams();
+  const deletedId = params[deleteId] || deleteId;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const api = new API();
   // Create delete mutation
   const deleteMutation = useMutation({
-    mutationFn: () => api.deleteOne('products', slug!),
+    mutationFn: () => api.deleteOne(endpoint, deletedId!),
     onSuccess: () => {
       // Invalidate products query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: [endpoint] });
       // Show success toast
-      toast.success('Product deleted successfully');
+      toast.success(message);
       // Navigate back to products list
       navigate('/admin/dashboard/products/manage');
     },
@@ -36,8 +49,8 @@ export default function DeleteProductConfirmation(): React.ReactElement {
 
   return (
     <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
-      <h2 className="text-lg font-bold mb-4">Delete Product</h2>
-      <p>Are you sure you want to delete this product?</p>
+      <h2 className="text-lg font-bold mb-4">{promptTitle}</h2>
+      <p>{promptSubTitle}</p>
       <p className="text-sm text-gray-500 mt-2">
         This action cannot be undone.
       </p>
