@@ -57,21 +57,20 @@ const getPageNumbers = (totalPages: number, currentPage: number) => {
 
 export const getSortField = (fieldName: string) => {
   // Add mappings for any fields that have different names in API vs UI
-  const fieldMappings: Record<string, string> = {
-    // Add mappings if needed
-    // 'uiFieldName': 'apiFieldName',
-  };
+  const fieldMappings: Record<string, string> = {};
 
   return fieldMappings[fieldName] || fieldName;
 };
 
-export // Function to check if a column is being sorted and in what direction
-const getSortDirection = (columnLabel: string, sortFields: QueryParams[]) => {
-  // Use the key property if available, otherwise use the label
-  const sortInfo = sortFields.find(
-    (sort) => sort.field === getSortField(columnLabel)
+export const getSortDirection = (
+  columnValue: string,
+  sortFields: Array<{ field: string; direction: string }>
+): string | null => {
+  // Find if this column is being sorted
+  const sortField = sortFields.find(
+    (sf) => sf.field.toLowerCase() === columnValue.toLowerCase()
   );
-  return sortInfo ? sortInfo.direction : null;
+  return sortField ? sortField.direction : null;
 };
 
 // Function to handle sort clicking on a column header
@@ -129,4 +128,12 @@ export const handleSort = (
   params.set('page', '1');
 
   setSearchParams(params);
+};
+
+// Key function for table
+export const keyfn = (item: unknown) => {
+  if (typeof item === 'object' && item !== null && 'id' in item) {
+    return `item-${(item as { id: number }).id}`;
+  }
+  return String(Math.random());
 };

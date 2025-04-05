@@ -52,13 +52,32 @@ export interface AdminProductProps {
   salePrice?: number;
 }
 
-export type APIResponse = {
-  products: AdminProductProps[];
-  results: number;
-  totalPages: number;
-  currentPage: number;
-  error?: string;
-};
+export interface AdminOrderProps {
+  id: number | string;
+  name: string;
+  email: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  phone: string;
+  totalPrice: number;
+  status: string;
+  shippedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: number | string;
+  orderItems: {
+    productId: number | string;
+    quantity: number;
+    price: number;
+    productName: string;
+    productImage: string;
+  }[];
+}
 
 export interface TableProps<T> {
   data: T[];
@@ -88,6 +107,7 @@ export interface TableHeaderProps {
 export interface Column {
   label: string;
   sortable?: boolean;
+  value?: string;
   render: (item: unknown) => React.ReactNode;
   skeleton?: {
     type?: 'number' | 'image' | 'text' | 'action' | 'status';
@@ -107,4 +127,19 @@ export interface TableRowsProps {
   isLoading: boolean;
   data: unknown[];
   keyfn: (item: unknown) => string;
+}
+
+export interface AdminTableProps {
+  isLoading: boolean;
+  error: string;
+  data: unknown[];
+  results: number;
+  children?: React.ReactNode;
+}
+
+export interface TableControlsProps {
+  options: Array<{ value: string; label: string }>;
+  currentLimit: string | number;
+  onLimitChange: (limit: string) => void;
+  onSearchChange: (search: string) => void;
 }
