@@ -16,6 +16,7 @@ import useDataFetching from '../../../../custom hooks/useDataFetching';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { Skeleton } from '../../../utils/skeleton';
+import ActionButtons from '../../../utils/ActionButtons';
 
 const config: Column[] = [
   {
@@ -149,18 +150,7 @@ const config: Column[] = [
     render: (item: unknown) => {
       const column = item as AdminProductProps;
       return (
-        <div className="flex gap-2 justify-center">
-          <Link to={`/admin/dashboard/products/${column.slug}`}>
-            <FaEdit className="text-text w-5 h-5" />
-          </Link>
-          <Link
-            to={`/admin/dashboard/products/manage/${column.slug}/delete`}
-            className=" text-red-600 hover:text-red-800"
-            title="Delete product"
-          >
-            <MdDeleteForever size={20} />
-          </Link>
-        </div>
+        <ActionButtons path="/admin/dashboard/products/manage" item={column} />
       );
     },
     skeleton: { type: 'action' },
@@ -212,6 +202,8 @@ export default function DashboardManageProducts(): React.ReactElement {
         results={results}
       >
         <TableControls
+          limit={limit}
+          limitOptions={LIMITOPTIONS}
           options={LIMITOPTIONS}
           currentLimit={limit}
           onLimitChange={handleLimitChange}

@@ -11,6 +11,7 @@ import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import classNames from 'classnames';
 import { createPortal } from 'react-dom';
+import ActionButtons from '../../utils/ActionButtons';
 
 const orderConfig: Column[] = [
   {
@@ -98,18 +99,7 @@ const orderConfig: Column[] = [
     render: (item: unknown) => {
       const column = item as AdminOrderProps;
       return (
-        <div className="flex gap-2 justify-center">
-          <Link to={`/admin/dashboard/orders/${column.id}`}>
-            <FaEdit className="text-text w-5 h-5" />
-          </Link>
-          <Link
-            to={`/admin/dashboard/orders/manage/${column.id}/delete`}
-            className=" text-red-600 hover:text-red-800"
-            title="Delete product"
-          >
-            <MdDeleteForever size={20} />
-          </Link>
-        </div>
+        <ActionButtons path="/admin/dashboard/orders/manage" item={column} />
       );
     },
     skeleton: { type: 'action' },
@@ -144,6 +134,8 @@ export default function DashboardManageOrders(): React.ReactElement {
         error={error as string}
       >
         <TableControls
+          limit={limit}
+          limitOptions={LIMIT_OPTIONS}
           currentLimit={limit}
           onLimitChange={handleLimitChange}
           onSearchChange={handleSearchChange}
