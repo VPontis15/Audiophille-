@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../../../api/API';
 import { toast } from 'react-toastify';
@@ -10,18 +10,22 @@ export default function DeleteProductConfirmation({
   message,
   promptTitle,
   promptSubTitle,
+  returnPath, // Add this prop
 }: {
   endpoint: string;
   deleteId: string;
   message: string;
   promptTitle: string;
   promptSubTitle: string;
+  returnPath?: string; // Optional return path
 }): React.ReactElement {
   const params = useParams();
+  const location = useLocation();
   const deletedId = params[deleteId] || deleteId;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const api = new API();
+
   // Create delete mutation
   const deleteMutation = useMutation({
     mutationFn: () => api.deleteOne(endpoint, deletedId!),
@@ -30,12 +34,18 @@ export default function DeleteProductConfirmation({
       queryClient.invalidateQueries({ queryKey: [endpoint] });
       // Show success toast
       toast.success(message);
-      // Navigate back to products list
-      navigate('/admin/dashboard/products/manage');
+
+      // Navigate to the return path if provided, preserving query parameters
+      if (returnPath) {
+        const queryParams = location.search;
+        navigate(`${returnPath}${queryParams}`);
+      } else {
+        navigate(-1);
+      }
     },
     onError: (error) => {
       console.error('Delete error:', error);
-      toast.error('Failed to delete product');
+      toast.error(`Failed to delete ${endpoint.slice(0, -1)}`);
     },
   });
 
@@ -44,7 +54,13 @@ export default function DeleteProductConfirmation({
   };
 
   const handleCancel = () => {
-    navigate(-1);
+    // Same navigation logic for cancel, preserving query parameters
+    if (returnPath) {
+      const queryParams = location.search;
+      navigate(`${returnPath}${queryParams}`);
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
