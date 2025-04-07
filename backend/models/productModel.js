@@ -7,8 +7,6 @@ module.exports.createProductTable = async function (pool) {
         price DECIMAL(13, 2) NOT NULL,
         status ENUM('published', 'draft') NOT NULL,
         gallery JSON NOT NULL,
-        brand VARCHAR(100) NOT NULL,
-        category VARCHAR(100) NOT NULL,
         quantity INT NOT NULL,
         rating DECIMAL(2, 1) NOT NULL,
         slug VARCHAR(100) NOT NULL UNIQUE,
@@ -22,15 +20,17 @@ module.exports.createProductTable = async function (pool) {
         saleEndDate DATE,
         relatedProducts JSON, 
         packageContents JSON,
-        numReviews INT NOT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+        categoryId INT NOT NULL,
+        brandId INT NOT NULL,
+        numReviews INT  NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE,
+        FOREIGN KEY (brandId) REFERENCES brands(id) ON DELETE CASCADE,
         INDEX (name),
-        INDEX (category),
-        INDEX (brand),
+      
         INDEX (slug)
-        )`;
+        ) ENGINE=InnoDB`;
 
     await pool.query(query);
     console.log('Created products table');
