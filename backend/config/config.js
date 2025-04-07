@@ -1,9 +1,11 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
-const { createProductTable } = require('../models/productModel');
-const { createUserTable } = require('../models/userModel');
-const { createOrderTable } = require('../models/orderModel');
-const { createCartTable } = require('../models/cartModel');
+const brandModel = require('../models/brandModel');
+const categoryModel = require('../models/categoryModel');
+const productModel = require('../models/productModel');
+const userModel = require('../models/userModel');
+const orderModel = require('../models/orderModel');
+const cartModel = require('../models/cartModel');
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -15,20 +17,40 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Modify exports to include both pool and createTables
+/**
+ * Creates all database tables for the application.
+ *
+ * This function attempts to create the following tables in sequence:
+ * - Brand table
+ * - Category table
+ * - Product table
+ * - User table
+ * - Order table
+ * - Cart table
+ *
+ * If any table creation fails, an error is logged to the console.
+ *
+ * @async
+ * @function createTables
+ * @returns {Promise<void>} A promise that resolves when all tables are created successfully.
+ * @throws {Error} If any table creation fails.
+ */
+async function createTables() {
+  try {
+    await brandModel.createBrandTable(pool);
+    await categoryModel.createCategoryTable(pool);
+    await productModel.createProductTable(pool);
+    await userModel.createUserTable(pool);
+    await orderModel.createOrderTable(pool);
+    await cartModel.createCartTable(pool);
+
+    console.log('All tables created successfully');
+  } catch (error) {
+    console.error('Error creating tables:', error);
+  }
+}
+
 module.exports = {
   pool,
-  createTables: async () => {
-    try {
-      await createProductTable(pool);
-      await createUserTable(pool);
-      await createOrderTable(pool);
-      await createCartTable(pool);
-
-      console.log('All tables created successfully');
-    } catch (error) {
-      console.error('Error creating tables:', error);
-      throw error;
-    }
-  },
+  createTables,
 };
