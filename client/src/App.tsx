@@ -18,6 +18,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardSingleProduct from './components/Dashboard/Products/ManageProducts/DashboardSingleProduct';
 import DeleteProductConfirmation from './components/components/ui/DeleteProductConfirmation ';
 import DashboardManageOrders from './components/Dashboard/Orders/DashboardManageOrders';
+import DashboardProductCategories from './components/Dashboard/Products/Categories/DashboardProductCategories';
+import DashboardProductBrands from './components/Dashboard/Products/Brands/DashboardProductBrands';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -56,7 +58,7 @@ const router = createBrowserRouter([
           {
             path: ':transactionId/success',
             element: (
-              <Modal>
+              <Modal returnPath="/">
                 <Completed />
               </Modal>
             ),
@@ -88,13 +90,14 @@ const router = createBrowserRouter([
               {
                 path: ':slug/delete',
                 element: (
-                  <Modal>
+                  <Modal returnPath="/admin/dashboard/products/manage">
                     <DeleteProductConfirmation
                       promptTitle="Delete Product"
                       promptSubTitle="Are you sure you want to delete this product?"
                       endpoint="products"
                       deleteId="slug"
                       message="Product deleted successfully"
+                      returnPath="/admin/dashboard/products/manage"
                     />
                   </Modal>
                 ),
@@ -109,12 +112,37 @@ const router = createBrowserRouter([
           {
             path: 'categories',
             // element: <DashboardCreateProduct />,
-            element: <h1>Categories</h1>,
+            element: <DashboardProductCategories />,
+            children: [
+              {
+                path: 'create',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/categories">
+                    <h1>RER</h1>
+                  </Modal>
+                ),
+              },
+              {
+                path: ':slug/delete',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/categories">
+                    <DeleteProductConfirmation
+                      promptTitle="Delete Category"
+                      promptSubTitle="Are you sure you want to delete this category?"
+                      endpoint="categories"
+                      deleteId="slug"
+                      message="Category deleted successfully"
+                      returnPath="/admin/dashboard/products/categories"
+                    />
+                  </Modal>
+                ),
+              },
+            ],
           },
           {
             path: 'brands',
             // element: <DashboardCreateProduct />,
-            element: <h1>Brands</h1>,
+            element: <DashboardProductBrands />,
           },
           {
             path: 'collections',
@@ -150,13 +178,14 @@ const router = createBrowserRouter([
               {
                 path: ':id/delete',
                 element: (
-                  <Modal>
+                  <Modal returnPath="/admin/dashboard/orders/manage">
                     <DeleteProductConfirmation
                       promptTitle="Delete Order"
                       promptSubTitle="Are you sure you want to delete this order?"
                       endpoint="orders"
                       deleteId="id"
                       message="Order deleted successfully"
+                      returnPath="/admin/dashboard/orders/manage"
                     />
                   </Modal>
                 ),
