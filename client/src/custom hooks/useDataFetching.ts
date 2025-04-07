@@ -19,6 +19,7 @@ export default function useDataFetching<T>({
   queryKey,
   defaultSort = 'createdAt',
   initialConfig,
+  additionalParams = {}, // Add this
 }: DataFetchingProps<T>) {
   // URL parameter handling
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,6 +57,7 @@ export default function useDataFetching<T>({
       page,
       limit,
       sort,
+      ...additionalParams,
     };
 
     // Add fields if provided
@@ -63,13 +65,33 @@ export default function useDataFetching<T>({
       params.fields = fields;
     }
 
-    // Add search parameter if available
+    // Add search parameter if available with proper structure for backend
     if (initialSearchTerm) {
       params.name = { like: initialSearchTerm };
     }
 
+    // Process additional filter parameters from URL
+    for (const [key, value] of searchParams.entries()) {
+      // Skip parameters we've already handled
+      if (['page', 'limit', 'sort', 's', 'fields'].includes(key)) {
+        continue;
+      }
+
+      // Add filter parameter to query
+      params[key] = value;
+    }
+
+    console.log('Final query parameters:', params);
     return params;
-  }, [page, limit, sort, fields, initialSearchTerm]);
+  }, [
+    page,
+    limit,
+    sort,
+    fields,
+    initialSearchTerm,
+    additionalParams,
+    searchParams,
+  ]);
 
   // Fetch data
   const api = new API();
@@ -78,7 +100,7 @@ export default function useDataFetching<T>({
     isLoading,
     error: queryError,
   } = useQuery<any>({
-    queryKey: [queryKey, page, limit, sort, initialSearchTerm],
+    queryKey: [queryKey, page, limit, sort, searchParams],
     queryFn: async () => {
       try {
         const response = await api.fetchAll<any>(endpoint, queryParams);
@@ -116,11 +138,17 @@ export default function useDataFetching<T>({
     params.set('page', '1');
     setSearchParams(params);
   };
-
+  console.log(data);
   // Extract data with fallbacks - works with both nested and flat structures
-  const items = data?.data?.[endpoint] || data?.[endpoint] || [];
-  const results = data?.data?.results || data?.results || 0;
-  const totalPages = data?.data?.totalPages || data?.totalPages || 0;
+  const items =
+    data?.data?.categories || // For hierarchical data structure
+    data?.data?.[endpoint] || // For regular endpoints
+    data?.categories || // Direct response formats
+    data?.[endpoint] || // Alternative formats
+    []; // Fallback
+
+  const results = data?.data?.results || data?.results || items.length || 0;
+  const totalPages = data?.data?.totalPages || data?.totalPages || 1;
   const currentPage = data?.data?.currentPage || data?.currentPage || 1;
   const responseError =
     data?.data?.error || data?.error || queryError?.message || null;
