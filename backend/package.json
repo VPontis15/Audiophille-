@@ -17,11 +17,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --watch server.js",
+    "seed:categories": "node seeders/seedCategories.js",
+    "seed:brands": "node seeders/seedBrands.js",
     "seed:products": "node seeders/seedProducts.js",
     "seed:users": "node seeders/seedUsers.js",
     "seed:carts": "node seeders/seedCarts.js",
     "seed:orders": "node seeders/seedOrders.js",
-    "seed:all": "npm run seed:users && npm run seed:products && npm run seed:carts && npm run seed:orders"
+    "seed:all": "npm run reset:db && npm run seed:users && npm run seed:categories && npm run seed:brands && npm run seed:products && npm run seed:carts && npm run seed:orders",
+    "reset:db": "node models/resetDb.js",
+    "create:db": "node models/createDb.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
