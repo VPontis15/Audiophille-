@@ -7,6 +7,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     primary?: boolean;
     secondary?: boolean;
     transparent?: boolean;
+    withIcon?: boolean;
     sm?: boolean;
     lg?: boolean;
   }>;

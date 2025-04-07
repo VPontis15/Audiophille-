@@ -24,4 +24,5 @@ export type DataFetchingProps<T> = {
   queryKey: string; // React Query key
   defaultSort?: string; // Default sort field
   initialConfig: Column[]; // Table configuration
+  additionalParams?: Record<string, string>; // Add this
 };

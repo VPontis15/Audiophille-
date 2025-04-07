@@ -137,7 +137,19 @@ export interface AdminTableProps {
   children?: React.ReactNode;
 }
 
+export interface CategoryProps {
+  id: number | string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TableControlsProps {
+  addLink?: string;
+  addBtn?: boolean;
+  limit: string | number;
+  limitOptions: Array<{ value: string; label: string }>;
   options: Array<{ value: string; label: string }>;
   currentLimit: string | number;
   onLimitChange: (limit: string) => void;
