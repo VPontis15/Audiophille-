@@ -30,4 +30,9 @@ export default class API {
     );
     return response.data;
   }
+
+  async getCategoriesHierarchy<T>(): Promise<T> {
+    const response = await axios.get<T>(`${this.baseUrl}/categories/hierarchy`);
+    return response.data;
+  }
 }
