@@ -5,8 +5,21 @@ exports.getAllProducts = async (req, res) => {
     // Initialize parameters for the SQL query
     let sqlParams = [];
 
-    // Start building the base query
-    let sqlQuery = 'SELECT * FROM products';
+    // Start building the base query - SELECT specific fields and alias them
+    let sqlQuery = `
+      SELECT 
+        p.*,
+        c.name AS category,
+        c.slug AS categorySlug,
+        b.name AS brand,
+        b.country AS brandCountry
+      FROM 
+        products p
+      INNER JOIN 
+        categories c ON p.categoryId = c.id
+      INNER JOIN 
+        brands b ON p.brandId = b.id
+    `;
 
     // Process query parameters for filtering, pagination, sorting
     const query = { ...req.query };
@@ -19,6 +32,16 @@ exports.getAllProducts = async (req, res) => {
       const whereClauses = [];
 
       for (const [key, value] of Object.entries(query)) {
+        // Map field names that need to be prefixed with table aliases
+        const fieldMap = {
+          category: 'c.name',
+          brand: 'b.name',
+          brandCountry: 'b.country',
+          // Add more mappings as needed
+        };
+
+        const fieldName = fieldMap[key] || `p.${key}`;
+
         // Handle special filtering operators (gt, gte, lt, lte, like)
         if (typeof value === 'object' && value !== null) {
           for (const [operator, operand] of Object.entries(value)) {
@@ -45,9 +68,9 @@ exports.getAllProducts = async (req, res) => {
             }
 
             if (sqlOperator === 'LIKE') {
-              whereClauses.push(`${key} ${sqlOperator} ?`);
+              whereClauses.push(`${fieldName} ${sqlOperator} ?`);
             } else {
-              whereClauses.push(`${key} ${sqlOperator} ?`);
+              whereClauses.push(`${fieldName} ${sqlOperator} ?`);
               sqlParams.push(operand);
             }
           }
@@ -55,17 +78,17 @@ exports.getAllProducts = async (req, res) => {
         // Handle array values (IN operator)
         else if (Array.isArray(value)) {
           const placeholders = value.map(() => '?').join(', ');
-          whereClauses.push(`${key} IN (${placeholders})`);
+          whereClauses.push(`${fieldName} IN (${placeholders})`);
           sqlParams.push(...value);
         }
         // Handle boolean fields
         else if (value === 'true' || value === 'false') {
-          whereClauses.push(`${key} = ?`);
+          whereClauses.push(`${fieldName} = ?`);
           sqlParams.push(value === 'true' ? 1 : 0);
         }
         // Handle regular equality comparison
         else {
-          whereClauses.push(`${key} = ?`);
+          whereClauses.push(`${fieldName} = ?`);
           sqlParams.push(value);
         }
       }
@@ -76,20 +99,27 @@ exports.getAllProducts = async (req, res) => {
       }
     }
 
-    // 2) SORTING
+    // 2) SORTING - Update to handle table aliases
     if (req.query.sort) {
+      const sortMap = {
+        category: 'c.name',
+        brand: 'b.name',
+        // Add more mappings as needed
+      };
+
       const sortFields = req.query.sort.split(',').map((field) => {
         // Check if the field starts with - for descending sort
-        if (field.startsWith('-')) {
-          return `${field.substring(1)} DESC`;
-        }
-        return `${field} ASC`;
+        const isDesc = field.startsWith('-');
+        const cleanField = isDesc ? field.substring(1) : field;
+        const mappedField = sortMap[cleanField] || `p.${cleanField}`;
+
+        return `${mappedField} ${isDesc ? 'DESC' : 'ASC'}`;
       });
 
       sqlQuery += ' ORDER BY ' + sortFields.join(', ');
     } else {
       // Default sort by creation date, most recent first
-      sqlQuery += ' ORDER BY createdAt DESC';
+      sqlQuery += ' ORDER BY p.createdAt DESC';
     }
 
     // 3) PAGINATION
@@ -108,18 +138,21 @@ exports.getAllProducts = async (req, res) => {
 
     // Get total count for pagination
     const [countResult] = await pool.execute(
-      `SELECT COUNT(*) as total FROM products ${
-        sqlQuery.includes('WHERE')
-          ? sqlQuery.substring(
-              sqlQuery.indexOf('WHERE'),
-              sqlQuery.includes('ORDER BY')
-                ? sqlQuery.indexOf('ORDER BY')
-                : sqlQuery.includes('LIMIT')
-                ? sqlQuery.indexOf('LIMIT')
-                : sqlQuery.length
-            )
-          : ''
-      }`,
+      `SELECT COUNT(*) as total FROM products p
+       INNER JOIN categories c ON p.categoryId = c.id
+       INNER JOIN brands b ON p.brandId = b.id
+       ${
+         sqlQuery.includes('WHERE')
+           ? sqlQuery.substring(
+               sqlQuery.indexOf('WHERE'),
+               sqlQuery.includes('ORDER BY')
+                 ? sqlQuery.indexOf('ORDER BY')
+                 : sqlQuery.includes('LIMIT')
+                 ? sqlQuery.indexOf('LIMIT')
+                 : sqlQuery.length
+             )
+           : ''
+       }`,
       sqlParams.slice(0, sqlQuery.split('?').length - 3) // Remove the limit and offset params
     );
 
@@ -214,7 +247,19 @@ exports.createProduct = async (req, res) => {
 exports.getProduct = async (req, res) => {
   try {
     const [products] = await pool.execute(
-      'SELECT * FROM products WHERE id = ?',
+      `SELECT 
+        p.*,
+        c.name AS category,
+        c.slug AS categorySlug,
+        b.name AS brand,
+        b.country AS brandCountry
+      FROM 
+        products p
+      INNER JOIN 
+        categories c ON p.categoryId = c.id
+      INNER JOIN 
+        brands b ON p.brandId = b.id
+      WHERE p.id = ?`,
       [req.params.id]
     );
 
@@ -244,7 +289,19 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const [products] = await pool.execute(
-      'SELECT * FROM products WHERE id = ?',
+      `SELECT 
+        p.*,
+        c.name AS category,
+        c.slug AS categorySlug,
+        b.name AS brand,
+        b.country AS brandCountry
+      FROM 
+        products p
+      INNER JOIN 
+        categories c ON p.categoryId = c.id
+      INNER JOIN 
+        brands b ON p.brandId = b.id
+      WHERE p.id = ?`,
       [req.params.id]
     );
 
