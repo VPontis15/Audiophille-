@@ -3,17 +3,75 @@ const { pool } = require('../config/config');
 const fs = require('fs');
 const path = require('path');
 
-// Load real product data
-let realProductsData = [];
+// Load real products from data.json if it exists
+let realProducts = [];
 try {
-  const jsonData = fs.readFileSync(
-    path.join(__dirname, '..', 'data.json'),
-    'utf8'
-  );
-  realProductsData = JSON.parse(jsonData);
-  console.log(`Loaded ${realProductsData.length} real products from data.json`);
+  const dataPath = path.join(__dirname, 'data.json');
+  if (fs.existsSync(dataPath)) {
+    realProducts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    console.log(`Loaded ${realProducts.length} real products from data.json`);
+  }
 } catch (error) {
-  console.error('Error loading real products data:', error);
+  console.error('Error loading real products:', error);
+}
+
+// Helper functions to get category and brand IDs
+async function getCategoryIdByName(categoryName) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id FROM categories WHERE name = ?',
+      [categoryName]
+    );
+
+    if (rows.length === 0) {
+      console.log(`Category not found: ${categoryName}, creating it...`);
+      // Insert the category with required fields
+      const [result] = await pool.query(
+        'INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)',
+        [
+          categoryName,
+          categoryName.toLowerCase().replace(/\s+/g, '-'),
+          `${categoryName} products`, // Add a basic description
+        ]
+      );
+      return result.insertId;
+    }
+
+    return rows[0].id;
+  } catch (error) {
+    console.error(
+      `Error getting/creating category ID for ${categoryName}:`,
+      error
+    );
+    throw error;
+  }
+}
+
+async function getBrandIdByName(brandName) {
+  try {
+    const [rows] = await pool.query('SELECT id FROM brands WHERE name = ?', [
+      brandName,
+    ]);
+
+    if (rows.length === 0) {
+      console.log(`Brand not found: ${brandName}, creating it...`);
+      // Insert the brand with required fields
+      const [result] = await pool.query(
+        'INSERT INTO brands (name, description, country) VALUES (?, ?, ?)',
+        [
+          brandName,
+          `${brandName} is a premium audio equipment manufacturer.`,
+          'United States', // Default country
+        ]
+      );
+      return result.insertId;
+    }
+
+    return rows[0].id;
+  } catch (error) {
+    console.error(`Error getting/creating brand ID for ${brandName}:`, error);
+    throw error;
+  }
 }
 
 // Audio product-specific data
@@ -600,152 +658,79 @@ function generatePackageContents(category, brand) {
   return contents;
 }
 
-async function seedProducts(count = 500) {
+async function seedProducts() {
   try {
-    console.log(`Seeding products...`);
+    console.log('Seeding products...');
 
-    // First seed the real products from data.json
-    for (const productData of realProductsData) {
-      // Convert the real product data to match your database schema
-      const gallery = [
-        {
-          desktop: {
-            url: productData.gallery.first.desktop,
-            alt: `${productData.name} gallery image 1 - desktop`,
-          },
-          tablet: {
-            url: productData.gallery.first.tablet,
-            alt: `${productData.name} gallery image 1 - tablet`,
-          },
-          mobile: {
-            url: productData.gallery.first.mobile,
-            alt: `${productData.name} gallery image 1 - mobile`,
-          },
-          thumbnail: {
-            url: generateThumbnailUrl(
-              productData.gallery.first.mobile,
-              productData.name
-            ),
-            alt: `${productData.name} gallery image 1 - thumbnail`,
-          },
-        },
-        {
-          desktop: {
-            url: productData.gallery.second.desktop,
-            alt: `${productData.name} gallery image 2 - desktop`,
-          },
-          tablet: {
-            url: productData.gallery.second.tablet,
-            alt: `${productData.name} gallery image 2 - tablet`,
-          },
-          mobile: {
-            url: productData.gallery.second.mobile,
-            alt: `${productData.name} gallery image 2 - mobile`,
-          },
-          thumbnail: {
-            url: generateThumbnailUrl(
-              productData.gallery.second.mobile,
-              productData.name
-            ),
-            alt: `${productData.name} gallery image 2 - thumbnail`,
-          },
-        },
-        {
-          desktop: {
-            url: productData.gallery.third.desktop,
-            alt: `${productData.name} gallery image 3 - desktop`,
-          },
-          tablet: {
-            url: productData.gallery.third.tablet,
-            alt: `${productData.name} gallery image 3 - tablet`,
-          },
-          mobile: {
-            url: productData.gallery.third.mobile,
-            alt: `${productData.name} gallery image 3 - mobile`,
-          },
-          thumbnail: {
-            url: generateThumbnailUrl(
-              productData.gallery.third.mobile,
-              productData.name
-            ),
-            alt: `${productData.name} gallery image 3 - thumbnail`,
-          },
-        },
-      ];
-
-      // Add thumbnail to featured image
-      const featuredImage = {
-        desktop: {
-          url: productData.image.desktop,
-          alt: `${productData.name} - desktop`,
-        },
-        tablet: {
-          url: productData.image.tablet,
-          alt: `${productData.name} - tablet`,
-        },
-        mobile: {
-          url: productData.image.mobile,
-          alt: `${productData.name} - mobile`,
-        },
-        thumbnail: {
-          url: generateThumbnailUrl(productData.image.mobile, productData.name),
-          alt: `${productData.name} - thumbnail`,
-        },
-      };
-
-      // Convert package contents
-      const packageContents = productData.includes.map(
-        (item) => `${item.quantity} x ${item.item}`
+    // First, check if categories and brands exist
+    const [categoriesResult] = await pool.query(
+      'SELECT COUNT(*) as count FROM categories'
+    );
+    if (categoriesResult[0].count === 0) {
+      throw new Error(
+        'No categories found. Please run the category seeder first.'
       );
-
-      // Convert related products
-      const relatedProducts = productData.others.map((product) => ({
-        slug: product.slug,
-        name: product.name,
-        image: product.image,
-      }));
-
-      const product = {
-        name: productData.name,
-        status: 'published',
-        description: productData.description,
-        price: productData.price,
-        gallery: JSON.stringify(gallery),
-        brand: productData.name.split(' ')[0], // Extract brand from name
-        category: productData.category,
-        quantity: faker.number.int({ min: 10, max: 50 }),
-        rating: parseFloat(
-          faker.number.float({ min: 4.0, max: 5.0, precision: 0.1 })
-        ),
-        slug: productData.slug,
-        collection: faker.helpers.arrayElement([
-          'premium',
-          'standard',
-          'budget',
-        ]),
-        isFeatured: productData.new,
-        featuredImage: JSON.stringify(featuredImage),
-        isNewArrival: productData.new,
-        isBestSeller: faker.datatype.boolean(0.3),
-        isOnSale: faker.datatype.boolean(0.3),
-        packageContents: JSON.stringify(packageContents),
-        numReviews: faker.number.int({ min: 5, max: 120 }),
-        relatedProducts: JSON.stringify(relatedProducts),
-      };
-
-      // Add sale price if on sale
-      if (product.isOnSale) {
-        product.salePrice = parseFloat((product.price * 0.8).toFixed(2));
-        product.saleEndDate = faker.date.future();
-      }
-
-      const sql = `INSERT INTO products SET ?`;
-      await pool.query(sql, product);
-      console.log(`Added real product: ${product.name}`);
     }
 
-    // Then generate additional fake products to reach the desired count
-    const remainingCount = count - realProductsData.length;
+    const [brandsResult] = await pool.query(
+      'SELECT COUNT(*) as count FROM brands'
+    );
+    if (brandsResult[0].count === 0) {
+      throw new Error('No brands found. Please run the brand seeder first.');
+    }
+
+    // Seed real products first (if any)
+    for (const product of realProducts) {
+      try {
+        // Get or create category ID
+        let categoryId;
+        try {
+          categoryId = await getCategoryIdByName(product.category);
+        } catch (error) {
+          // If category doesn't exist, create it
+          const [result] = await pool.query(
+            'INSERT INTO categories (name, slug) VALUES (?, ?)',
+            [
+              product.category,
+              product.category.toLowerCase().replace(/\s+/g, '-'),
+            ]
+          );
+          categoryId = result.insertId;
+        }
+
+        // Get or create brand ID
+        let brandId;
+        try {
+          brandId = await getBrandIdByName(product.brand);
+        } catch (error) {
+          // If brand doesn't exist, create it
+          const [result] = await pool.query(
+            'INSERT INTO brands (name) VALUES (?)',
+            [product.brand]
+          );
+          brandId = result.insertId;
+        }
+
+        // Now add these IDs to the product data
+        const productData = {
+          ...product,
+          categoryId,
+          brandId,
+        };
+
+        // Remove any properties that aren't in the database schema
+        delete productData.id; // In case it has an ID already
+
+        // Insert the product with proper IDs
+        await pool.query('INSERT INTO products SET ?', productData);
+        console.log(`Added real product: ${product.name}`);
+      } catch (error) {
+        console.error(`Error adding real product ${product.name}:`, error);
+      }
+    }
+
+    // Then generate additional fake products if needed
+    const remainingCount = 500 - realProducts.length;
     if (remainingCount > 0) {
       console.log(`Generating ${remainingCount} additional products...`);
 
@@ -802,16 +787,39 @@ async function seedProducts(count = 500) {
           });
         }
 
-        const brand = faker.helpers.arrayElement(audioBrands);
+        const brandName = faker.helpers.arrayElement(audioBrands);
         const productName = generateAudioProductName(category);
+
+        // Get category and brand IDs
+        let categoryId;
+        try {
+          categoryId = await getCategoryIdByName(category);
+        } catch (error) {
+          // If category doesn't exist, create it
+          const [result] = await pool.query(
+            'INSERT INTO categories (name, slug) VALUES (?, ?)',
+            [category, category.toLowerCase()]
+          );
+          categoryId = result.insertId;
+        }
+
+        let brandId;
+        try {
+          brandId = await getBrandIdByName(brandName);
+        } catch (error) {
+          // If brand doesn't exist, create it
+          const [result] = await pool.query(
+            'INSERT INTO brands (name) VALUES (?)',
+            [brandName]
+          );
+          brandId = result.insertId;
+        }
 
         const product = {
           name: productName,
           description: generateAudioDescription(category),
           price: parseFloat(faker.commerce.price({ min: 49, max: 2999 })),
           gallery: JSON.stringify(galleryImages),
-          brand: brand,
-          category: category,
           quantity: faker.number.int({ min: 0, max: 100 }),
           rating: parseFloat(
             faker.number.float({ min: 1, max: 5, precision: 0.1 })
@@ -829,8 +837,11 @@ async function seedProducts(count = 500) {
           isOnSale: faker.datatype.boolean(0.4),
           numReviews: faker.number.int({ min: 0, max: 250 }),
           packageContents: JSON.stringify(
-            generatePackageContents(category, brand)
+            generatePackageContents(category, brandName)
           ),
+          status: 'published',
+          categoryId: categoryId,
+          brandId: brandId,
         };
 
         // Add sale price and end date only if the product is on sale
@@ -855,7 +866,7 @@ async function seedProducts(count = 500) {
       }
     }
 
-    console.log('Database seeded successfully!');
+    console.log('Products seeded successfully!');
   } catch (error) {
     console.error('Error seeding database:', error);
   } finally {
@@ -863,10 +874,6 @@ async function seedProducts(count = 500) {
   }
 }
 
-// Run the seeder with default count of fake products (plus the real ones)
-seedProducts(process.argv[2] || 500)
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+seedProducts()
+  .then(() => console.log('Products seeding completed'))
+  .catch((err) => console.error('Products seeding failed:', err));
