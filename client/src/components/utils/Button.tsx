@@ -8,6 +8,7 @@ const Button: FunctionComponent<ButtonProps> = ({
   primary,
   secondary,
   transparent,
+  withIcon,
   sm = false,
   lg = false,
   to = '',
@@ -24,6 +25,8 @@ const Button: FunctionComponent<ButtonProps> = ({
         secondary,
       ' border-none bg-transparent text-text hover:text-accent text-[13px]':
         transparent,
+      // icon btn
+      ' gap-2 items-center justify-center inline-flex': withIcon,
 
       // Size variants
       'py-2 px-4 text-xs': sm,
