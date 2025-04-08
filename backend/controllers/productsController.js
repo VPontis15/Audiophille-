@@ -49,29 +49,31 @@ exports.getAllProducts = async (req, res) => {
             switch (operator) {
               case 'gt':
                 sqlOperator = '>';
+                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
+                sqlParams.push(operand);
                 break;
               case 'gte':
                 sqlOperator = '>=';
+                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
+                sqlParams.push(operand);
                 break;
               case 'lt':
                 sqlOperator = '<';
+                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
+                sqlParams.push(operand);
                 break;
               case 'lte':
                 sqlOperator = '<=';
+                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
+                sqlParams.push(operand);
                 break;
               case 'like':
                 sqlOperator = 'LIKE';
+                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
                 sqlParams.push(`%${operand}%`);
                 break;
               default:
                 continue; // Skip unsupported operators
-            }
-
-            if (sqlOperator === 'LIKE') {
-              whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-            } else {
-              whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-              sqlParams.push(operand);
             }
           }
         }
@@ -215,7 +217,7 @@ exports.createProduct = async (req, res) => {
 
     // Insert the new product
     const [result] = await pool.execute('INSERT INTO products SET ?', data);
-    console.log(result);
+
     // Respond with created product
     res.status(201).json({
       status: 'Success',

@@ -204,27 +204,64 @@ exports.getCategory = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
+    // Validate request body
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
-        status: 'fail',
-        message: 'Category name is required',
+        status: 'Fail',
+        message: 'No category data provided',
       });
     }
-    const [result] = await pool.execute(
-      'INSERT INTO categories (name) VALUES (?)',
-      [name]
-    );
+
+    const data = {
+      ...req.body,
+    };
+
+    if (!data.slug) {
+      data.slug = data.name.toLowerCase().replace(/ /g, '-');
+    }
+
+    // Convert object to columns and values
+    const columns = Object.keys(data);
+    const placeholders = columns.map(() => '?').join(', ');
+    const values = columns.map((col) => data[col]);
+
+    // Build explicit query
+    const query = `INSERT INTO categories (${columns.join(
+      ', '
+    )}) VALUES (${placeholders})`;
+
+    // Log for debugging
+    console.log('Executing query:', query);
+    console.log('With values:', values);
+
+    // Execute with explicit parameters
+    const [result] = await pool.execute(query, values);
+
+    // Respond with created category
     res.status(201).json({
-      status: 'success',
-      data: {
-        category: { id: result.insertId, name },
+      status: 'Success',
+      category: {
+        id: result.insertId,
+        ...data,
       },
     });
   } catch (error) {
+    console.error('Error creating category:', error);
+    console.error('Error details:', error.stack);
+
+    // Handle specific error cases
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        status: 'Fail',
+        message: 'A category with this unique identifier already exists',
+      });
+    }
+
+    // Generic server error
     res.status(500).json({
-      status: 'fail',
-      message: error.message,
+      status: 'Error',
+      message: 'Unable to create category',
+      error: error.message,
     });
   }
 };
