@@ -9,6 +9,7 @@ export interface FormInputProps {
   full?: boolean;
   checked?: boolean;
   onBlur?: (e: string | number | void) => void;
+  className?: string;
 }
 
 export interface FormErrors {
