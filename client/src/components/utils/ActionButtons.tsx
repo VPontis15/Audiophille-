@@ -1,18 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
-import { CategoryProps } from '../../types/Dashboard/types';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
+
+interface ItemWithId {
+  id?: string | number;
+  slug?: string;
+}
 
 export default function ActionButtons({
   item,
   path,
 }: {
-  item: unknown;
+  item: ItemWithId;
   path?: string;
 }): React.ReactElement {
   const location = useLocation();
   const queryParams = location.search;
-  const id = item.slug ? item.slug : item.id;
+  const id = typeof item.slug === 'string' ? item.slug : item.id;
   return (
     <div className="flex items-center justify-center gap-x-2">
       <Link

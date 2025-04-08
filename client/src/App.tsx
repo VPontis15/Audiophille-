@@ -20,6 +20,7 @@ import DeleteProductConfirmation from './components/components/ui/DeleteProductC
 import DashboardManageOrders from './components/Dashboard/Orders/DashboardManageOrders';
 import DashboardProductCategories from './components/Dashboard/Products/Categories/DashboardProductCategories';
 import DashboardProductBrands from './components/Dashboard/Products/Brands/DashboardProductBrands';
+import AddForm from './components/components/ui/AddForm';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -118,7 +119,7 @@ const router = createBrowserRouter([
                 path: 'create',
                 element: (
                   <Modal returnPath="/admin/dashboard/products/categories">
-                    <h1>RER</h1>
+                    <AddForm />
                   </Modal>
                 ),
               },
