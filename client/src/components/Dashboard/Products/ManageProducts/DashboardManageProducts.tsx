@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
 import {
   AdminOrderProps,
   AdminProductProps,
@@ -13,8 +13,7 @@ import TableControls from '../../../components/TableControls';
 import AdminContentWrapper from '../../AdminContentWrapper';
 import { keyfn } from '../../../../helpers/helper';
 import useDataFetching from '../../../../custom hooks/useDataFetching';
-import { FaEdit } from 'react-icons/fa';
-import { MdDeleteForever } from 'react-icons/md';
+
 import { Skeleton } from '../../../utils/skeleton';
 import ActionButtons from '../../../utils/ActionButtons';
 
@@ -190,6 +189,7 @@ export default function DashboardManageProducts(): React.ReactElement {
     endpoint: 'products',
     fields: PRODUCT_FIELDS,
     queryKey: 'products',
+    additionalParams: { searchField: 'name' },
     initialConfig: config,
   });
 

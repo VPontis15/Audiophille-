@@ -6,9 +6,8 @@ import AdminContentWrapper from '../AdminContentWrapper';
 import { keyfn } from '../../../helpers/helper';
 import useDataFetching from '../../../custom hooks/useDataFetching';
 import { AdminOrderProps, Column } from '../../../types/Dashboard/types';
-import { Link, Outlet } from 'react-router';
-import { FaEdit } from 'react-icons/fa';
-import { MdDeleteForever } from 'react-icons/md';
+import { Outlet } from 'react-router';
+
 import classNames from 'classnames';
 import { createPortal } from 'react-dom';
 import ActionButtons from '../../utils/ActionButtons';
@@ -123,6 +122,7 @@ export default function DashboardManageOrders(): React.ReactElement {
     fields: 'id,name,email,phone,address,totalPrice,status,createdAt',
     queryKey: 'orders',
     initialConfig: orderConfig,
+    additionalParams: { searchField: 'status' },
   });
 
   return (
