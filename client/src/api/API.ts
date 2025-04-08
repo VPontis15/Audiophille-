@@ -35,4 +35,12 @@ export default class API {
     const response = await axios.get<T>(`${this.baseUrl}/categories/hierarchy`);
     return response.data;
   }
+
+  async createOne<T>(
+    endpoint: string,
+    data: Record<string, unknown>
+  ): Promise<T> {
+    const response = await axios.post<T>(`${this.baseUrl}/${endpoint}`, data);
+    return response.data;
+  }
 }
