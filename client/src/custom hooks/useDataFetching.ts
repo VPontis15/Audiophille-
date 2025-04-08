@@ -19,7 +19,7 @@ export default function useDataFetching<T>({
   queryKey,
   defaultSort = 'createdAt',
   initialConfig,
-  additionalParams = {}, // Add this
+  additionalParams = {},
 }: DataFetchingProps<T>) {
   // URL parameter handling
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,11 +53,15 @@ export default function useDataFetching<T>({
 
   // Build query parameters
   const queryParams = useMemo(() => {
+    // Create a clean copy of additionalParams without searchField
+    const cleanedParams = { ...additionalParams };
+    delete cleanedParams.searchField;
+
     const params: Record<string, string | number | Record<string, string>> = {
       page,
       limit,
       sort,
-      ...additionalParams,
+      ...cleanedParams, // Use the cleaned version without searchField
     };
 
     // Add fields if provided
@@ -65,9 +69,13 @@ export default function useDataFetching<T>({
       params.fields = fields;
     }
 
-    // Add search parameter if available with proper structure for backend
+    // Add search parameter if available
     if (initialSearchTerm) {
-      params.name = { like: initialSearchTerm };
+      // Get the search field from additionalParams
+      const searchField = additionalParams.searchField || 'name';
+
+      // Add the actual search field to params
+      params[searchField as string] = { like: initialSearchTerm };
     }
 
     // Process additional filter parameters from URL
@@ -81,7 +89,6 @@ export default function useDataFetching<T>({
       params[key] = value;
     }
 
-    console.log('Final query parameters:', params);
     return params;
   }, [
     page,
@@ -91,6 +98,7 @@ export default function useDataFetching<T>({
     initialSearchTerm,
     additionalParams,
     searchParams,
+    endpoint,
   ]);
 
   // Fetch data
@@ -100,7 +108,7 @@ export default function useDataFetching<T>({
     isLoading,
     error: queryError,
   } = useQuery<any>({
-    queryKey: [queryKey, page, limit, sort, searchParams],
+    queryKey: [queryKey, page, limit, sort, initialSearchTerm],
     queryFn: async () => {
       try {
         const response = await api.fetchAll<any>(endpoint, queryParams);
