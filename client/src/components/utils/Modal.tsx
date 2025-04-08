@@ -53,25 +53,21 @@ export default function Modal({
       }
     };
 
-    const handleClickOutside = (event: MouseEvent) => {
-      const dialog = document.querySelector('.dialog');
-      if (!dialog) return;
-      if (dialog && !dialog.contains(event.target as Node)) {
-        closeModal();
-      }
-    };
-    document.body.addEventListener('click', handleClickOutside);
-
     window.addEventListener('keydown', handleEscape);
     return () => {
       window.removeEventListener('keydown', handleEscape);
-      document.body.removeEventListener('click', handleClickOutside);
     };
-  }, [navigate, returnPath, location.search, preserveState]);
+  }, [navigate, returnPath, location.search, preserveState, closeModal]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="dialog relative max-h-[90vh] overflow-auto">
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      onClick={closeModal} // Close when clicking the overlay
+    >
+      <div
+        className="dialog relative max-h-[90vh] overflow-auto"
+        onClick={(e) => e.stopPropagation()} // Prevent clicks inside dialog from closing
+      >
         {children}
       </div>
     </div>
