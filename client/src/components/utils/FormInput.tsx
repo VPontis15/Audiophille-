@@ -11,6 +11,7 @@ export default function FormInput({
   onChange,
   required = false,
   full = false,
+  className = '',
   ...rest
 }: FormInputProps): React.ReactElement {
   const [errors, setErrors] = useState<FormErrors>({});
@@ -78,7 +79,7 @@ export default function FormInput({
           {label}
         </label>
         <input
-          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${
+          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
             errors[name]
               ? 'bg-red-100 border-red-400 focus-visible:ring-red-400'
               : null
@@ -103,10 +104,10 @@ export default function FormInput({
   } else {
     return (
       <div
-        className={`flex border border-border rounded-xl w-full  gap-2.5 p-4 items-center`}
+        className={`flex border border-border rounded-xl w-full   gap-2.5 p-4 items-center ${className}`}
       >
         <input
-          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] w-5 h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
+          className="checked:accent-accent cursor-pointer w-full placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
           id={name}
           name={name}
           type={type}
