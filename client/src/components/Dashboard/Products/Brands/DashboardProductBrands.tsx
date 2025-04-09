@@ -1,17 +1,21 @@
 import useDataFetching from '../../../../custom hooks/useDataFetching';
-import { CategoryProps, Column } from '../../../../types/Dashboard/types';
+import { BrandProps, Column } from '../../../../types/Dashboard/types';
 import { Pagination } from '../../../components/Pagination';
 import TableControls from '../../../components/TableControls';
 import AdminTable from '../../../components/ui/AdminTable';
 import TableContent from '../../../utils/TableContent';
 import AdminContentWrapper from '../../AdminContentWrapper';
-
+import { keyfn } from '../../../../helpers/helper';
+import { FaEdit } from 'react-icons/fa';
+import { MdDeleteForever } from 'react-icons/md';
+import { Link } from 'react-router';
+import ActionButtons from '../../../utils/ActionButtons';
 const brandsConfig: Column[] = [
   {
     label: 'name',
     value: 'name',
     render: (item: unknown) => {
-      const column = item as CategoryProps;
+      const column = item as BrandProps;
       return column.name;
     },
     skeleton: { type: 'text' },
@@ -20,7 +24,7 @@ const brandsConfig: Column[] = [
     label: 'slug',
     value: 'slug',
     render: (item: unknown) => {
-      const column = item as CategoryProps;
+      const column = item as BrandProps;
       return column.slug;
     },
     skeleton: { type: 'text' },
@@ -29,7 +33,7 @@ const brandsConfig: Column[] = [
     label: 'createdAt',
     value: 'createdAt',
     render: (item: unknown) => {
-      const column = item as CategoryProps;
+      const column = item as BrandProps;
       return new Date(column.createdAt).toLocaleDateString('gr-GR', {
         year: 'numeric',
         month: '2-digit',
@@ -42,32 +46,15 @@ const brandsConfig: Column[] = [
     label: 'actions',
     value: 'actions',
     sortable: false,
-    render: () => {
+    render: (item: unknown) => {
+      const column = item as BrandProps;
       return (
-        <div className="flex items-center justify-center gap-x-2">
-          <button
-            type="button"
-            className="text-blue-500 hover:text-blue-700"
-            onClick={() => {}}
-          >
-            <FaEdit size={20} />
-          </button>
-          <button
-            type="button"
-            className="text-red-500 hover:text-red-700"
-            onClick={() => {}}
-          >
-            <MdDeleteForever size={20} />
-          </button>
-        </div>
+        <ActionButtons path="/admin/dashboard/products/brands" item={column} />
       );
     },
     skeleton: { type: 'action' },
   },
 ];
-import { keyfn } from '../../../../helpers/helper';
-import { FaEdit } from 'react-icons/fa';
-import { MdDeleteForever } from 'react-icons/md';
 
 export default function DashboardProductBrands(): React.ReactElement {
   const {
@@ -83,12 +70,11 @@ export default function DashboardProductBrands(): React.ReactElement {
     results,
 
     totalPages,
-  } = useDataFetching<CategoryProps[]>({
+  } = useDataFetching<BrandProps[]>({
     endpoint: 'brands',
     fields: 'name,slug,createdAt',
-    queryKey: 'brands/hierarchy',
+    queryKey: 'brands',
     initialConfig: brandsConfig,
-    additionalParams: { hierarchy: 'true' },
   });
 
   console.log(brands);
@@ -101,6 +87,10 @@ export default function DashboardProductBrands(): React.ReactElement {
         results={results}
       >
         <TableControls
+          limit={limit}
+          limitOptions={LIMIT_OPTIONS}
+          addBtn={true}
+          addLink="/admin/dashboard/products/brands/create"
           currentLimit={limit}
           onLimitChange={handleLimitChange}
           onSearchChange={handleSearchChange}
