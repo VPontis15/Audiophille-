@@ -1,5 +1,3 @@
-import Button from '../../utils/Button';
-
 export default function FormWrapper({
   children,
   title,
@@ -26,7 +24,6 @@ export default function FormWrapper({
       {title && <h1 className="text-2xl font-bold">{title}</h1>}
       {description && <p className="text-gray-500">{description}</p>}
       {children}
-      <Button primary>Add</Button>
     </form>
   );
 }
