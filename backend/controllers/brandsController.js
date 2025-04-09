@@ -88,6 +88,7 @@ exports.getAllBrands = async function (req, res) {
       const validFields = [
         'id',
         'name',
+        'slug',
         'description',
         'country',
         'isPopular',
@@ -162,6 +163,7 @@ exports.getBrand = async function (req, res) {
       const validFields = [
         'id',
         'name',
+        'slug', // Add slug to valid fields
         'description',
         'country',
         'isPopular',
@@ -184,8 +186,8 @@ exports.getBrand = async function (req, res) {
     }
 
     const [brand] = await pool.execute(
-      `SELECT ${fields} FROM brands WHERE id = ?`,
-      [req.params.id]
+      `SELECT ${fields} FROM brands WHERE slug = ?`,
+      [req.params.slug]
     );
 
     if (brand.length === 0) {
@@ -215,6 +217,7 @@ exports.createBrand = async function (req, res) {
     // Extract all possible fields from request body
     const {
       name,
+      slug = null, // Accept slug from request if provided
       description = null,
       country = null,
       isPopular = false,
@@ -229,10 +232,18 @@ exports.createBrand = async function (req, res) {
       });
     }
 
+    // Generate slug if not provided
+    const brandSlug =
+      slug ||
+      name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+
     // Build query dynamically based on provided fields
-    const fields = ['name'];
-    const values = [name];
-    const placeholders = ['?'];
+    const fields = ['name', 'slug']; // Always include slug
+    const values = [name, brandSlug];
+    const placeholders = ['?', '?'];
 
     // Add optional fields if provided
     if (description !== undefined) {
@@ -278,6 +289,7 @@ exports.createBrand = async function (req, res) {
         brand: {
           id: result.insertId,
           name,
+          slug: brandSlug, // Include the slug in response
           description,
           country,
           isPopular,
@@ -294,7 +306,7 @@ exports.createBrand = async function (req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         status: 'fail',
-        message: 'A brand with this name already exists',
+        message: 'A brand with this name or slug already exists',
       });
     }
 
@@ -309,8 +321,8 @@ exports.updateBrand = async function (req, res) {
   try {
     // Get current brand to know what fields to update
     const [currentBrand] = await pool.execute(
-      'SELECT * FROM brands WHERE id = ?',
-      [req.params.id]
+      'SELECT * FROM brands WHERE slug = ?',
+      [req.params.slug]
     );
 
     if (currentBrand.length === 0) {
@@ -323,6 +335,14 @@ exports.updateBrand = async function (req, res) {
     // Extract fields from request body
     const updates = { ...req.body };
 
+    // Auto-generate slug if name is updated but slug isn't provided
+    if (updates.name && !updates.slug) {
+      updates.slug = updates.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+    }
+
     // Build SET clause and parameters dynamically
     const setClause = [];
     const values = [];
@@ -332,6 +352,7 @@ exports.updateBrand = async function (req, res) {
       if (
         [
           'name',
+          'slug',
           'description',
           'country',
           'isPopular',
@@ -359,9 +380,9 @@ exports.updateBrand = async function (req, res) {
     }
 
     // Add ID for WHERE clause
-    values.push(req.params.id);
+    values.push(req.params.slug);
 
-    const query = `UPDATE brands SET ${setClause.join(', ')} WHERE id = ?`;
+    const query = `UPDATE brands SET ${setClause.join(', ')} WHERE slug = ?`;
     const [result] = await pool.execute(query, values);
 
     if (result.affectedRows === 0) {
@@ -371,10 +392,31 @@ exports.updateBrand = async function (req, res) {
       });
     }
 
-    // Get updated brand
+    // After a successful update, fetch the updated brand
+    // We need to handle the possibility that the slug itself was updated
+    let updatedSlugOrId;
+    if (updates.slug) {
+      // If the slug was updated, use the new slug
+      updatedSlugOrId = updates.slug;
+      const [updatedBrand] = await pool.execute(
+        'SELECT * FROM brands WHERE slug = ?',
+        [updatedSlugOrId]
+      );
+
+      if (updatedBrand.length > 0) {
+        return res.status(200).json({
+          status: 'success',
+          data: {
+            brand: updatedBrand[0],
+          },
+        });
+      }
+    }
+
+    // Fallback: use the original brand's ID for a guaranteed lookup
     const [updatedBrand] = await pool.execute(
       'SELECT * FROM brands WHERE id = ?',
-      [req.params.id]
+      [currentBrand[0].id]
     );
 
     res.status(200).json({
@@ -389,7 +431,7 @@ exports.updateBrand = async function (req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         status: 'fail',
-        message: 'A brand with this name already exists',
+        message: 'A brand with this name or slug already exists',
       });
     }
 
@@ -402,9 +444,10 @@ exports.updateBrand = async function (req, res) {
 
 exports.deleteBrand = async function (req, res) {
   try {
-    const [result] = await pool.execute('DELETE FROM brands WHERE id = ?', [
-      req.params.id,
-    ]);
+    const query = 'DELETE FROM brands WHERE slug = ?';
+    const param = req.params.slug;
+
+    const [result] = await pool.execute(query, [param]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
