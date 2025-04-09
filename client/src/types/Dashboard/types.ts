@@ -105,6 +105,7 @@ export interface TableHeaderProps {
 }
 
 export interface Column {
+  filterable?: boolean;
   label: string;
   sortable?: boolean;
   value?: string;
