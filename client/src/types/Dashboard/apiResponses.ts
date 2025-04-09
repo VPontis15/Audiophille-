@@ -26,3 +26,15 @@ export type DataFetchingProps<T> = {
   initialConfig: Column[]; // Table configuration
   additionalParams?: Record<string, string>; // Add this
 };
+
+export interface CategoryResponse {
+  status: string;
+  data: {
+    category: {
+      id: number;
+      name: string;
+      slug: string;
+      [key: string]: unknown; // For any additional fields
+    };
+  };
+}

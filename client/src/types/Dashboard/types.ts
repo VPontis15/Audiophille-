@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { JSX } from 'react';
 import { ImageVariant } from '../ProductTypes';
 
 export interface NavigationLinkProps {
@@ -154,4 +154,13 @@ export interface TableControlsProps {
   currentLimit: string | number;
   onLimitChange: (limit: string) => void;
   onSearchChange: (search: string) => void;
+}
+
+export interface EntityFormProps {
+  endpoint: string; // 'categories', 'brands', 'products', etc.
+  queryKey: string; // For invalidating queries
+  title: string; // Form title
+  description?: string; // Form description
+  additionalFields?: JSX.Element[]; // Optional additional fields for complex entities
+  mapToApiPayload?: (formData: Record<string, string>) => Record<string, any>; // Optional transformer
 }
