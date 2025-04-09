@@ -30,6 +30,7 @@ const config: Column[] = [
   {
     label: 'status',
     value: 'status',
+    filterable: true,
     render: (item: unknown) => {
       const column = item as AdminProductProps;
       return (
@@ -126,6 +127,8 @@ const config: Column[] = [
   {
     label: 'category',
     value: 'category',
+    filterable: true,
+
     sortable: true,
     render: (item: unknown) => {
       const column = item as AdminProductProps;
@@ -136,6 +139,8 @@ const config: Column[] = [
   {
     label: 'brand',
     value: 'brand',
+    filterable: true,
+
     sortable: true,
     render: (item: unknown) => {
       const column = item as AdminProductProps;

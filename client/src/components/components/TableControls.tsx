@@ -4,7 +4,7 @@ import Button from '../utils/Button';
 import SelectInput from './ui/SelectInput';
 import { IoMdSearch } from 'react-icons/io';
 import { IoMdAdd } from 'react-icons/io';
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 export default function TableControls({
   options,
   currentLimit,
@@ -13,6 +13,8 @@ export default function TableControls({
   onSearchChange,
   addBtn = false,
 }: TableControlsProps) {
+  const location = useLocation();
+  const queryParams = location.search;
   return (
     <div className="flex justify-between items-center my-4 py-2">
       <div className="flex gap-4 items-center">
@@ -27,7 +29,12 @@ export default function TableControls({
           <span className="text-sm text-gray-600">entries</span>
         </div>
         {addBtn && (
-          <Button to={addLink} sm withIcon className=" text-accent rounded-md">
+          <Button
+            to={`${addLink}/${queryParams}`}
+            sm
+            withIcon
+            className=" text-accent rounded-md"
+          >
             <IoMdAdd width={20} height={20} className="w-5 h-5" />
             Add New
           </Button>

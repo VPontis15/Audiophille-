@@ -77,7 +77,6 @@ export default function DashboardProductBrands(): React.ReactElement {
     initialConfig: brandsConfig,
   });
 
-  console.log(brands);
   return (
     <AdminContentWrapper heading="Manage brands">
       <AdminTable
