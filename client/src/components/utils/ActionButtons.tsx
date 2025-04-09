@@ -20,7 +20,7 @@ export default function ActionButtons({
   return (
     <div className="flex items-center justify-center gap-x-2">
       <Link
-        to={`${path}/${id}${queryParams}`}
+        to={`${path}/${id}/edit/${queryParams}`}
         type="button"
         className="text-text hover:text-blue-700"
       >
