@@ -124,7 +124,7 @@ const router = createBrowserRouter([
                       endpoint="categories"
                       queryKey="categories"
                       title="Add Category"
-                      description="Add a new category to your store"
+                      description="Add a new category to your store "
                     />
                   </Modal>
                 ),
