@@ -179,8 +179,8 @@ exports.getAllCategories = async (req, res) => {
 exports.getCategory = async (req, res) => {
   try {
     const [category] = await pool.execute(
-      'SELECT * FROM categories WHERE id = ?',
-      [req.params.id]
+      'SELECT * FROM categories WHERE slug = ?',
+      [req.params.slug]
     );
     if (category.length === 0) {
       return res.status(404).json({
@@ -268,33 +268,97 @@ exports.createCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) {
+    // Validate request body
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        status: 'Fail',
+        message: 'No category data provided',
+      });
+    }
+
+    const data = {
+      ...req.body,
+    };
+
+    // Make sure name exists
+    if (!data.name) {
       return res.status(400).json({
         status: 'fail',
         message: 'Category name is required',
       });
     }
-    const [result] = await pool.execute(
-      'UPDATE categories SET name = ? WHERE id = ?',
-      [name, req.params.id]
+
+    // First check if the category exists
+    const [existingCategory] = await pool.execute(
+      'SELECT * FROM categories WHERE slug = ?',
+      [req.params.slug]
     );
+
+    if (!existingCategory || existingCategory.length === 0) {
+      console.log('Category not found for update, slug:', req.params.slug);
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Category not found',
+      });
+    }
+
+    // Generate slug if not provided but name was updated
+    if (data.name && !data.slug) {
+      data.slug = data.name.toLowerCase().replace(/ /g, '-');
+    }
+
+    // Build the SET clause for the UPDATE query
+    const setClause = Object.keys(data)
+      .map((key) => `${key} = ?`)
+      .join(', ');
+
+    const values = Object.values(data);
+
+    // Add the slug parameter for the WHERE clause
+    values.push(req.params.slug);
+
+    // Build and execute the update query
+    const query = `UPDATE categories SET ${setClause} WHERE slug = ?`;
+
+    // Log for debugging
+    console.log('Executing update query:', query);
+    console.log('With values:', values);
+
+    const [result] = await pool.execute(query, values);
+
     if (result.affectedRows === 0) {
       return res.status(404).json({
         status: 'fail',
         message: 'Category not found',
       });
     }
+
     res.status(200).json({
       status: 'success',
       data: {
-        category: { id: req.params.id, name },
+        category: {
+          id: existingCategory[0].id,
+          ...data,
+        },
       },
     });
   } catch (error) {
+    console.error('Error updating category:', error);
+    console.error('Error details:', error.stack);
+
+    // Handle specific error cases
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        status: 'Fail',
+        message: 'A category with this unique identifier already exists',
+      });
+    }
+
+    // Generic server error
     res.status(500).json({
-      status: 'fail',
-      message: error.message,
+      status: 'Error',
+      message: 'Unable to update category',
+      error: error.message,
     });
   }
 };
