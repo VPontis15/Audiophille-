@@ -120,6 +120,7 @@ const router = createBrowserRouter([
                 element: (
                   <Modal returnPath="/admin/dashboard/products/categories">
                     <EntityForm
+                      entityKey="category"
                       endpoint="categories"
                       queryKey="categories"
                       title="Add Category"
@@ -133,6 +134,7 @@ const router = createBrowserRouter([
                 element: (
                   <Modal returnPath="/admin/dashboard/products/categories">
                     <EntityForm
+                      entityKey="category"
                       endpoint="categories"
                       queryKey="categories"
                       title="Edit Category"
@@ -161,6 +163,51 @@ const router = createBrowserRouter([
             path: 'brands',
             // element: <DashboardCreateProduct />,
             element: <DashboardProductBrands />,
+            children: [
+              {
+                path: 'create',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/brands">
+                    <EntityForm
+                      entityKey="brand"
+                      endpoint="brands"
+                      queryKey="brands"
+                      title="Add Brand"
+                      description="Add a new brand to your store"
+                    />
+                  </Modal>
+                ),
+              },
+              {
+                path: ':slug/edit',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/brands">
+                    <EntityForm
+                      entityKey="brand"
+                      endpoint="brands"
+                      queryKey="brands"
+                      title="Edit Brand"
+                      description="Edit a brand in your store"
+                    />
+                  </Modal>
+                ),
+              },
+              {
+                path: ':slug/delete',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/brands">
+                    <DeleteProductConfirmation
+                      promptTitle="Delete Brand"
+                      promptSubTitle="Are you sure you want to delete this brand?"
+                      endpoint="brands"
+                      deleteId="slug"
+                      message="Brand deleted successfully"
+                      returnPath="/admin/dashboard/products/brands"
+                    />
+                  </Modal>
+                ),
+              },
+            ],
           },
           {
             path: 'collections',
