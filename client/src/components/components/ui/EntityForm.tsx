@@ -15,6 +15,7 @@ export default function EntityForm({
   queryKey,
   title,
   description,
+  entityKey,
   additionalFields = [],
   mapToApiPayload = (data) => data,
 }: EntityFormProps): React.ReactElement {
@@ -49,14 +50,15 @@ export default function EntityForm({
 
   // Update form data when editData is loaded
   useEffect(() => {
-    if (editData?.data?.category) {
-      const categoryData = editData.data.category;
+    const entityData = editData?.data?.[entityKey];
+
+    if (entityData) {
       setFormData({
-        name: categoryData.name || '',
-        slug: categoryData.slug || '',
+        name: entityData.name || '',
+        slug: entityData.slug || '',
       });
     }
-  }, [editData]);
+  }, [editData, endpoint]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
