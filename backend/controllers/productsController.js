@@ -1,170 +1,147 @@
-const { pool } = require('../config/config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 exports.getAllProducts = async (req, res) => {
   try {
-    // Initialize parameters for the SQL query
-    let sqlParams = [];
+    // Initialize parameters for Prisma query
+    const where = {};
 
-    // Start building the base query - SELECT specific fields and alias them
-    let sqlQuery = `
-      SELECT 
-        p.*,
-        c.name AS category,
-        c.slug AS categorySlug,
-        b.name AS brand,
-        b.country AS brandCountry
-      FROM 
-        products p
-      INNER JOIN 
-        categories c ON p.categoryId = c.id
-      INNER JOIN 
-        brands b ON p.brandId = b.id
-    `;
+    // Process query parameters for filtering
+    Object.keys(req.query).forEach((key) => {
+      // Skip pagination, sorting and fields parameters
+      if (['page', 'limit', 'sort', 'fields'].includes(key)) return;
 
-    // Process query parameters for filtering, pagination, sorting
-    const query = { ...req.query };
-    const excludedFields = ['page', 'limit', 'sort', 'fields'];
-    excludedFields.forEach((field) => delete query[field]);
-
-    // 1) FILTERING
-    if (Object.keys(query).length > 0) {
-      // Build WHERE clause from query parameters
-      const whereClauses = [];
-
-      for (const [key, value] of Object.entries(query)) {
-        // Map field names that need to be prefixed with table aliases
-        const fieldMap = {
-          category: 'c.name',
-          brand: 'b.name',
-          brandCountry: 'b.country',
-          // Add more mappings as needed
+      // Handle various filter types
+      if (key === 'category') {
+        where.categories = {
+          name: req.query[key],
         };
+      } else if (key === 'brand') {
+        where.brands = {
+          name: req.query[key],
+        };
+      } else if (key === 'brandCountry') {
+        where.brands = {
+          country: req.query[key],
+        };
+      }
+      // Handle special filtering operators
+      else if (typeof req.query[key] === 'object') {
+        const operators = req.query[key];
 
-        const fieldName = fieldMap[key] || `p.${key}`;
-
-        // Handle special filtering operators (gt, gte, lt, lte, like)
-        if (typeof value === 'object' && value !== null) {
-          for (const [operator, operand] of Object.entries(value)) {
-            let sqlOperator;
-            switch (operator) {
-              case 'gt':
-                sqlOperator = '>';
-                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-                sqlParams.push(operand);
-                break;
-              case 'gte':
-                sqlOperator = '>=';
-                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-                sqlParams.push(operand);
-                break;
-              case 'lt':
-                sqlOperator = '<';
-                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-                sqlParams.push(operand);
-                break;
-              case 'lte':
-                sqlOperator = '<=';
-                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-                sqlParams.push(operand);
-                break;
-              case 'like':
-                sqlOperator = 'LIKE';
-                whereClauses.push(`${fieldName} ${sqlOperator} ?`);
-                sqlParams.push(`%${operand}%`);
-                break;
-              default:
-                continue; // Skip unsupported operators
-            }
+        for (const op in operators) {
+          switch (op) {
+            case 'gt':
+              where[key] = { gt: parseFloat(operators[op]) };
+              break;
+            case 'gte':
+              where[key] = { gte: parseFloat(operators[op]) };
+              break;
+            case 'lt':
+              where[key] = { lt: parseFloat(operators[op]) };
+              break;
+            case 'lte':
+              where[key] = { lte: parseFloat(operators[op]) };
+              break;
+            case 'like':
+              where[key] = { contains: operators[op] };
+              break;
           }
         }
-        // Handle array values (IN operator)
-        else if (Array.isArray(value)) {
-          const placeholders = value.map(() => '?').join(', ');
-          whereClauses.push(`${fieldName} IN (${placeholders})`);
-          sqlParams.push(...value);
-        }
-        // Handle boolean fields
-        else if (value === 'true' || value === 'false') {
-          whereClauses.push(`${fieldName} = ?`);
-          sqlParams.push(value === 'true' ? 1 : 0);
-        }
-        // Handle regular equality comparison
-        else {
-          whereClauses.push(`${fieldName} = ?`);
-          sqlParams.push(value);
-        }
       }
-
-      // Add WHERE clause to the query if we have any conditions
-      if (whereClauses.length > 0) {
-        sqlQuery += ' WHERE ' + whereClauses.join(' AND ');
+      // Handle boolean fields
+      else if (req.query[key] === 'true' || req.query[key] === 'false') {
+        where[key] = req.query[key] === 'true';
       }
-    }
+      // Handle regular equality
+      else {
+        where[key] = req.query[key];
+      }
+    });
 
-    // 2) SORTING - Update to handle table aliases
+    // 2) SORTING
+    const orderBy = [];
     if (req.query.sort) {
-      const sortMap = {
-        category: 'c.name',
-        brand: 'b.name',
-        // Add more mappings as needed
-      };
+      const sortFields = req.query.sort.split(',');
+      sortFields.forEach((field) => {
+        // Map field names to correct casing for Prisma
+        const fieldMap = {
+          createdat: 'createdAt',
+          updatedat: 'updatedAt',
+          category: { categories: { name: 'asc' } },
+          brand: { brands: { name: 'asc' } },
+        };
 
-      const sortFields = req.query.sort.split(',').map((field) => {
-        // Check if the field starts with - for descending sort
         const isDesc = field.startsWith('-');
         const cleanField = isDesc ? field.substring(1) : field;
-        const mappedField = sortMap[cleanField] || `p.${cleanField}`;
 
-        return `${mappedField} ${isDesc ? 'DESC' : 'ASC'}`;
+        // Handle special relation sorting
+        if (cleanField === 'category') {
+          orderBy.push({
+            categories: { name: isDesc ? 'desc' : 'asc' },
+          });
+        } else if (cleanField === 'brand') {
+          orderBy.push({
+            brands: { name: isDesc ? 'desc' : 'asc' },
+          });
+        } else {
+          // Regular field sorting
+          const prismaField = fieldMap[cleanField.toLowerCase()] || cleanField;
+          orderBy.push({ [prismaField]: isDesc ? 'desc' : 'asc' });
+        }
       });
-
-      sqlQuery += ' ORDER BY ' + sortFields.join(', ');
     } else {
-      // Default sort by creation date, most recent first
-      sqlQuery += ' ORDER BY p.createdAt DESC';
+      // Default sort
+      orderBy.push({ createdAt: 'desc' });
     }
 
     // 3) PAGINATION
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-    sqlQuery += ' LIMIT ? OFFSET ?';
-    sqlParams.push(limit, offset);
-
-    // 4) FIELD LIMITING (we'll handle this after query execution)
-    const selectFields = req.query.fields ? req.query.fields.split(',') : null;
-
-    // Execute the query
-    const [products] = await pool.execute(sqlQuery, sqlParams);
-
-    // Get total count for pagination
-    const [countResult] = await pool.execute(
-      `SELECT COUNT(*) as total FROM products p
-       INNER JOIN categories c ON p.categoryId = c.id
-       INNER JOIN brands b ON p.brandId = b.id
-       ${
-         sqlQuery.includes('WHERE')
-           ? sqlQuery.substring(
-               sqlQuery.indexOf('WHERE'),
-               sqlQuery.includes('ORDER BY')
-                 ? sqlQuery.indexOf('ORDER BY')
-                 : sqlQuery.includes('LIMIT')
-                 ? sqlQuery.indexOf('LIMIT')
-                 : sqlQuery.length
-             )
-           : ''
-       }`,
-      sqlParams.slice(0, sqlQuery.split('?').length - 3) // Remove the limit and offset params
-    );
-
-    const totalProducts = countResult[0].total;
+    // 4) EXECUTE QUERIES
+    const totalProducts = await prisma.products.count({ where });
     const totalPages = Math.ceil(totalProducts / limit);
 
-    // Apply field limiting if needed
-    let formattedProducts = products;
-    if (selectFields) {
-      formattedProducts = products.map((product) => {
+    const products = await prisma.products.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        categories: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+        brands: {
+          select: {
+            name: true,
+            country: true,
+          },
+        },
+      },
+    });
+
+    // Format the response to match the expected structure
+    const formattedProducts = products.map((product) => ({
+      ...product,
+      category: product.categories.name,
+      categorySlug: product.categories.slug,
+      brand: product.brands.name,
+      brandCountry: product.brands.country,
+      // Remove the nested objects
+      categories: undefined,
+      brands: undefined,
+    }));
+
+    // 5) FIELD SELECTION
+    let result = formattedProducts;
+    if (req.query.fields) {
+      const selectFields = req.query.fields.split(',');
+      result = formattedProducts.map((product) => {
         const filteredProduct = {};
         selectFields.forEach((field) => {
           if (product[field] !== undefined) {
@@ -178,11 +155,11 @@ exports.getAllProducts = async (req, res) => {
     // Respond with the results
     res.status(200).json({
       status: 'Success',
-      results: products.length,
+      results: result.length,
       totalProducts,
       totalPages,
       currentPage: page,
-      products: formattedProducts,
+      products: result,
       pagination: {
         total: totalProducts,
         pages: totalPages,
@@ -210,28 +187,49 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    const data = {
-      slug: req.body.name.trim().toLowerCase().replace(/ /g, '-'),
-      ...req.body,
-    };
+    // Generate slug if not provided
+    const slug =
+      req.body.slug ||
+      req.body.name
+        .trim()
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^a-z0-9-]/g, '');
 
-    // Insert the new product
-    const [result] = await pool.execute('INSERT INTO products SET ?', data);
+    // Create the product with Prisma
+    const newProduct = await prisma.products.create({
+      data: {
+        ...req.body,
+        slug,
+      },
+      include: {
+        categories: true,
+        brands: true,
+      },
+    });
+
+    // Format the response
+    const formattedProduct = {
+      ...newProduct,
+      category: newProduct.categories.name,
+      categorySlug: newProduct.categories.slug,
+      brand: newProduct.brands.name,
+      brandCountry: newProduct.brands.country,
+      // Remove the nested objects
+      categories: undefined,
+      brands: undefined,
+    };
 
     // Respond with created product
     res.status(201).json({
       status: 'Success',
-      product: {
-        id: result.insertId,
-        ...req.body,
-        slug: req.body.name.toLowerCase().replace(/ /g, '-'),
-      },
+      product: formattedProduct,
     });
   } catch (error) {
     console.error('Error creating product:', error);
 
     // Handle specific error cases
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'P2002') {
       return res.status(409).json({
         status: 'Fail',
         message: 'A product with this unique identifier already exists',
@@ -246,37 +244,43 @@ exports.createProduct = async (req, res) => {
     });
   }
 };
+
 exports.getProduct = async (req, res) => {
   try {
-    const [products] = await pool.execute(
-      `SELECT 
-        p.*,
-        c.name AS category,
-        c.slug AS categorySlug,
-        b.name AS brand,
-        b.country AS brandCountry
-      FROM 
-        products p
-      INNER JOIN 
-        categories c ON p.categoryId = c.id
-      INNER JOIN 
-        brands b ON p.brandId = b.id
-      WHERE p.id = ?`,
-      [req.params.id]
-    );
+    const product = await prisma.products.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      include: {
+        categories: true,
+        brands: true,
+      },
+    });
 
     // Check if product exists
-    if (products.length === 0) {
+    if (!product) {
       return res.status(404).json({
         status: 'Fail',
         message: `No product found with ID ${req.params.id}`,
       });
     }
 
-    // If product exists, return the first (and typically only) product
+    // Format the response
+    const formattedProduct = {
+      ...product,
+      category: product.categories.name,
+      categorySlug: product.categories.slug,
+      brand: product.brands.name,
+      brandCountry: product.brands.country,
+      // Remove the nested objects
+      categories: undefined,
+      brands: undefined,
+    };
+
+    // If product exists, return it
     res.status(200).json({
       status: 'Success',
-      product: products[0],
+      product: formattedProduct,
     });
   } catch (error) {
     console.error('Error retrieving product:', error);
@@ -290,49 +294,57 @@ exports.getProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const [products] = await pool.execute(
-      `SELECT 
-        p.*,
-        c.name AS category,
-        c.slug AS categorySlug,
-        b.name AS brand,
-        b.country AS brandCountry
-      FROM 
-        products p
-      INNER JOIN 
-        categories c ON p.categoryId = c.id
-      INNER JOIN 
-        brands b ON p.brandId = b.id
-      WHERE p.id = ?`,
-      [req.params.id]
-    );
+    // Find the product to update first
+    const existingProduct = await prisma.products.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      include: {
+        categories: true,
+        brands: true,
+      },
+    });
 
     // Check if product exists
-    if (products.length === 0) {
-      return res
-        .status(404)
-        .json({ status: 'Fail', message: 'Product not found' });
+    if (!existingProduct) {
+      return res.status(404).json({
+        status: 'Fail',
+        message: 'Product not found',
+      });
     }
-
-    const product = products[0];
 
     // Remove fields that shouldn't be updated
     const updateData = { ...req.body };
     delete updateData.id; // Prevent ID manipulation
     delete updateData.createdAt; // Prevent modifying creation timestamp
 
-    // Merge existing product with update data
-    const updatedProduct = { ...product, ...updateData };
+    // Update the product
+    const updatedProduct = await prisma.products.update({
+      where: {
+        id: parseInt(req.params.id),
+      },
+      data: updateData,
+      include: {
+        categories: true,
+        brands: true,
+      },
+    });
 
-    // Perform the update
-    await pool.execute('UPDATE products SET ? WHERE id = ?', [
-      updateData, // Only send the fields to be updated
-      req.params.id,
-    ]);
+    // Format the response
+    const formattedProduct = {
+      ...updatedProduct,
+      category: updatedProduct.categories.name,
+      categorySlug: updatedProduct.categories.slug,
+      brand: updatedProduct.brands.name,
+      brandCountry: updatedProduct.brands.country,
+      // Remove the nested objects
+      categories: undefined,
+      brands: undefined,
+    };
 
     res.status(200).json({
       status: 'Success',
-      product: updatedProduct,
+      product: formattedProduct,
     });
   } catch (error) {
     console.error('Error updating product:', error);
@@ -346,21 +358,41 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const [result] = await pool.execute('DELETE FROM products WHERE slug = ?', [
-      req.params.slug,
-    ]);
+    // Find product by slug first
+    const product = await prisma.products.findFirst({
+      where: {
+        slug: req.params.slug,
+      },
+    });
 
-    // Check if any rows were affected
-    if (result.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ status: 'Fail', message: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({
+        status: 'Fail',
+        message: 'Product not found',
+      });
     }
+
+    // Then delete by ID
+    await prisma.products.delete({
+      where: {
+        id: product.id,
+      },
+    });
 
     // 204 No Content is appropriate for successful delete with no response body
     res.status(204).end();
   } catch (error) {
     console.error('Error deleting product:', error);
+
+    // Handle constraints
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        status: 'Error',
+        message:
+          'Cannot delete this product because it is referenced by other records',
+      });
+    }
+
     res.status(500).json({
       status: 'Error',
       message: 'Unable to delete product',

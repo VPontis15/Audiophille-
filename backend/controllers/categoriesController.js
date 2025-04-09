@@ -1,46 +1,27 @@
-const { pool } = require('../config/config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 exports.getAllCategories = async (req, res) => {
   try {
     // Check if hierarchy is requested
     const includeHierarchy = req.query.hierarchy === 'true';
 
-    // If hierarchy is requested, use a different approach
+    // Handle hierarchical view
     if (includeHierarchy) {
-      console.log('Hierarchy requested, fetching parent categories');
-      const [parentCategories] = await pool.execute(
-        'SELECT * FROM categories WHERE parent_id IS NULL'
-      );
-      console.log('Found parent categories:', parentCategories.length);
-
-      const hierarchicalCategories = [];
-
-      for (const parent of parentCategories) {
-        console.log(`Fetching children for parent ${parent.id}`);
-        const [children] = await pool.execute(
-          'SELECT * FROM categories WHERE parent_id = ?',
-          [parent.id]
-        );
-        console.log(
-          `Found ${children.length} children for parent ${parent.id}`
-        );
-
-        hierarchicalCategories.push({
-          ...parent,
-          subcategories: children || [],
-        });
-      }
-
-      console.log(
-        'Final hierarchical structure:',
-        JSON.stringify(hierarchicalCategories, null, 2)
-      );
+      const parentCategories = await prisma.categories.findMany({
+        where: {
+          parentId: null,
+        },
+        include: {
+          subcategories: true, // This assumes a relation named "subcategories" in your Prisma schema
+        },
+      });
 
       // Apply field selection if requested
-      let formattedCategories = hierarchicalCategories;
+      let formattedCategories = parentCategories;
       if (req.query.fields) {
         const selectFields = req.query.fields.split(',');
-        formattedCategories = hierarchicalCategories.map((category) => {
+        formattedCategories = parentCategories.map((category) => {
           const filteredCategory = {};
           selectFields.forEach((field) => {
             if (field === 'subcategories') {
@@ -78,72 +59,80 @@ exports.getAllCategories = async (req, res) => {
     }
 
     // Regular flat categories with filtering, pagination, etc.
-    let sqlParams = [];
-    let baseQuery = 'SELECT * FROM categories';
+    const where = {};
 
+    // Process query parameters for filtering
     const query = { ...req.query };
     const excludedFields = ['page', 'limit', 'sort', 'fields', 'hierarchy'];
-    excludedFields.forEach((field) => delete query[field]);
 
-    // Filtering
-    if (Object.keys(query).length > 0) {
-      const whereClauses = [];
-      for (const [key, value] of Object.entries(query)) {
-        if (typeof value === 'object' && value !== null) {
-          for (const [operator, operand] of Object.entries(value)) {
-            const sqlOperator = {
-              gt: '>',
-              gte: '>=',
-              lt: '<',
-              lte: '<=',
-              like: 'LIKE',
-            }[operator];
-            if (sqlOperator) {
-              whereClauses.push(`${key} ${sqlOperator} ?`);
-              sqlParams.push(sqlOperator === 'LIKE' ? `%${operand}%` : operand);
-            }
+    Object.keys(query).forEach((key) => {
+      // Skip excluded fields
+      if (excludedFields.includes(key)) return;
+
+      // Handle various filter operators
+      if (typeof query[key] === 'object') {
+        for (const op in query[key]) {
+          switch (op) {
+            case 'gt':
+              where[key] = { gt: parseFloat(query[key][op]) };
+              break;
+            case 'gte':
+              where[key] = { gte: parseFloat(query[key][op]) };
+              break;
+            case 'lt':
+              where[key] = { lt: parseFloat(query[key][op]) };
+              break;
+            case 'lte':
+              where[key] = { lte: parseFloat(query[key][op]) };
+              break;
+            case 'like':
+              where[key] = { contains: query[key][op] };
+              break;
           }
-        } else if (Array.isArray(value)) {
-          const placeholders = value.map(() => '?').join(', ');
-          whereClauses.push(`${key} IN (${placeholders})`);
-          sqlParams.push(...value);
-        } else {
-          whereClauses.push(`${key} = ?`);
-          sqlParams.push(value);
         }
+      } else {
+        // Simple equality
+        where[key] = query[key];
       }
-      if (whereClauses.length > 0)
-        baseQuery += ' WHERE ' + whereClauses.join(' AND ');
-    }
+    });
 
     // Sorting
-    let sortClause = req.query.sort
-      ? ' ORDER BY ' +
-        req.query.sort
-          .split(',')
-          .map(
-            (field) =>
-              `${field.replace('-', '')} ${
-                field.startsWith('-') ? 'DESC' : 'ASC'
-              }`
-          )
-          .join(', ')
-      : ' ORDER BY id ASC';
+    const orderBy = [];
+    if (req.query.sort) {
+      const sortFields = req.query.sort.split(',');
+      sortFields.forEach((field) => {
+        const isDesc = field.startsWith('-');
+        const cleanField = isDesc ? field.substring(1) : field;
+
+        // Handle casing for Prisma
+        const fieldMap = {
+          createdat: 'createdAt',
+          updatedat: 'updatedAt',
+        };
+
+        const prismaField = fieldMap[cleanField.toLowerCase()] || cleanField;
+        orderBy.push({ [prismaField]: isDesc ? 'desc' : 'asc' });
+      });
+    } else {
+      orderBy.push({ id: 'asc' });
+    }
 
     // Pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-    const countQuery = baseQuery.replace('*', 'COUNT(*) as total');
-    const finalQuery = baseQuery + sortClause + ' LIMIT ? OFFSET ?';
-    const paginationParams = [...sqlParams, limit, offset];
-
-    const [countResult] = await pool.execute(countQuery, sqlParams);
-    const [categories] = await pool.execute(finalQuery, paginationParams);
-
-    const totalCategories = countResult[0].total;
+    // Count total categories
+    const totalCategories = await prisma.categories.count({ where });
     const totalPages = Math.ceil(totalCategories / limit);
+
+    // Get categories with pagination
+    const categories = await prisma.categories.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+    });
 
     // Field Selection
     let formattedCategories = categories;
@@ -169,6 +158,7 @@ exports.getAllCategories = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Error fetching categories:', error);
     res.status(500).json({
       status: 'fail',
       message: error.message,
@@ -178,20 +168,23 @@ exports.getAllCategories = async (req, res) => {
 
 exports.getCategory = async (req, res) => {
   try {
-    const [category] = await pool.execute(
-      'SELECT * FROM categories WHERE slug = ?',
-      [req.params.slug]
-    );
-    if (category.length === 0) {
+    const category = await prisma.categories.findFirst({
+      where: {
+        slug: req.params.slug,
+      },
+    });
+
+    if (!category) {
       return res.status(404).json({
         status: 'fail',
         message: 'Category not found',
       });
     }
+
     res.status(200).json({
       status: 'success',
       data: {
-        category: category[0],
+        category,
       },
     });
   } catch (error) {
@@ -212,45 +205,32 @@ exports.createCategory = async (req, res) => {
       });
     }
 
-    const data = {
-      ...req.body,
-    };
+    // Generate slug if not provided
+    const slug =
+      req.body.slug ||
+      req.body.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
 
-    if (!data.slug) {
-      data.slug = data.name.toLowerCase().replace(/ /g, '-');
-    }
-
-    // Convert object to columns and values
-    const columns = Object.keys(data);
-    const placeholders = columns.map(() => '?').join(', ');
-    const values = columns.map((col) => data[col]);
-
-    // Build explicit query
-    const query = `INSERT INTO categories (${columns.join(
-      ', '
-    )}) VALUES (${placeholders})`;
-
-    // Log for debugging
-    console.log('Executing query:', query);
-    console.log('With values:', values);
-
-    // Execute with explicit parameters
-    const [result] = await pool.execute(query, values);
+    // Create category with Prisma
+    const newCategory = await prisma.categories.create({
+      data: {
+        ...req.body,
+        slug,
+      },
+    });
 
     // Respond with created category
     res.status(201).json({
       status: 'Success',
-      category: {
-        id: result.insertId,
-        ...data,
-      },
+      category: newCategory,
     });
   } catch (error) {
     console.error('Error creating category:', error);
-    console.error('Error details:', error.stack);
 
     // Handle specific error cases
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'P2002') {
       return res.status(409).json({
         status: 'Fail',
         message: 'A category with this unique identifier already exists',
@@ -276,78 +256,56 @@ exports.updateCategory = async (req, res) => {
       });
     }
 
-    const data = {
-      ...req.body,
-    };
-
-    // Make sure name exists
-    if (!data.name) {
+    // Make sure name exists if attempting to update
+    if (req.body.name === '') {
       return res.status(400).json({
         status: 'fail',
-        message: 'Category name is required',
+        message: 'Category name cannot be empty',
       });
     }
 
-    // First check if the category exists
-    const [existingCategory] = await pool.execute(
-      'SELECT * FROM categories WHERE slug = ?',
-      [req.params.slug]
-    );
+    // Find the category by slug first
+    const category = await prisma.categories.findFirst({
+      where: {
+        slug: req.params.slug,
+      },
+    });
 
-    if (!existingCategory || existingCategory.length === 0) {
-      console.log('Category not found for update, slug:', req.params.slug);
+    if (!category) {
       return res.status(404).json({
         status: 'fail',
         message: 'Category not found',
       });
     }
 
-    // Generate slug if not provided but name was updated
-    if (data.name && !data.slug) {
-      data.slug = data.name.toLowerCase().replace(/ /g, '-');
+    // Generate slug if name is updated but slug isn't provided
+    let updateData = { ...req.body };
+    if (updateData.name && !updateData.slug) {
+      updateData.slug = updateData.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
     }
 
-    // Build the SET clause for the UPDATE query
-    const setClause = Object.keys(data)
-      .map((key) => `${key} = ?`)
-      .join(', ');
-
-    const values = Object.values(data);
-
-    // Add the slug parameter for the WHERE clause
-    values.push(req.params.slug);
-
-    // Build and execute the update query
-    const query = `UPDATE categories SET ${setClause} WHERE slug = ?`;
-
-    // Log for debugging
-    console.log('Executing update query:', query);
-    console.log('With values:', values);
-
-    const [result] = await pool.execute(query, values);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Category not found',
-      });
-    }
+    // Update the category
+    const updatedCategory = await prisma.categories.update({
+      where: {
+        id: category.id,
+      },
+      data: updateData,
+    });
 
     res.status(200).json({
       status: 'success',
       data: {
-        category: {
-          id: existingCategory[0].id,
-          ...data,
-        },
+        category: updatedCategory,
       },
     });
   } catch (error) {
     console.error('Error updating category:', error);
-    console.error('Error details:', error.stack);
 
     // Handle specific error cases
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 'P2002') {
       return res.status(409).json({
         status: 'Fail',
         message: 'A category with this unique identifier already exists',
@@ -365,21 +323,43 @@ exports.updateCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
   try {
-    const [result] = await pool.execute(
-      'DELETE FROM categories WHERE slug = ?',
-      [req.params.slug]
-    );
-    if (result.affectedRows === 0) {
+    // Find category by slug first
+    const category = await prisma.categories.findFirst({
+      where: {
+        slug: req.params.slug,
+      },
+    });
+
+    if (!category) {
       return res.status(404).json({
         status: 'fail',
         message: 'Category not found',
       });
     }
+
+    // Delete the category by ID
+    await prisma.categories.delete({
+      where: {
+        id: category.id,
+      },
+    });
+
     res.status(204).json({
       status: 'success',
       data: null,
     });
   } catch (error) {
+    console.error('Error deleting category:', error);
+
+    // Handle constraint errors
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        status: 'fail',
+        message:
+          'Cannot delete this category because it is referenced by other records',
+      });
+    }
+
     res.status(500).json({
       status: 'fail',
       message: error.message,
@@ -389,16 +369,19 @@ exports.deleteCategory = async (req, res) => {
 
 exports.getCategoryProducts = async (req, res) => {
   try {
-    const [products] = await pool.execute(
-      'SELECT products.* FROM products INNER JOIN categories ON products.categoryId = categories.id WHERE categories.id = ?',
-      [req.params.id]
-    );
+    const products = await prisma.products.findMany({
+      where: {
+        categoryId: parseInt(req.params.id),
+      },
+    });
+
     if (products.length === 0) {
       return res.status(404).json({
         status: 'fail',
         message: 'No products found for this category',
       });
     }
+
     res.status(200).json({
       status: 'success',
       results: products.length,
@@ -416,79 +399,27 @@ exports.getCategoryProducts = async (req, res) => {
 
 exports.getCategoryHierarchy = async (req, res) => {
   try {
-    // First, check if we can get ANY data from the categories table
-    const [categoryCount] = await pool.execute(
-      'SELECT COUNT(*) as count FROM categories'
-    );
-
-    if (categoryCount[0].count === 0) {
-      console.log('No categories found in database');
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          categories: [],
-        },
-      });
-    }
-
-    // Try a simpler query first
-    const [simpleCategories] = await pool.execute('SELECT * FROM categories');
-
-    // Now try the hierarchical query
-    const [results] = await pool.execute(`
-      SELECT 
-          parent.id AS parent_id, 
-          parent.name AS parent_name,
-          parent.slug AS parent_slug,
-          child.id AS child_id, 
-          child.name AS child_name,
-          child.slug AS child_slug
-      FROM 
-          categories AS parent
-      LEFT JOIN 
-          categories AS child ON child.parent_id = parent.id
-      WHERE 
-          parent.parent_id IS NULL
-      ORDER BY 
-          parent.name, child.name
-    `);
-
-    // Handle case when no parent categories exist
-    if (results.length === 0) {
-      return res.status(200).json({
-        status: 'success',
-        data: {
-          categories: [],
-        },
-      });
-    }
-
-    // Process the flat result into a hierarchical structure
-    const parentMap = new Map();
-
-    // First pass: create parent categories
-    results.forEach((row) => {
-      if (!parentMap.has(row.parent_id)) {
-        parentMap.set(row.parent_id, {
-          id: row.parent_id,
-          name: row.parent_name,
-          slug: row.parent_slug,
-          subcategories: [],
-        });
-      }
-
-      // Add child category if it exists
-      if (row.child_id) {
-        console.log('Adding child:', row.child_id, 'to parent:', row.parent_id);
-        parentMap.get(row.parent_id).subcategories.push({
-          id: row.child_id,
-          name: row.child_name,
-          slug: row.child_slug,
-        });
-      }
+    // Get all parent categories
+    const parentCategories = await prisma.categories.findMany({
+      where: {
+        parentId: null,
+      },
+      include: {
+        subcategories: true, // This assumes a relation named "subcategories" in your Prisma schema
+      },
     });
 
-    const categoryHierarchy = Array.from(parentMap.values());
+    // Format response to expected structure
+    const categoryHierarchy = parentCategories.map((parent) => ({
+      id: parent.id,
+      name: parent.name,
+      slug: parent.slug,
+      subcategories: parent.subcategories.map((child) => ({
+        id: child.id,
+        name: child.name,
+        slug: child.slug,
+      })),
+    }));
 
     return res.status(200).json({
       status: 'success',

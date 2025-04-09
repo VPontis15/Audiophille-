@@ -1,14 +1,20 @@
 const { pool } = require('../config/config');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 exports.getAllBrands = async function (req, res) {
   try {
-    // Initialize parameters for SQL query
-    let sqlParams = [];
-    let sqlQuery = 'SELECT * FROM brands';
+    // Initialize parameters for Prisma query
+    const where = {};
 
     // 1) FILTERING
-    const filterableFields = ['name', 'country', 'isPopular'];
-    const filterConditions = [];
+    const filterableFields = [
+      'name',
+      'country',
+      'isPopular',
+      'slug',
+      'createdAt',
+    ];
 
     // Process query parameters for filtering
     Object.keys(req.query).forEach((key) => {
@@ -19,70 +25,71 @@ exports.getAllBrands = async function (req, res) {
       if (filterableFields.includes(key)) {
         // Handle isPopular as boolean
         if (key === 'isPopular') {
-          const boolValue = req.query[key].toLowerCase() === 'true' ? 1 : 0;
-          filterConditions.push(`${key} = ?`);
-          sqlParams.push(boolValue);
+          where[key] = req.query[key].toLowerCase() === 'true';
         }
-        // Handle text search with LIKE operator
+        // Handle text search with contains
         else if (typeof req.query[key] === 'object' && req.query[key].like) {
-          filterConditions.push(`${key} LIKE ?`);
-          sqlParams.push(`%${req.query[key].like}%`);
+          where[key] = { contains: req.query[key].like };
         }
         // Handle exact equality
         else {
-          filterConditions.push(`${key} = ?`);
-          sqlParams.push(req.query[key]);
+          where[key] = req.query[key];
         }
       }
     });
 
-    // Add WHERE clause if we have any filter conditions
-    if (filterConditions.length > 0) {
-      sqlQuery += ' WHERE ' + filterConditions.join(' AND ');
-    }
-
     // 2) SORTING
+    const orderBy = [];
     if (req.query.sort) {
       const sortFields = req.query.sort.split(',');
-      const sortClauses = sortFields.map((field) => {
-        // Handle descending sort with negative sign
+      sortFields.forEach((field) => {
+        // Normalize field name by converting to camelCase if needed
+        let normalizedField = field;
         if (field.startsWith('-')) {
-          return `${field.substring(1)} DESC`;
+          normalizedField = field.substring(1);
         }
-        return `${field} ASC`;
-      });
 
-      sqlQuery += ' ORDER BY ' + sortClauses.join(', ');
+        // Map field names to correct casing for Prisma
+        const fieldMap = {
+          createdat: 'createdAt',
+          updatedat: 'updatedAt',
+          ispopular: 'isPopular',
+          // Add other fields that might need case correction
+        };
+
+        const prismaField =
+          fieldMap[normalizedField.toLowerCase()] || normalizedField;
+
+        if (field.startsWith('-')) {
+          orderBy.push({ [prismaField]: 'desc' });
+        } else {
+          orderBy.push({ [prismaField]: 'asc' });
+        }
+      });
     } else {
       // Default sort
-      sqlQuery += ' ORDER BY createdAt DESC';
+      orderBy.push({ createdAt: 'desc' });
     }
 
     // 3) PAGINATION
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     // Get total count for pagination metadata
-    const [countResult] = await pool.execute(
-      'SELECT COUNT(*) as total FROM brands' +
-        (filterConditions.length > 0
-          ? ' WHERE ' + filterConditions.join(' AND ')
-          : ''),
-      sqlParams.slice()
-    );
-
-    const totalBrands = countResult[0].total;
+    const totalBrands = await prisma.brands.count({ where });
     const totalPages = Math.ceil(totalBrands / limit);
 
-    // Add pagination to query
-    sqlQuery += ' LIMIT ? OFFSET ?';
-    sqlParams.push(limit, offset);
-
     // Execute the main query
-    const [brands] = await pool.execute(sqlQuery, sqlParams);
+    const brands = await prisma.brands.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+    });
 
     // 4) FIELD SELECTION
+    let result = brands;
     if (req.query.fields) {
       const fields = req.query.fields.split(',');
       const validFields = [
@@ -99,7 +106,7 @@ exports.getAllBrands = async function (req, res) {
       ];
 
       // Filter brands to only include requested fields
-      const filteredBrands = brands.map((brand) => {
+      result = brands.map((brand) => {
         const filteredBrand = {};
         fields.forEach((field) => {
           if (validFields.includes(field)) {
@@ -108,35 +115,17 @@ exports.getAllBrands = async function (req, res) {
         });
         return filteredBrand;
       });
-
-      // Return filtered response
-      return res.status(200).json({
-        status: 'success',
-        results: filteredBrands.length,
-        totalBrands,
-        totalPages,
-        currentPage: page,
-        data: {
-          brands: filteredBrands,
-        },
-        pagination: {
-          total: totalBrands,
-          pages: totalPages,
-          page,
-          limit,
-        },
-      });
     }
 
-    // Return full response if no field filtering
+    // Return response
     res.status(200).json({
       status: 'success',
-      results: brands.length,
+      results: result.length,
       totalBrands,
       totalPages,
       currentPage: page,
       data: {
-        brands,
+        brands: result,
       },
       pagination: {
         total: totalBrands,
@@ -156,51 +145,15 @@ exports.getAllBrands = async function (req, res) {
 
 exports.getBrand = async function (req, res) {
   try {
-    // Handle field selection
-    let fields = '*';
-    if (req.query.fields) {
-      const requestedFields = req.query.fields.split(',');
-      const validFields = [
-        'id',
-        'name',
-        'slug', // Add slug to valid fields
-        'description',
-        'country',
-        'isPopular',
-        'logo',
-        'website',
-        'createdAt',
-        'updatedAt',
-      ];
-      const safeFields = requestedFields.filter((field) =>
-        validFields.includes(field)
-      );
-
-      if (safeFields.length > 0) {
-        // Always include id field
-        if (!safeFields.includes('id')) {
-          safeFields.unshift('id');
-        }
-        fields = safeFields.join(', ');
-      }
-    }
-
-    const [brand] = await pool.execute(
-      `SELECT ${fields} FROM brands WHERE slug = ?`,
-      [req.params.slug]
-    );
-
-    if (brand.length === 0) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Brand not found',
-      });
-    }
-
+    const brand = await prisma.brands.findFirstOrThrow({
+      where: {
+        slug: req.params.slug,
+      },
+    });
     res.status(200).json({
       status: 'success',
       data: {
-        brand: brand[0],
+        brand,
       },
     });
   } catch (error) {
@@ -214,96 +167,32 @@ exports.getBrand = async function (req, res) {
 
 exports.createBrand = async function (req, res) {
   try {
-    // Extract all possible fields from request body
-    const {
-      name,
-      slug = null, // Accept slug from request if provided
-      description = null,
-      country = null,
-      isPopular = false,
-      logo = null,
-      website = null,
-    } = req.body;
-
-    if (!name) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Brand name is required',
-      });
-    }
-
-    // Generate slug if not provided
-    const brandSlug =
-      slug ||
-      name
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-
-    // Build query dynamically based on provided fields
-    const fields = ['name', 'slug']; // Always include slug
-    const values = [name, brandSlug];
-    const placeholders = ['?', '?'];
-
-    // Add optional fields if provided
-    if (description !== undefined) {
-      fields.push('description');
-      values.push(description);
-      placeholders.push('?');
-    }
-
-    if (country !== undefined) {
-      fields.push('country');
-      values.push(country);
-      placeholders.push('?');
-    }
-
-    if (isPopular !== undefined) {
-      fields.push('isPopular');
-      values.push(isPopular ? 1 : 0);
-      placeholders.push('?');
-    }
-
-    if (logo !== undefined) {
-      fields.push('logo');
-      values.push(logo);
-      placeholders.push('?');
-    }
-
-    if (website !== undefined) {
-      fields.push('website');
-      values.push(website);
-      placeholders.push('?');
-    }
-
-    const query = `INSERT INTO brands (${fields.join(
-      ', '
-    )}) VALUES (${placeholders.join(', ')})`;
-
-    const [result] = await pool.execute(query, values);
+    // Added await here
+    const newBrand = await prisma.brands.create({
+      data: {
+        ...req.body,
+        isPopular: req.body.isPopular ? true : false, // Convert to boolean
+        logo: req.file ? req.file.path : null, // Handle file upload
+        slug:
+          req.body.slug ||
+          req.body.name
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, ''),
+      },
+    });
 
     // Return created brand with all provided fields
     res.status(201).json({
       status: 'success',
       data: {
-        brand: {
-          id: result.insertId,
-          name,
-          slug: brandSlug, // Include the slug in response
-          description,
-          country,
-          isPopular,
-          logo,
-          website,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        brand: newBrand,
       },
     });
   } catch (error) {
     console.error('Error creating brand:', error);
-    // Handle duplicate entry error
-    if (error.code === 'ER_DUP_ENTRY') {
+    // Handle duplicate entry error - using Prisma error code
+    if (error.code === 'P2002') {
       return res.status(400).json({
         status: 'fail',
         message: 'A brand with this name or slug already exists',
@@ -319,106 +208,28 @@ exports.createBrand = async function (req, res) {
 
 exports.updateBrand = async function (req, res) {
   try {
-    // Get current brand to know what fields to update
-    const [currentBrand] = await pool.execute(
-      'SELECT * FROM brands WHERE slug = ?',
-      [req.params.slug]
-    );
-
-    if (currentBrand.length === 0) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Brand not found',
-      });
-    }
-
-    // Extract fields from request body
-    const updates = { ...req.body };
-
-    // Auto-generate slug if name is updated but slug isn't provided
-    if (updates.name && !updates.slug) {
-      updates.slug = updates.name
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-    }
-
-    // Build SET clause and parameters dynamically
-    const setClause = [];
-    const values = [];
-
-    Object.keys(updates).forEach((key) => {
-      // Only allow updating certain fields
-      if (
-        [
-          'name',
-          'slug',
-          'description',
-          'country',
-          'isPopular',
-          'logo',
-          'website',
-        ].includes(key)
-      ) {
-        // Handle boolean conversion for isPopular
-        if (key === 'isPopular') {
-          setClause.push(`${key} = ?`);
-          values.push(updates[key] ? 1 : 0);
-        } else {
-          setClause.push(`${key} = ?`);
-          values.push(updates[key]);
-        }
-      }
+    const brandToUpdate = await prisma.brands.findFirstOrThrow({
+      where: {
+        slug: req.params.slug,
+      },
     });
 
-    // If no valid fields to update
-    if (setClause.length === 0) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'No valid fields to update',
-      });
-    }
-
-    // Add ID for WHERE clause
-    values.push(req.params.slug);
-
-    const query = `UPDATE brands SET ${setClause.join(', ')} WHERE slug = ?`;
-    const [result] = await pool.execute(query, values);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'Brand not found',
-      });
-    }
-
-    // After a successful update, fetch the updated brand
-    // We need to handle the possibility that the slug itself was updated
-    let updatedSlugOrId;
-    if (updates.slug) {
-      // If the slug was updated, use the new slug
-      updatedSlugOrId = updates.slug;
-      const [updatedBrand] = await pool.execute(
-        'SELECT * FROM brands WHERE slug = ?',
-        [updatedSlugOrId]
-      );
-
-      if (updatedBrand.length > 0) {
-        return res.status(200).json({
-          status: 'success',
-          data: {
-            brand: updatedBrand[0],
-          },
-        });
-      }
-    }
-
-    // Fallback: use the original brand's ID for a guaranteed lookup
-    const [updatedBrand] = await pool.execute(
-      'SELECT * FROM brands WHERE id = ?',
-      [currentBrand[0].id]
-    );
-
+    const updatedBrand = await prisma.brands.update({
+      where: {
+        id: brandToUpdate.id,
+      },
+      data: {
+        ...req.body,
+        isPopular: req.body.isPopular ? true : false, // Convert to boolean
+        logo: req.file ? req.file.path : null, // Handle file upload
+        slug:
+          req.body.slug ||
+          req.body.name
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, ''),
+      },
+    });
     res.status(200).json({
       status: 'success',
       data: {
@@ -444,24 +255,41 @@ exports.updateBrand = async function (req, res) {
 
 exports.deleteBrand = async function (req, res) {
   try {
-    const query = 'DELETE FROM brands WHERE slug = ?';
-    const param = req.params.slug;
+    const brandToDelete = await prisma.brands.findFirst({
+      where: {
+        slug: req.params.slug,
+      },
+    });
+    if (!brandToDelete) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Brand not found',
+      });
+    }
+    // Now we can delete directly by slug since it's unique
+    await prisma.brands.delete({
+      where: {
+        id: brandToDelete.id,
+      },
+    });
 
-    const [result] = await pool.execute(query, [param]);
+    return res.status(200).json({
+      status: 'success',
+      message: 'Brand deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting brand:', error);
 
-    if (result.affectedRows === 0) {
+    // Handle record not found
+    if (error.code === 'P2025') {
       return res.status(404).json({
         status: 'fail',
         message: 'Brand not found',
       });
     }
 
-    // Return 204 No Content for successful deletion
-    res.status(204).send();
-  } catch (error) {
-    console.error('Error deleting brand:', error);
     // Handle foreign key constraint error
-    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+    if (error.code === 'P2003') {
       return res.status(400).json({
         status: 'fail',
         message:
