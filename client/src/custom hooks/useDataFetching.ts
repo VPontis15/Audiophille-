@@ -146,7 +146,6 @@ export default function useDataFetching<T>({
     params.set('page', '1');
     setSearchParams(params);
   };
-  console.log(data);
   // Extract data with fallbacks - works with both nested and flat structures
   const items =
     data?.data?.categories || // For hierarchical data structure
