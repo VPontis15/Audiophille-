@@ -36,6 +36,18 @@ export default class API {
     return response.data;
   }
 
+  async updateOne<T>(
+    endpoint: string,
+    id: string,
+    data: Record<string, unknown>
+  ): Promise<T> {
+    const response = await axios.patch<T>(
+      `${this.baseUrl}/${endpoint}/${id}`,
+      data
+    );
+    return response.data;
+  }
+
   async createOne<T>(
     endpoint: string,
     data: Record<string, unknown>
