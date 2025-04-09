@@ -20,7 +20,7 @@ import DeleteProductConfirmation from './components/components/ui/DeleteProductC
 import DashboardManageOrders from './components/Dashboard/Orders/DashboardManageOrders';
 import DashboardProductCategories from './components/Dashboard/Products/Categories/DashboardProductCategories';
 import DashboardProductBrands from './components/Dashboard/Products/Brands/DashboardProductBrands';
-import AddForm from './components/components/ui/AddForm';
+import EntityForm from './components/components/ui/EntityForm';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -119,7 +119,24 @@ const router = createBrowserRouter([
                 path: 'create',
                 element: (
                   <Modal returnPath="/admin/dashboard/products/categories">
-                    <AddForm />
+                    <EntityForm
+                      endpoint="categories"
+                      queryKey="categories"
+                      title="Add Category"
+                      description="Add a new category to your store"
+                    />
+                  </Modal>
+                ),
+              },
+              {
+                path: ':slug/edit',
+                element: (
+                  <Modal returnPath="/admin/dashboard/products/categories">
+                    <EntityForm
+                      endpoint="categories"
+                      queryKey="categories"
+                      title="Edit Category"
+                    />
                   </Modal>
                 ),
               },
