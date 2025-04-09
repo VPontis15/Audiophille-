@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model brands {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique(map: "name") @db.VarChar(100)
+  slug        String     @db.VarChar(255)
+  description String?    @db.Text
+  country     String?    @db.VarChar(50)
+  isPopular   Boolean?   @default(false)
+  logo        String?    @db.VarChar(255)
+  website     String?    @db.VarChar(255)
+  createdAt   DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime   @default(now()) @db.Timestamp(0)
+  products    products[]
+
+
+}
+
+model cartitems {
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int      @default(1)
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  carts     carts    @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cartitems_ibfk_1")
+  products  products @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "cartitems_ibfk_2")
+
+  @@unique([cartId, productId], map: "cartId")
+  @@index([productId], map: "productId")
+}
+
+model carts {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime    @default(now()) @db.Timestamp(0)
+  updatedAt DateTime    @default(now()) @db.Timestamp(0)
+  cartitems cartitems[]
+  users     users       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "carts_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model categories {
+  id               Int          @id @default(autoincrement())
+  name             String       @db.VarChar(255)
+  parent_id        Int?
+  description      String?      @db.Text
+  image_url        String?      @db.VarChar(255)
+  slug             String?      @unique(map: "slug") @db.VarChar(255)
+  is_featured      Boolean?     @default(false)
+  createdAt        DateTime     @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime     @default(now()) @db.Timestamp(0)
+  categories       categories?  @relation("categoriesTocategories", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "categories_ibfk_1")
+  other_categories categories[] @relation("categoriesTocategories")
+  products         products[]
+
+  @@index([parent_id], map: "parent_id")
+}
+
+model orderitems {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  name      String   @db.VarChar(100)
+  quantity  Int      @default(1)
+  price     Decimal  @db.Decimal(10, 2)
+  image     String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  orders    orders   @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "orderitems_ibfk_1")
+  products  products @relation(fields: [productId], references: [id], onUpdate: Restrict, map: "orderitems_ibfk_2")
+
+  @@index([orderId], map: "orderId")
+  @@index([productId], map: "productId")
+}
+
+model orders {
+  id              Int            @id @default(autoincrement())
+  userId          Int
+  shippingAddress String         @db.Text
+  paymentMethod   String         @db.VarChar(50)
+  itemsPrice      Decimal        @db.Decimal(10, 2)
+  shippingPrice   Decimal        @db.Decimal(10, 2)
+  taxPrice        Decimal        @db.Decimal(10, 2)
+  totalPrice      Decimal        @db.Decimal(10, 2)
+  isPaid          Boolean?       @default(false)
+  paidAt          DateTime?      @db.Timestamp(0)
+  status          orders_status? @default(pending)
+  deliveredAt     DateTime?      @db.Timestamp(0)
+  createdAt       DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime       @default(now()) @db.Timestamp(0)
+  orderitems      orderitems[]
+  users           users          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "orders_ibfk_1")
+
+  @@index([status], map: "status")
+  @@index([userId], map: "userId")
+}
+
+model products {
+  id              Int             @id @default(autoincrement())
+  name            String          @db.VarChar(100)
+  description     String          @db.Text
+  price           Decimal         @db.Decimal(13, 2)
+  status          products_status
+  gallery         String          @db.LongText
+  quantity        Int
+  rating          Decimal         @db.Decimal(2, 1)
+  slug            String          @unique(map: "slug") @db.VarChar(100)
+  collection      String          @db.VarChar(100)
+  isFeatured      Boolean?        @default(false)
+  featuredImage   String?         @db.LongText
+  isNewArrival    Boolean?        @default(false)
+  isBestSeller    Boolean?        @default(false)
+  isOnSale        Boolean?        @default(false)
+  salePrice       Decimal?        @db.Decimal(13, 2)
+  saleEndDate     DateTime?       @db.Date
+  relatedProducts String?         @db.LongText
+  packageContents String?         @db.LongText
+  categoryId      Int
+  brandId         Int
+  numReviews      Int?
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime        @default(now()) @db.Timestamp(0)
+  cartitems       cartitems[]
+  orderitems      orderitems[]
+  categories      categories      @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_ibfk_1")
+  brands          brands          @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_ibfk_2")
+
+  @@index([brandId], map: "brandId")
+  @@index([categoryId], map: "categoryId")
+  @@index([name], map: "name")
+  @@index([slug], map: "slug_2")
+}
+
+model users {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  email        String   @unique(map: "email") @db.VarChar(100)
+  password     String   @db.VarChar(100)
+  phone        String?  @db.VarChar(15)
+  address      String?  @db.VarChar(255)
+  city         String?  @db.VarChar(100)
+  country      String?  @db.VarChar(100)
+  postalCode   String?  @db.VarChar(20)
+  profileImage String?  @db.VarChar(255)
+  isAdmin      Boolean? @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime @default(now()) @db.Timestamp(0)
+  carts        carts[]
+  orders       orders[]
+
+  @@index([email], map: "email_2")
+  @@index([name], map: "name")
+}
+
+enum products_status {
+  published
+  draft
+}
+
+enum orders_status {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
