@@ -145,6 +145,13 @@ export interface CategoryProps {
   updatedAt: string;
 }
 
+export interface BrandProps {
+  id: number | string;
+  name: string;
+  slug: string;
+  createdAt: string;
+}
+
 export interface TableControlsProps {
   addLink?: string;
   addBtn?: boolean;
@@ -160,6 +167,7 @@ export interface EntityFormProps {
   endpoint: string; // 'categories', 'brands', 'products', etc.
   queryKey: string; // For invalidating queries
   title: string; // Form title
+  entityKey: string; // Entity key for the form (e.g., 'category', 'brand', 'product')
   description?: string; // Form description
   additionalFields?: JSX.Element[]; // Optional additional fields for complex entities
   mapToApiPayload?: (formData: Record<string, string>) => Record<string, any>; // Optional transformer
