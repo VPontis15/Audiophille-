@@ -13,6 +13,36 @@ export const LIMIT_OPTIONS = [
   { value: '200', label: '200' },
 ];
 
+/**
+ * A custom hook for data fetching with pagination, sorting, filtering, and search capabilities.
+ *
+ * @template T - The type of data items being fetched
+ *
+ * @param {Object} options - The configuration options for data fetching
+ * @param {string} options.endpoint - The API endpoint to fetch data from
+ * @param {string[]} [options.fields] - Optional list of fields to include in the response
+ * @param {string} options.queryKey - The key used for React Query caching
+ * @param {string} [options.defaultSort='createdAt'] - Default field to sort by
+ * @param {Object} [options.initialConfig] - Initial configuration for the data fetching
+ * @param {Object} [options.additionalParams={}] - Additional parameters to include in the request
+ * @param {string} [options.additionalParams.searchField] - Field to use for search operations (defaults to 'name')
+ *
+ * @returns {Object} The fetch result and control methods
+ * @returns {T[]} returns.items - The fetched data items
+ * @returns {number} returns.results - Total number of results
+ * @returns {number} returns.limit - Current page size limit
+ * @returns {number} returns.totalPages - Total number of pages
+ * @returns {number} returns.currentPage - Current page number
+ * @returns {string|null} returns.error - Error message if any
+ * @returns {boolean} returns.isLoading - Loading state
+ * @returns {Object} returns.config - Configuration object
+ * @returns {Function} returns.handleSearchChange - Function to handle search input changes
+ * @returns {Function} returns.handlePageChange - Function to handle page changes
+ * @returns {Function} returns.handleLimitChange - Function to handle page size limit changes
+ * @returns {string} returns.searchInput - Current search input value
+ * @returns {Function} returns.setSearchInput - Function to directly set search input
+ * @returns {string[]} returns.LIMIT_OPTIONS - Available page size options
+ */
 export default function useDataFetching<T>({
   endpoint,
   fields,
@@ -98,7 +128,6 @@ export default function useDataFetching<T>({
     initialSearchTerm,
     additionalParams,
     searchParams,
-    endpoint,
   ]);
 
   // Fetch data
