@@ -21,6 +21,7 @@ import DashboardManageOrders from './components/Dashboard/Orders/DashboardManage
 import DashboardProductCategories from './components/Dashboard/Products/Categories/DashboardProductCategories';
 import DashboardProductBrands from './components/Dashboard/Products/Brands/DashboardProductBrands';
 import EntityForm from './components/components/ui/EntityForm';
+import DashboardCreateProduct from './components/Dashboard/Products/DashboardCreateProduct';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -107,8 +108,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'create',
-            // element: <DashboardCreateProduct />,
-            element: <h1>Create</h1>,
+            element: <DashboardCreateProduct />,
           },
           {
             path: 'categories',
