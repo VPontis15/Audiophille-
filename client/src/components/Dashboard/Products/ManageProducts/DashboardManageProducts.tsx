@@ -214,7 +214,7 @@ export default function DashboardManageProducts(): React.ReactElement {
           onLimitChange={handleLimitChange}
           onSearchChange={handleSearchChange}
         />
-        <div className="overflow-x-auto max-h-115 overflow-auto rounded-t-lg">
+        <div className="overflow-x-auto max-h-200 overflow-auto rounded-t-lg">
           <TableContent
             isLoading={isLoading}
             error={error}
