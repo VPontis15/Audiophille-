@@ -295,3 +295,7 @@ form {
     transform: scaleY(1);
   }
 }
+
+.css-kibgh4-control {
+  padding-block: 0.25rem;
+}
