@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { FormErrors, FormInputProps } from '../../types/formType';
 import ErrorMessage from './ErrorMessage';
 
@@ -68,6 +68,60 @@ export default function FormInput({
         }
     }
   };
+  if (type === 'textarea') {
+    return (
+      <div
+        className={`flex flex-col gap-2.5 w-full relative  ${
+          full ? 'md:w-full' : 'md:w-1/2'
+        } `}
+      >
+        <label className="text-[12px] font-bold" htmlFor={name}>
+          {label}
+        </label>
+        <textarea
+          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
+            errors[name]
+              ? 'bg-red-100 border-red-400 focus-visible:ring-red-400'
+              : null
+          } `}
+          id={name}
+          name={name}
+          placeholder={placeholder}
+          value={value !== null && value !== undefined ? String(value) : ''}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e as any)}
+          required={required}
+          {...rest}
+          onBlur={(e) => showErrorOnBlur(e)}
+        />
+        {errors[name] && (
+          <ErrorMessage className="absolute -bottom-5.5">
+            {errors[name]}
+          </ErrorMessage>
+        )}
+      </div>
+    );
+  }
+  if (type === 'checkbox') {
+    return (
+      <div
+        className={`flex  rounded-xl   gap-2.5 p-4 items-center ${className}`}
+      >
+        <input
+          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
+          id={name}
+          name={name}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          required={required}
+        />
+        <label className="text-[14px] font-bold " htmlFor={name}>
+          {label}
+        </label>
+      </div>
+    );
+  }
   if (type !== 'radio') {
     return (
       <div
@@ -88,7 +142,7 @@ export default function FormInput({
           name={name}
           type={type}
           placeholder={placeholder}
-          value={value}
+          value={value ?? ''}
           onChange={onChange}
           required={required}
           {...rest}
@@ -104,10 +158,10 @@ export default function FormInput({
   } else {
     return (
       <div
-        className={`flex border border-border rounded-xl w-full   gap-2.5 p-4 items-center ${className}`}
+        className={`flex border border-border rounded-xl   gap-2.5 p-4 items-center ${className}`}
       >
         <input
-          className="checked:accent-accent cursor-pointer w-full placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
+          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
           id={name}
           name={name}
           type={type}
