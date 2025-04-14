@@ -1,19 +1,21 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Modal({
   children,
   returnPath,
   preserveState = true,
+  className = '',
 }: {
   children: ReactNode;
+  className?: string;
   returnPath?: string;
   preserveState?: boolean;
 }): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     if (returnPath) {
       // Get current search parameters
       const currentSearchParams = new URLSearchParams(location.search);
@@ -44,7 +46,7 @@ export default function Modal({
       // If no returnPath specified, just go back
       navigate(-1);
     }
-  };
+  }, [navigate, returnPath, location.search, preserveState]);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -57,7 +59,7 @@ export default function Modal({
     return () => {
       window.removeEventListener('keydown', handleEscape);
     };
-  }, [navigate, returnPath, location.search, preserveState, closeModal]);
+  }, [closeModal]);
 
   return (
     <div
@@ -65,7 +67,7 @@ export default function Modal({
       onClick={closeModal} // Close when clicking the overlay
     >
       <div
-        className="dialog relative max-h-[90vh] overflow-auto"
+        className={`bg-white rounded-lg shadow-xl relative max-h-[90vh] overflow-auto ${className}`}
         onClick={(e) => e.stopPropagation()} // Prevent clicks inside dialog from closing
       >
         {children}
