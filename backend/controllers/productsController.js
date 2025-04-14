@@ -125,13 +125,13 @@ exports.getAllProducts = async (req, res) => {
       },
     });
 
-    // Format the response to match the expected structure
+    // Format the response to match the expected structure, with proper null checks
     const formattedProducts = products.map((product) => ({
       ...product,
-      category: product.categories.name,
-      categorySlug: product.categories.slug,
-      brand: product.brands.name,
-      brandCountry: product.brands.country,
+      category: product.categories?.name || null,
+      categorySlug: product.categories?.slug || null,
+      brand: product.brands?.name || null,
+      brandCountry: product.brands?.country || null,
       // Remove the nested objects
       categories: undefined,
       brands: undefined,
@@ -140,16 +140,24 @@ exports.getAllProducts = async (req, res) => {
     // 5) FIELD SELECTION
     let result = formattedProducts;
     if (req.query.fields) {
-      const selectFields = req.query.fields.split(',');
-      result = formattedProducts.map((product) => {
-        const filteredProduct = {};
-        selectFields.forEach((field) => {
-          if (product[field] !== undefined) {
-            filteredProduct[field] = product[field];
-          }
+      try {
+        const selectFields = req.query.fields.split(',');
+        result = formattedProducts.map((product) => {
+          const filteredProduct = {};
+          selectFields.forEach((field) => {
+            // For all fields requested, check if they exist on the product
+            // This will handle both direct fields and calculated fields like brand and category
+            if (product[field] !== undefined) {
+              filteredProduct[field] = product[field];
+            }
+          });
+          return filteredProduct;
         });
-        return filteredProduct;
-      });
+      } catch (error) {
+        console.error('Error during field selection:', error);
+        // Continue with unfiltered results if field selection fails
+        result = formattedProducts;
+      }
     }
 
     // Respond with the results
@@ -187,14 +195,18 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    // Generate slug if not provided
-    const slug =
-      req.body.slug ||
-      req.body.name
+    // Safely generate slug with proper null checks
+    let slug = req.body.slug;
+    if (!slug && req.body.name) {
+      slug = req.body.name
         .trim()
         .toLowerCase()
         .replace(/ /g, '-')
         .replace(/[^a-z0-9-]/g, '');
+    } else if (!slug) {
+      // Fallback if neither slug nor name is provided
+      slug = `product-${Date.now()}`;
+    }
 
     // Create the product with Prisma
     const newProduct = await prisma.products.create({
@@ -208,13 +220,13 @@ exports.createProduct = async (req, res) => {
       },
     });
 
-    // Format the response
+    // Safely format the response without assuming relationship properties exist
     const formattedProduct = {
       ...newProduct,
-      category: newProduct.categories.name,
-      categorySlug: newProduct.categories.slug,
-      brand: newProduct.brands.name,
-      brandCountry: newProduct.brands.country,
+      category: newProduct.categories?.name || null,
+      categorySlug: newProduct.categories?.slug || null,
+      brand: newProduct.brands?.name || null,
+      brandCountry: newProduct.brands?.country || null,
       // Remove the nested objects
       categories: undefined,
       brands: undefined,
@@ -265,13 +277,13 @@ exports.getProduct = async (req, res) => {
       });
     }
 
-    // Format the response
+    // Format the response with null checks
     const formattedProduct = {
       ...product,
-      category: product.categories.name,
-      categorySlug: product.categories.slug,
-      brand: product.brands.name,
-      brandCountry: product.brands.country,
+      category: product.categories?.name || null,
+      categorySlug: product.categories?.slug || null,
+      brand: product.brands?.name || null,
+      brandCountry: product.brands?.country || null,
       // Remove the nested objects
       categories: undefined,
       brands: undefined,
@@ -330,13 +342,13 @@ exports.updateProduct = async (req, res) => {
       },
     });
 
-    // Format the response
+    // Format the response with null checks
     const formattedProduct = {
       ...updatedProduct,
-      category: updatedProduct.categories.name,
-      categorySlug: updatedProduct.categories.slug,
-      brand: updatedProduct.brands.name,
-      brandCountry: updatedProduct.brands.country,
+      category: updatedProduct.categories?.name || null,
+      categorySlug: updatedProduct.categories?.slug || null,
+      brand: updatedProduct.brands?.name || null,
+      brandCountry: updatedProduct.brands?.country || null,
       // Remove the nested objects
       categories: undefined,
       brands: undefined,

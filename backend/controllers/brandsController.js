@@ -167,18 +167,25 @@ exports.getBrand = async function (req, res) {
 
 exports.createBrand = async function (req, res) {
   try {
+    // Generate slug safely
+    let slug = req.body.slug;
+    if (!slug && req.body.name) {
+      slug = req.body.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+    } else if (!slug) {
+      // Fallback if neither slug nor name is provided
+      slug = `brand-${Date.now()}`;
+    }
+
     // Added await here
     const newBrand = await prisma.brands.create({
       data: {
         ...req.body,
         isPopular: req.body.isPopular ? true : false, // Convert to boolean
         logo: req.file ? req.file.path : null, // Handle file upload
-        slug:
-          req.body.slug ||
-          req.body.name
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^a-z0-9-]/g, ''),
+        slug: slug,
       },
     });
 

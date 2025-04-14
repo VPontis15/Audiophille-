@@ -12,7 +12,7 @@ module.exports.createCategoryTable = async function (pool) {
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB`; // Explicitly set InnoDB engine
+            ) ENGINE=InnoDB`;
 
     await pool.query(categoriesQuery);
     console.log('Created categories table');
