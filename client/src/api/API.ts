@@ -55,4 +55,12 @@ export default class API {
     const response = await axios.post<T>(`${this.baseUrl}/${endpoint}`, data);
     return response.data;
   }
+
+  createOneWithFormData(endpoint: string, formData: FormData) {
+    return axios.post(`${this.baseUrl}/${endpoint}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
 }
