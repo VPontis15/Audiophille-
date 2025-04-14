@@ -107,6 +107,17 @@ async function seedBrands() {
     console.log('Seeding brands...');
 
     for (const brand of audioBrands) {
+      // Check if brand already exists
+      const [existingBrands] = await pool.query(
+        'SELECT id FROM brands WHERE name = ?',
+        [brand.name]
+      );
+
+      if (existingBrands.length > 0) {
+        console.log(`Brand "${brand.name}" already exists, skipping...`);
+        continue;
+      }
+
       const brandData = {
         name: brand.name,
         description: generateBrandDescription(brand),

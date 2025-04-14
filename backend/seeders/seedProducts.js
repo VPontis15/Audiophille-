@@ -1,7 +1,9 @@
 const { faker } = require('@faker-js/faker');
-const { pool } = require('../config/config');
+const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
+
+const prisma = new PrismaClient();
 
 // Load real products from data.json if it exists
 let realProducts = [];
@@ -18,26 +20,24 @@ try {
 // Helper functions to get category and brand IDs
 async function getCategoryIdByName(categoryName) {
   try {
-    const [rows] = await pool.query(
-      'SELECT id FROM categories WHERE name = ?',
-      [categoryName]
-    );
+    // Try to find existing category
+    let category = await prisma.categories.findFirst({
+      where: { name: categoryName },
+    });
 
-    if (rows.length === 0) {
+    if (!category) {
       console.log(`Category not found: ${categoryName}, creating it...`);
       // Insert the category with required fields
-      const [result] = await pool.query(
-        'INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)',
-        [
-          categoryName,
-          categoryName.toLowerCase().replace(/\s+/g, '-'),
-          `${categoryName} products`, // Add a basic description
-        ]
-      );
-      return result.insertId;
+      category = await prisma.categories.create({
+        data: {
+          name: categoryName,
+          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+          description: `${categoryName} products`, // Add a basic description
+        },
+      });
     }
 
-    return rows[0].id;
+    return category.id;
   } catch (error) {
     console.error(
       `Error getting/creating category ID for ${categoryName}:`,
@@ -49,25 +49,25 @@ async function getCategoryIdByName(categoryName) {
 
 async function getBrandIdByName(brandName) {
   try {
-    const [rows] = await pool.query('SELECT id FROM brands WHERE name = ?', [
-      brandName,
-    ]);
+    // Try to find existing brand
+    let brand = await prisma.brands.findFirst({
+      where: { name: brandName },
+    });
 
-    if (rows.length === 0) {
+    if (!brand) {
       console.log(`Brand not found: ${brandName}, creating it...`);
       // Insert the brand with required fields
-      const [result] = await pool.query(
-        'INSERT INTO brands (name, description, country) VALUES (?, ?, ?)',
-        [
-          brandName,
-          `${brandName} is a premium audio equipment manufacturer.`,
-          'United States', // Default country
-        ]
-      );
-      return result.insertId;
+      brand = await prisma.brands.create({
+        data: {
+          name: brandName,
+          slug: brandName.toLowerCase().replace(/\s+/g, '-'),
+          description: `${brandName} is a premium audio equipment manufacturer.`,
+          country: 'United States', // Default country
+        },
+      });
     }
 
-    return rows[0].id;
+    return brand.id;
   } catch (error) {
     console.error(`Error getting/creating brand ID for ${brandName}:`, error);
     throw error;
@@ -154,6 +154,104 @@ const audioBrands = [
   'VibeTech',
   'AcousticEdge',
 ];
+
+// Audio specifications generators
+function generateFrequencyResponse(category) {
+  const lowFreq = faker.helpers.arrayElement(['5', '10', '15', '20', '25']);
+  const highFreq = faker.helpers.arrayElement([
+    '20',
+    '22',
+    '24',
+    '30',
+    '40',
+    '50',
+  ]);
+
+  return `${lowFreq}Hz - ${highFreq}kHz`;
+}
+
+function generateImpedance() {
+  return `${faker.helpers.arrayElement([
+    '16',
+    '32',
+    '50',
+    '64',
+    '80',
+    '100',
+    '250',
+    '300',
+  ])} Ohms`;
+}
+
+function generateConnectivity() {
+  const options = [
+    'Bluetooth 5.0',
+    'Bluetooth 5.1',
+    'Bluetooth 5.2',
+    'Bluetooth 5.3',
+    'Wired (3.5mm)',
+    'Wired (USB-C)',
+    'Wired & Bluetooth',
+    'USB-C & Bluetooth',
+    'Wi-Fi & Bluetooth',
+    'LDAC & Bluetooth',
+    'aptX HD & Bluetooth',
+  ];
+
+  return faker.helpers.arrayElement(options);
+}
+
+function generateBatteryLife(category) {
+  if (category === 'speakers') {
+    return `${faker.number.int({ min: 8, max: 24 })} hours`;
+  } else {
+    return `${faker.number.int({ min: 4, max: 80 })} hours`;
+  }
+}
+
+function generateColor() {
+  return faker.helpers.arrayElement([
+    'Black',
+    'White',
+    'Silver',
+    'Space Gray',
+    'Navy Blue',
+    'Midnight Black',
+    'Rose Gold',
+    'Carbon Black',
+    'Ivory White',
+    'Graphite',
+    'Matte Black',
+    'Titanium',
+  ]);
+}
+
+function generateWarranty() {
+  return `${faker.helpers.arrayElement([
+    '1',
+    '2',
+    '3',
+    '5',
+  ])} year${faker.helpers.arrayElement(['', 's'])}`;
+}
+
+function generateSKU(brandName, category, productNumber) {
+  const brandPrefix = brandName.substring(0, 3).toUpperCase();
+  const categoryPrefix = category.substring(0, 2).toUpperCase();
+  const randomNum = faker.string.numeric(4);
+
+  return `${brandPrefix}-${categoryPrefix}${randomNum}`;
+}
+
+function generateWeight(category) {
+  if (category === 'headphones') {
+    return `${faker.number.int({ min: 180, max: 450 })}g`;
+  } else if (category === 'earphones') {
+    return `${faker.number.int({ min: 4, max: 15 })}g (each)`;
+  } else {
+    return `${faker.number.float({ min: 0.5, max: 5.0, precision: 0.1 })}kg`;
+  }
+}
 
 // Update the generateThumbnailUrl function to use 80x80 instead of 56x56
 function generateThumbnailUrl(imageUrl, alt) {
@@ -663,19 +761,15 @@ async function seedProducts() {
     console.log('Seeding products...');
 
     // First, check if categories and brands exist
-    const [categoriesResult] = await pool.query(
-      'SELECT COUNT(*) as count FROM categories'
-    );
-    if (categoriesResult[0].count === 0) {
+    const categoriesCount = await prisma.categories.count();
+    if (categoriesCount === 0) {
       throw new Error(
         'No categories found. Please run the category seeder first.'
       );
     }
 
-    const [brandsResult] = await pool.query(
-      'SELECT COUNT(*) as count FROM brands'
-    );
-    if (brandsResult[0].count === 0) {
+    const brandsCount = await prisma.brands.count();
+    if (brandsCount === 0) {
       throw new Error('No brands found. Please run the brand seeder first.');
     }
 
@@ -683,46 +777,32 @@ async function seedProducts() {
     for (const product of realProducts) {
       try {
         // Get or create category ID
-        let categoryId;
-        try {
-          categoryId = await getCategoryIdByName(product.category);
-        } catch (error) {
-          // If category doesn't exist, create it
-          const [result] = await pool.query(
-            'INSERT INTO categories (name, slug) VALUES (?, ?)',
-            [
-              product.category,
-              product.category.toLowerCase().replace(/\s+/g, '-'),
-            ]
-          );
-          categoryId = result.insertId;
-        }
+        const categoryId = await getCategoryIdByName(product.category);
 
         // Get or create brand ID
-        let brandId;
-        try {
-          brandId = await getBrandIdByName(product.brand);
-        } catch (error) {
-          // If brand doesn't exist, create it
-          const [result] = await pool.query(
-            'INSERT INTO brands (name) VALUES (?)',
-            [product.brand]
-          );
-          brandId = result.insertId;
-        }
+        const brandId = await getBrandIdByName(product.brand);
 
         // Now add these IDs to the product data
         const productData = {
           ...product,
-          categoryId,
-          brandId,
+          // Use the correct Prisma relation syntax
+          categories: {
+            connect: { id: categoryId },
+          },
+          brands: {
+            connect: { id: brandId },
+          },
         };
 
         // Remove any properties that aren't in the database schema
         delete productData.id; // In case it has an ID already
+        delete productData.category; // Remove the string category name
+        delete productData.brand; // Remove the string brand name
 
         // Insert the product with proper IDs
-        await pool.query('INSERT INTO products SET ?', productData);
+        await prisma.products.create({
+          data: productData,
+        });
         console.log(`Added real product: ${product.name}`);
       } catch (error) {
         console.error(`Error adding real product ${product.name}:`, error);
@@ -730,7 +810,9 @@ async function seedProducts() {
     }
 
     // Then generate additional fake products if needed
-    const remainingCount = 500 - realProducts.length;
+    const productsCount = await prisma.products.count();
+    const remainingCount = 500 - productsCount;
+
     if (remainingCount > 0) {
       console.log(`Generating ${remainingCount} additional products...`);
 
@@ -791,34 +873,24 @@ async function seedProducts() {
         const productName = generateAudioProductName(category);
 
         // Get category and brand IDs
-        let categoryId;
-        try {
-          categoryId = await getCategoryIdByName(category);
-        } catch (error) {
-          // If category doesn't exist, create it
-          const [result] = await pool.query(
-            'INSERT INTO categories (name, slug) VALUES (?, ?)',
-            [category, category.toLowerCase()]
-          );
-          categoryId = result.insertId;
-        }
+        const categoryId = await getCategoryIdByName(category);
+        const brandId = await getBrandIdByName(brandName);
 
-        let brandId;
-        try {
-          brandId = await getBrandIdByName(brandName);
-        } catch (error) {
-          // If brand doesn't exist, create it
-          const [result] = await pool.query(
-            'INSERT INTO brands (name) VALUES (?)',
-            [brandName]
-          );
-          brandId = result.insertId;
-        }
+        // Check if product is on sale
+        const isOnSale = faker.datatype.boolean(0.4);
+        const price = parseFloat(faker.commerce.price({ min: 49, max: 2999 }));
+        const salePrice = isOnSale
+          ? parseFloat((price * 0.8).toFixed(2))
+          : null; // 20% off
+        const discountType = isOnSale
+          ? faker.helpers.arrayElement(['fixed', 'percentage'])
+          : 'none';
 
+        // Update the product object to use the correct Prisma relation syntax
         const product = {
           name: productName,
           description: generateAudioDescription(category),
-          price: parseFloat(faker.commerce.price({ min: 49, max: 2999 })),
+          price,
           gallery: JSON.stringify(galleryImages),
           quantity: faker.number.int({ min: 0, max: 100 }),
           rating: parseFloat(
@@ -834,31 +906,44 @@ async function seedProducts() {
           featuredImage: JSON.stringify(featuredImageSet),
           isNewArrival: faker.datatype.boolean(0.2),
           isBestSeller: faker.datatype.boolean(0.25),
-          isOnSale: faker.datatype.boolean(0.4),
+          isOnSale,
+          salePrice,
+          discountType,
+          saleEndDate: isOnSale ? faker.date.future() : null,
           numReviews: faker.number.int({ min: 0, max: 250 }),
           packageContents: JSON.stringify(
             generatePackageContents(category, brandName)
           ),
           status: 'published',
-          categoryId: categoryId,
-          brandId: brandId,
+          // Use the Prisma relation syntax instead of direct IDs
+          categories: {
+            connect: { id: categoryId },
+          },
+          brands: {
+            connect: { id: brandId },
+          },
+
+          // New audio-specific fields
+          sku: generateSKU(brandName, category, i),
+          weight: generateWeight(category),
+          frequencyResponse: generateFrequencyResponse(category),
+          impedance: category !== 'speakers' ? generateImpedance() : null,
+          connectivity: generateConnectivity(),
+          batteryLife:
+            category !== 'speakers' ? generateBatteryLife(category) : null,
+          warranty: generateWarranty(),
+
+          // Create related products (array of IDs 1-10)
+          relatedProducts: JSON.stringify(
+            Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, () =>
+              faker.number.int({ min: 1, max: 10 })
+            )
+          ),
         };
 
-        // Add sale price and end date only if the product is on sale
-        if (product.isOnSale) {
-          product.salePrice = parseFloat((product.price * 0.8).toFixed(2)); // 20% off
-          product.saleEndDate = faker.date.future();
-        }
-
-        // Create related products (array of IDs 1-10)
-        product.relatedProducts = JSON.stringify(
-          Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, () =>
-            faker.number.int({ min: 1, max: 10 })
-          )
-        );
-
-        const sql = `INSERT INTO products SET ?`;
-        await pool.query(sql, product);
+        await prisma.products.create({
+          data: product,
+        });
 
         if ((i + 1) % 50 === 0 || i === remainingCount - 1) {
           console.log(`Added ${i + 1}/${remainingCount} generated products`);
@@ -870,7 +955,7 @@ async function seedProducts() {
   } catch (error) {
     console.error('Error seeding database:', error);
   } finally {
-    await pool.end();
+    await prisma.$disconnect();
   }
 }
 

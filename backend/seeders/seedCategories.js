@@ -121,8 +121,19 @@ async function seedCategories() {
   try {
     console.log('Seeding categories...');
 
-    // Insert main categories first
+    // Insert main categories first, but check if they exist first
     for (const category of mainCategories) {
+      // Check if category already exists
+      const [existingCategories] = await pool.query(
+        'SELECT id FROM categories WHERE slug = ?',
+        [category.slug]
+      );
+
+      if (existingCategories.length > 0) {
+        console.log(`Category "${category.name}" already exists, skipping...`);
+        continue;
+      }
+
       const sql = `
         INSERT INTO categories (name, slug, description, is_featured) 
         VALUES (?, ?, ?, true)
@@ -163,6 +174,19 @@ async function seedCategories() {
         for (const subcategory of subcategories[mainCategory]) {
           // Create slug for the subcategory
           const slug = createSlug(subcategory);
+
+          // Check if subcategory already exists
+          const [existingSubcategories] = await pool.query(
+            'SELECT id FROM categories WHERE slug = ?',
+            [slug]
+          );
+
+          if (existingSubcategories.length > 0) {
+            console.log(
+              `Subcategory "${subcategory}" already exists, skipping...`
+            );
+            continue;
+          }
 
           // Generate description
           const description = generateCategoryDescription(subcategory);
