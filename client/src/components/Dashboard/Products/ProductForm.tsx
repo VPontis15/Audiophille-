@@ -5,6 +5,10 @@ import Select, { StylesConfig } from 'react-select';
 import FormRow from '../../utils/FormRow';
 import noImageFound from '../../../assets/no-product-image.png';
 import FormInputFile from '../../utils/FormInputFile';
+import CreateFormSection from '../../utils/CreateFormSection';
+import CreateFormColumn from '../../utils/CreateFormColumn';
+import Button from '../../utils/Button';
+import API from '../../../api/API';
 
 // Custom styles for react-select
 const customSelectStyles: StylesConfig = {
@@ -78,9 +82,17 @@ export default function ProductForm() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [discountType, setDiscountType] = useState('none');
   const [isOnSale, setIsOnSale] = useState(false);
-  const [salePrice, setSalePrice] = useState(0);
-  const [saleStartDate, setSaleStartDate] = useState<Date | null>(null);
-  const [saleEndDate, setSaleEndDate] = useState<Date | null>(null);
+  const [discount, setDiscount] = useState(0);
+
+  // Product details state
+  const [sku, setSku] = useState('');
+  const [weight, setWeight] = useState('');
+  const [frequencyResponse, setFrequencyResponse] = useState('');
+  const [impedance, setImpedance] = useState('');
+  const [connectivity, setConnectivity] = useState('');
+  const [batteryLife, setBatteryLife] = useState('');
+  const [color, setColor] = useState('');
+  const [warranty, setWarranty] = useState('');
 
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,10 +103,29 @@ export default function ProductForm() {
     fn: React.Dispatch<React.SetStateAction<T>>
   ) => {
     const value =
-      e.target.type === 'date' && e.target.value
+      e.target.type === 'checkbox'
+        ? e.target.checked
+        : e.target.type === 'date' && e.target.value
         ? new Date(e.target.value)
         : e.target.value;
     fn(value as unknown as T);
+  };
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fn:
+      | React.Dispatch<React.SetStateAction<File | null>>
+      | React.Dispatch<React.SetStateAction<File[]>>
+  ) => {
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      if (files.length === 1 && fn === setImage) {
+        fn(fileArray[0]);
+      } else {
+        (fn as React.Dispatch<React.SetStateAction<File[]>>)(fileArray);
+      }
+    }
   };
 
   const handleImageClick = () => {
@@ -141,20 +172,70 @@ export default function ProductForm() {
     },
   ];
 
+  const onHandleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Update isOnSale based on discount and discountType
+    const productIsOnSale = discount > 0 && discountType !== 'none';
+
+    const productData = {
+      name: title || 'Untitled Product', // Provide default name
+      description: description || 'No description provided', // Provide default description
+      price: price || 0,
+      quantity: quantity || 0,
+      categoryId: parseInt(category) || 1, // Ensure category ID is sent as integer with default
+      brandId: parseInt(brand) || 1, // Ensure brand ID is sent as integer with default
+      tags: tags || [],
+      isFeatured: isFeatured || false,
+      discountType: discountType || 'none',
+      isOnSale: productIsOnSale,
+      discount: discount || 0,
+      sku: sku || '',
+      weight: weight || '',
+      frequencyResponse: frequencyResponse || '',
+      impedance: impedance || '',
+      connectivity: connectivity || '',
+      batteryLife: batteryLife || '',
+      color: color || '',
+      warranty: warranty || '',
+      status: 'published', // Default status
+      gallery: '[]', // Default empty gallery
+      rating: 0, // Default rating
+      collection: 'default', // Default collection
+    };
+
+    console.log('Product Data:', productData);
+    const api = new API();
+    try {
+      const response = await api.createOne('products', productData);
+      console.log('Product created successfully:', response);
+    } catch (error) {
+      console.error('Error creating product:', error);
+      // Better error handling
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+      }
+    }
+  };
+
   return (
     <>
       <form
-        className=" max-w-[98%] mx-auto grid grid-cols-[55%_30%] gap-8"
+        onSubmit={onHandleSubmit}
+        encType="multipart/form-data"
+        className="  mx-auto grid grid-cols-[65%_30%] gap-8"
         action=""
       >
-        <section className="flex flex-col gap-4 ">
-          <div className="bg-slate-50 p-8 rounded-2xl grid gap-6">
+        <CreateFormColumn>
+          <CreateFormSection>
             <h2 className="text-xl font-bold">General Information</h2>
             <FormInput
               className="bg-slate-100"
               full
               label="Product title"
               name="title"
+              required
+              placeholder="e.g. Wireless Headphones"
               type="text"
               onChange={(e) => handleDataChange(e, setTitle)}
               value={title}
@@ -168,8 +249,91 @@ export default function ProductForm() {
               onChange={(e) => handleDataChange(e, setDescription)}
               value={description}
             />
-          </div>
-          <div className="bg-slate-50 p-8 rounded-2xl grid gap-6">
+          </CreateFormSection>
+
+          <CreateFormSection>
+            <h2 className="text-xl font-bold">Product Details</h2>
+            <FormRow>
+              <FormInput
+                className="bg-slate-100"
+                label="SKU"
+                name="sku"
+                type="text"
+                onChange={(e) => handleDataChange(e, setSku)}
+                value={sku}
+              />
+              <FormInput
+                className="bg-slate-100"
+                label="Weight"
+                name="weight"
+                type="text"
+                placeholder="e.g. 250g"
+                onChange={(e) => handleDataChange(e, setWeight)}
+                value={weight}
+              />
+            </FormRow>
+            <FormRow>
+              <FormInput
+                className="bg-slate-100"
+                label="Frequency Response"
+                name="frequencyResponse"
+                type="text"
+                placeholder="e.g. 20Hz-20kHz"
+                onChange={(e) => handleDataChange(e, setFrequencyResponse)}
+                value={frequencyResponse}
+              />
+              <FormInput
+                className="bg-slate-100"
+                label="Color"
+                name="color"
+                type="text"
+                onChange={(e) => handleDataChange(e, setColor)}
+                value={color}
+              />
+            </FormRow>
+            <FormRow>
+              <FormInput
+                className="bg-slate-100"
+                label="Connectivity"
+                name="connectivity"
+                type="text"
+                placeholder="e.g. Bluetooth 5.0, Wired"
+                onChange={(e) => handleDataChange(e, setConnectivity)}
+                value={connectivity}
+              />
+              <FormInput
+                className="bg-slate-100"
+                label="Impedance"
+                name="impedance"
+                type="text"
+                placeholder="e.g. 32 Ohms"
+                onChange={(e) => handleDataChange(e, setImpedance)}
+                value={impedance}
+              />
+            </FormRow>
+            <FormRow>
+              <FormInput
+                className="bg-slate-100"
+                label="Battery Life"
+                name="batteryLife"
+                type="text"
+                placeholder="e.g. 24 hours"
+                onChange={(e) => handleDataChange(e, setBatteryLife)}
+                value={batteryLife}
+              />
+              <FormInput
+                className="bg-slate-100"
+                label="Warranty"
+                name="warranty"
+                type="text"
+                placeholder="e.g. 2 years"
+                onChange={(e) => handleDataChange(e, setWarranty)}
+                value={warranty}
+              />
+            </FormRow>
+          </CreateFormSection>
+
+          <CreateFormSection>
             <h2 className="text-xl font-bold">Price and stock options</h2>
             <FormRow>
               <FormInput
@@ -196,8 +360,8 @@ export default function ProductForm() {
                 label="Disount"
                 name="discount"
                 type="number"
-                onChange={(e) => handleDataChange(e, setSalePrice)}
-                value={salePrice}
+                onChange={(e) => handleDataChange(e, setDiscount)}
+                value={discount}
               />
               <Select
                 options={discountOptions}
@@ -215,28 +379,30 @@ export default function ProductForm() {
                 styles={customSelectStyles}
               />{' '}
             </div>
-          </div>
-        </section>
-        <section className="flex flex-col gap-4">
-          <div className="bg-slate-50 p-8 rounded-2xl grid gap-6">
+          </CreateFormSection>
+        </CreateFormColumn>
+        <CreateFormColumn>
+          <CreateFormSection>
             <h2 className="text-xl font-bold">Upload an image</h2>
             <FormInputFile
+              full
               label="Product Image"
               name="image"
               type="file"
               value={image}
-              onChange={(e) => handleDataChange(e, setImage)}
+              onChange={(e) => handleFileChange(e, setImage)}
               className="w-full max-w-full"
               placeholder="Upload main product image"
               defaultPreview={noImageFound}
             />
             <FormInputFile
+              full
               label="Product images"
               name="images"
               type="file"
               multiple
               value={images}
-              onChange={(e) => handleDataChange(e, setImages)}
+              onChange={(e) => handleFileChange(e, setImages)}
             />
 
             <FormInput
@@ -245,10 +411,11 @@ export default function ProductForm() {
               name="isFeatured"
               type="checkbox"
               onChange={(e) => handleDataChange(e, setIsFeatured)}
+              checked={isFeatured}
               value={isFeatured}
             />
-          </div>
-          <div className="bg-slate-50 p-8 rounded-2xl grid gap-6">
+          </CreateFormSection>
+          <CreateFormSection>
             <h2 className="text-xl font-bold">Product options</h2>
             <div className="flex gap-6 items-center">
               <div className="flex flex-col gap-2 w-1/2">
@@ -291,8 +458,9 @@ export default function ProductForm() {
                 />
               </div>
             </div>
-          </div>
-        </section>
+            <Button primary>Publish</Button>
+          </CreateFormSection>
+        </CreateFormColumn>
       </form>
     </>
   );
