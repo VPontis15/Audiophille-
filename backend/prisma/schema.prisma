@@ -121,9 +121,8 @@ model products {
   isNewArrival    Boolean?        @default(false)
   isBestSeller    Boolean?        @default(false)
   isOnSale        Boolean?        @default(false)
-  salePrice       Decimal?        @db.Decimal(13, 2)
-  saleEndDate     DateTime?       @db.Date
-  discountType    String?         @db.VarChar(20) @default("none")
+  discount        Decimal?        @db.Decimal(10, 2)
+  discountType    String?         @default("none")
   numReviews      Int?            @default(0)
   relatedProducts String?         @db.LongText
   packageContents String?         @db.LongText
@@ -139,6 +138,7 @@ model products {
   impedance       String?         @db.VarChar(50)
   connectivity    String?         @db.VarChar(100)
   batteryLife     String?         @db.VarChar(50)
+  color           String?         @db.VarChar(50)
   warranty        String?         @db.VarChar(100)
   
   createdAt       DateTime        @default(now()) @db.Timestamp(0)

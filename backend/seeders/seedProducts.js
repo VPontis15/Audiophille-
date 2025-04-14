@@ -879,12 +879,21 @@ async function seedProducts() {
         // Check if product is on sale
         const isOnSale = faker.datatype.boolean(0.4);
         const price = parseFloat(faker.commerce.price({ min: 49, max: 2999 }));
-        const salePrice = isOnSale
-          ? parseFloat((price * 0.8).toFixed(2))
-          : null; // 20% off
+
+        // Calculate discount instead of salePrice
+        let discount = null;
         const discountType = isOnSale
           ? faker.helpers.arrayElement(['fixed', 'percentage'])
           : 'none';
+
+        // Set discount amount based on discountType
+        if (isOnSale) {
+          if (discountType === 'fixed') {
+            discount = parseFloat((price * 0.2).toFixed(2)); // Fixed amount (20% of price)
+          } else {
+            discount = 20; // 20% percentage discount
+          }
+        }
 
         // Update the product object to use the correct Prisma relation syntax
         const product = {
@@ -907,10 +916,8 @@ async function seedProducts() {
           isNewArrival: faker.datatype.boolean(0.2),
           isBestSeller: faker.datatype.boolean(0.25),
           isOnSale,
-          salePrice,
+          discount,
           discountType,
-          saleEndDate: isOnSale ? faker.date.future() : null,
-          numReviews: faker.number.int({ min: 0, max: 250 }),
           packageContents: JSON.stringify(
             generatePackageContents(category, brandName)
           ),
@@ -931,6 +938,7 @@ async function seedProducts() {
           connectivity: generateConnectivity(),
           batteryLife:
             category !== 'speakers' ? generateBatteryLife(category) : null,
+          color: generateColor(),
           warranty: generateWarranty(),
 
           // Create related products (array of IDs 1-10)

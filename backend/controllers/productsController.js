@@ -213,6 +213,18 @@ exports.createProduct = async (req, res) => {
       data: {
         ...req.body,
         slug,
+        categoryId: undefined,
+        brandId: undefined,
+        categories: req.body.categoryId
+          ? {
+              connect: { id: parseInt(req.body.categoryId) },
+            }
+          : undefined,
+        brands: req.body.brandId
+          ? {
+              connect: { id: parseInt(req.body.brandId) },
+            }
+          : undefined,
       },
       include: {
         categories: true,
