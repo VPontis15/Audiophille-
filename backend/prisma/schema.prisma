@@ -107,15 +107,15 @@ model orders {
 
 model products {
   id              Int             @id @default(autoincrement())
-  name            String          @db.VarChar(100)
-  description     String          @db.Text
-  price           Decimal         @db.Decimal(13, 2)
-  status          products_status
-  gallery         String          @db.LongText
-  quantity        Int
-  rating          Decimal         @db.Decimal(2, 1)
-  slug            String          @unique(map: "slug") @db.VarChar(100)
-  collection      String          @db.VarChar(100)
+  name            String?         @db.VarChar(100)
+  description     String?         @db.Text
+  price           Decimal?        @db.Decimal(13, 2)
+  status          products_status? @default(published)
+  gallery         String?         @db.LongText
+  quantity        Int?            @default(0)
+  rating          Decimal?        @db.Decimal(2, 1)
+  slug            String?         @unique(map: "slug") @db.VarChar(100)
+  collection      String?         @db.VarChar(100)
   isFeatured      Boolean?        @default(false)
   featuredImage   String?         @db.LongText
   isNewArrival    Boolean?        @default(false)
@@ -123,17 +123,32 @@ model products {
   isOnSale        Boolean?        @default(false)
   salePrice       Decimal?        @db.Decimal(13, 2)
   saleEndDate     DateTime?       @db.Date
+  discountType    String?         @db.VarChar(20) @default("none")
+  numReviews      Int?            @default(0)
   relatedProducts String?         @db.LongText
   packageContents String?         @db.LongText
-  categoryId      Int
-  brandId         Int
-  numReviews      Int?
+  
+  // Foreign keys with explicit relationship definitions
+  categoryId      Int?
+  brandId         Int?
+  
+  // New audio-specific product details
+  sku             String?         @db.VarChar(50)
+  weight          String?         @db.VarChar(50)
+  frequencyResponse String?       @db.VarChar(100)
+  impedance       String?         @db.VarChar(50)
+  connectivity    String?         @db.VarChar(100)
+  batteryLife     String?         @db.VarChar(50)
+  warranty        String?         @db.VarChar(100)
+  
   createdAt       DateTime        @default(now()) @db.Timestamp(0)
   updatedAt       DateTime        @default(now()) @db.Timestamp(0)
+  
+  // Relationships
   cartitems       cartitems[]
   orderitems      orderitems[]
-  categories      categories      @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_ibfk_1")
-  brands          brands          @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "products_ibfk_2")
+  categories      categories?     @relation(fields: [categoryId], references: [id], onDelete: SetNull, onUpdate: Restrict, map: "products_ibfk_1")
+  brands          brands?         @relation(fields: [brandId], references: [id], onDelete: SetNull, onUpdate: Restrict, map: "products_ibfk_2")
 
   @@index([brandId], map: "brandId")
   @@index([categoryId], map: "categoryId")
