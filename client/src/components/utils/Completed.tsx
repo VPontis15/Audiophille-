@@ -24,10 +24,15 @@ export function Completed(): React.ReactElement {
       <div className="grid  md:grid-cols-[55%_45%]   items-center mt-8 ">
         <div className="bg-grey rounded-t-lg md:rounded-l-lg flex h-full w-full flex-col gap-2 pl-6 pt-10 pb-6 pr-6  ">
           <CheckoutSummaryItem imgSize={50} product={items[0]} />
-          <div className="w-full h-0.5 bg-black opacity-[.08]"></div>
-          <span className=" text-center">
-            and {items.length} other {items.length > 1 ? 'items' : 'item'}
-          </span>
+          {items.slice(1).length > 0 && (
+            <>
+              <div className="w-full h-0.5 bg-black opacity-[.08]"></div>
+              <span className=" text-center">
+                and {items.slice(1).length} other{' '}
+                {items.slice(1).length > 1 ? 'items' : 'item'}
+              </span>
+            </>
+          )}
         </div>
         <div className="bg-black rounded-b-lg md:rounded-r-lg text-white flex flex-col gap-2 h-full w-full pl-6 pt-4 md:pt-10 pb-6 pr-18.5 ">
           <h2 className="uppercase text-white/50  font-bold">Grand Total</h2>

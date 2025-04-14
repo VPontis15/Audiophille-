@@ -9,6 +9,7 @@ import CreateFormSection from '../../utils/CreateFormSection';
 import CreateFormColumn from '../../utils/CreateFormColumn';
 import Button from '../../utils/Button';
 import API from '../../../api/API';
+import { toast } from 'react-toastify';
 
 // Custom styles for react-select
 const customSelectStyles: StylesConfig = {
@@ -73,12 +74,11 @@ export default function ProductForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState(0);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState<number>(0);
   const [category, setCategory] = useState('');
   const [brand, setBrand] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [images, setImages] = useState<File[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
   const [isFeatured, setIsFeatured] = useState(false);
   const [discountType, setDiscountType] = useState('none');
   const [isOnSale, setIsOnSale] = useState(false);
@@ -105,6 +105,10 @@ export default function ProductForm() {
     const value =
       e.target.type === 'checkbox'
         ? e.target.checked
+        : e.target.type === 'number'
+        ? e.target.value === ''
+          ? 0
+          : Number(e.target.value)
         : e.target.type === 'date' && e.target.value
         ? new Date(e.target.value)
         : e.target.value;
@@ -179,13 +183,12 @@ export default function ProductForm() {
     const productIsOnSale = discount > 0 && discountType !== 'none';
 
     const productData = {
-      name: title || 'Untitled Product', // Provide default name
-      description: description || 'No description provided', // Provide default description
+      name: title, // Provide default name
+      description: description, // Provide default description
       price: price || 0,
-      quantity: quantity || 0,
+      quantity: Number.isInteger(quantity) ? quantity : Math.floor(quantity),
       categoryId: parseInt(category) || 1, // Ensure category ID is sent as integer with default
       brandId: parseInt(brand) || 1, // Ensure brand ID is sent as integer with default
-      tags: tags || [],
       isFeatured: isFeatured || false,
       discountType: discountType || 'none',
       isOnSale: productIsOnSale,
@@ -208,12 +211,13 @@ export default function ProductForm() {
     const api = new API();
     try {
       const response = await api.createOne('products', productData);
-      console.log('Product created successfully:', response);
+      toast.success('Product created successfully!');
     } catch (error) {
       console.error('Error creating product:', error);
       // Better error handling
       if (error.response) {
         console.error('Response data:', error.response.data);
+        toast.error(`Error: ${error.response.data.message}`);
       }
     }
   };
