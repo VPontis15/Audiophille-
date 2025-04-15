@@ -4,7 +4,7 @@ const port = process.env.PORT || 5000;
 const { createTables } = require('./config/config');
 async function startServer() {
   try {
-    await createTables(); // Uncommented to ensure tables are created
+    await createTables();
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
