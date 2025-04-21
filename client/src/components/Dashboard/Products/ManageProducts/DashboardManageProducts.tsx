@@ -153,9 +153,7 @@ const config: Column[] = [
     sortable: false,
     render: (item: unknown) => {
       const column = item as AdminProductProps;
-      return (
-        <ActionButtons path="/admin/dashboard/products/manage" item={column} />
-      );
+      return <ActionButtons path="/admin/dashboard/products" item={column} />;
     },
     skeleton: { type: 'action' },
   },
