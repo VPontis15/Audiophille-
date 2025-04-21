@@ -6,6 +6,7 @@ import noImageFound from '../../assets/no-product-image.png';
 interface FormInputFileProps extends FormInputProps {
   multiple?: boolean;
   defaultPreview?: string;
+  defaultPreviews?: string[];
   maxImages?: number;
 }
 
@@ -20,6 +21,7 @@ export default function FormInputFile({
   className = '',
   multiple = false,
   defaultPreview = '',
+  defaultPreviews = [],
   maxImages = 3,
   ...rest
 }: FormInputFileProps): React.ReactElement {
@@ -198,6 +200,42 @@ export default function FormInputFile({
           </p>
         </div>
       )}
+
+      {/* Render defaultPreviews if no custom previews are available */}
+      {multiple &&
+        !previews.length &&
+        defaultPreviews &&
+        defaultPreviews.length > 0 && (
+          <div className="mb-3 p-3 bg-white border border-gray-200 rounded-md">
+            <div className="flex flex-row gap-3 justify-start">
+              {defaultPreviews.map((previewUrl, index) => (
+                <div key={index} className="w-15 h-15 rounded-2xl relative ">
+                  <img
+                    width={60}
+                    height={60}
+                    loading="lazy"
+                    src={previewUrl}
+                    alt={`Preview ${index + 1}`}
+                    className="w-15 h-15 object-cover rounded border border-gray-200"
+                  />
+                </div>
+              ))}
+              {[...Array(Math.max(0, maxImages - defaultPreviews.length))].map(
+                (_, index) => (
+                  <div
+                    key={`placeholder-${index}`}
+                    className="w-24 h-24 flex-1 border border-dashed border-gray-200 rounded flex items-center justify-center"
+                  >
+                    <p className="text-xs text-gray-400">+</p>
+                  </div>
+                )
+              )}
+            </div>
+            <p className="text-sm font-medium mt-2 text-gray-500">
+              {displayText}
+            </p>
+          </div>
+        )}
 
       <div
         className={`relative border border-dashed border-border rounded-md p-4 text-center cursor-pointer hover:bg-gray-50 transition-colors ${

@@ -79,7 +79,7 @@ export default function FormInput({
           {label}
         </label>
         <textarea
-          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
+          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-3 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
             errors[name]
               ? 'bg-red-100 border-red-400 focus-visible:ring-red-400'
               : null
@@ -107,7 +107,7 @@ export default function FormInput({
         className={`flex  rounded-xl   gap-2.5 p-4 items-center ${className}`}
       >
         <input
-          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
+          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-3 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
           id={name}
           name={name}
           type={type}
@@ -133,7 +133,7 @@ export default function FormInput({
           {label}
         </label>
         <input
-          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
+          className={`font-bold placeholder:opacity-60 placeholder:text-[14px] border border-border py-2.5 pl-3 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent ${className} ${
             errors[name]
               ? 'bg-red-100 border-red-400 focus-visible:ring-red-400'
               : null
@@ -161,7 +161,7 @@ export default function FormInput({
         className={`flex border border-border rounded-xl   gap-2.5 p-4 items-center ${className}`}
       >
         <input
-          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-6 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
+          className="checked:accent-accent cursor-pointer placeholder:opacity-50 placeholder:text-[14px] min-w-5 min-h-5 border  border-border py-1.5 pl-3 rounded-md focus-visible:outline-none focus-visible:ring focus-visible:ring-accent "
           id={name}
           name={name}
           type={type}
