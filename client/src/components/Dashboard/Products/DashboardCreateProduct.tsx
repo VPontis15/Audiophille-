@@ -1,9 +1,13 @@
 import AdminContentWrapper from '../AdminContentWrapper';
 import ProductForm from './ProductForm';
 
-export default function DashboardCreateProduct() {
+export default function DashboardCreateProduct({
+  heading,
+}: {
+  heading: string;
+}): React.ReactElement {
   return (
-    <AdminContentWrapper heading="Add a new product">
+    <AdminContentWrapper heading={heading}>
       <ProductForm />
     </AdminContentWrapper>
   );

@@ -108,7 +108,11 @@ const router = createBrowserRouter([
           },
           {
             path: 'create',
-            element: <DashboardCreateProduct />,
+            element: <DashboardCreateProduct heading={'Add a new product'} />,
+          },
+          {
+            path: ':slug/edit',
+            element: <DashboardCreateProduct heading={'Edit product'} />,
           },
           {
             path: 'categories',
