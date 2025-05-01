@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import SelectInput from '../../utils/SelectInput';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
-
+import { TiDelete } from 'react-icons/ti';
 interface Category {
   id?: string;
   _id?: string;
@@ -23,6 +23,11 @@ interface Brand {
   id?: string;
   _id?: string;
   name?: string;
+}
+
+interface IncludedItem {
+  amount: number;
+  item: string;
 }
 
 export default function ProductForm({}) {
@@ -52,6 +57,10 @@ export default function ProductForm({}) {
   const { slug } = useParams<{ slug: string }>();
   const [productToUpdate, setProductToUpdate] = useState<any>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const [item, setItem] = useState('');
+  const [itemAmount, setItemAmount] = useState(0);
+
+  const [includedItems, setIncludedItems] = useState<IncludedItem[]>([]);
   const api = new API();
 
   const { data: productData, isLoading: isProductLoading } = useQuery<{
@@ -263,7 +272,43 @@ export default function ProductForm({}) {
     ? galleryImages.map((img) => img?.desktop?.url).filter(Boolean)
     : [];
 
-  console.log(galleryImages);
+  // Handle the case when the slug is not provided (e.g., when creating a new product)
+  useEffect(() => {
+    if (!slug) {
+      setTitle('');
+      setDescription('');
+      setPrice(0);
+      setQuantity(0);
+      setCategory('');
+      setBrand('');
+      setImage(null);
+      setGallery([]);
+      setIsFeatured(false);
+      setDiscountType('none');
+      setIsOnSale(false);
+      setDiscount(0);
+      setStatus('published');
+      setSku('');
+      setWeight('');
+      setFrequencyResponse('');
+      setImpedance('');
+      setConnectivity('');
+      setBatteryLife('');
+      setColor('');
+      setWarranty('');
+      setProductToUpdate(null);
+    }
+  }, [slug]);
+
+  const handleIncludedItem = () => {
+    if (item && itemAmount > 0) {
+      setIncludedItems((prev) => [...prev, { item, amount: itemAmount }]);
+      setItem('');
+      setItemAmount(0);
+    } else {
+      toast.error('Please provide a valid item and amount.');
+    }
+  };
 
   return (
     <>
@@ -379,7 +424,77 @@ export default function ProductForm({}) {
               />
             </FormRow>
           </CreateFormSection>
-
+          <CreateFormSection>
+            <h2 className="text-xl font-bold capitalize">In the box</h2>
+            <FormRow>
+              <FormInput
+                className="bg-slate-100"
+                label="Amount"
+                name="itemAmount"
+                type="number"
+                onChange={(e) => handleDataChange(e, setItemAmount)}
+                value={itemAmount}
+              />{' '}
+              <FormInput
+                className="bg-slate-100"
+                label="Item"
+                name="item"
+                type="text"
+                onChange={(e) => handleDataChange(e, setItem)}
+                value={item}
+              />
+            </FormRow>
+            <Button
+              className="justify-self-end"
+              secondary
+              sm
+              type="button"
+              onClick={handleIncludedItem}
+            >
+              Add item
+            </Button>
+            {includedItems && includedItems.length > 0 && (
+              <CreateFormSection className="border border-slate-300 px-4 py-2 rounded-lg">
+                <div className="flex gap-2 w-full  items-center">
+                  <span className="text-accent flex-1 text-left font-bold">
+                    Amount
+                  </span>
+                  <span className="text-accent flex-1 text-center pl-6 font-bold">
+                    Name
+                  </span>
+                  <span className="text-accent flex-1 text-end font-bold">
+                    Actions
+                  </span>
+                </div>
+                <div className=" flex-col space-y-4  ">
+                  {includedItems.map((includedItem, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-2 w-full  items-center"
+                    >
+                      <span className="font-bold flex-1 pl-2.5">
+                        x{includedItem.amount}
+                      </span>
+                      <span className="flex-1 capitalize">
+                        {includedItem.item}
+                      </span>
+                      <TiDelete
+                        size={35}
+                        className="cursor-pointer text-black-500"
+                        onClick={() =>
+                          setIncludedItems((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        &times;
+                      </TiDelete>
+                    </div>
+                  ))}
+                </div>
+              </CreateFormSection>
+            )}
+          </CreateFormSection>
           <CreateFormSection>
             <h2 className="text-xl font-bold">Price and stock options</h2>
             <FormRow>
