@@ -273,7 +273,7 @@ exports.getProduct = async (req, res) => {
   try {
     const product = await prisma.products.findUnique({
       where: {
-        id: parseInt(req.params.id),
+        slug: req.params.slug,
       },
       include: {
         categories: true,
@@ -285,7 +285,7 @@ exports.getProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         status: 'Fail',
-        message: `No product found with ID ${req.params.id}`,
+        message: `No product found with slug ${req.params.slug}`,
       });
     }
 

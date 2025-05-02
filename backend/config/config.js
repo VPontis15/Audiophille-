@@ -1,5 +1,16 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Load environment variables based on NODE_ENV
+const envFile =
+  process.env.NODE_ENV === 'production'
+    ? '.env.production'
+    : '.env.development';
+
+console.log(`Loading environment from ${envFile}`);
+dotenv.config({ path: path.resolve(__dirname, '..', envFile) });
+
 const brandModel = require('../models/brandModel');
 const categoryModel = require('../models/categoryModel');
 const productModel = require('../models/productModel');
@@ -37,6 +48,16 @@ const pool = mysql.createPool({
  */
 async function createTables() {
   try {
+    // First verify the database connection
+    console.log('Testing database connection...');
+    try {
+      await pool.query('SELECT 1');
+      console.log('Database connection successful!');
+    } catch (error) {
+      console.error('Database connection failed:', error.message);
+      throw error;
+    }
+
     await brandModel.createBrandTable(pool);
     await categoryModel.createCategoryTable(pool);
     await productModel.createProductTable(pool);
@@ -47,6 +68,7 @@ async function createTables() {
     console.log('All tables created successfully');
   } catch (error) {
     console.error('Error creating tables:', error);
+    throw error;
   }
 }
 

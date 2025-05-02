@@ -86,6 +86,57 @@ export default function ProductForm({}) {
     }
   }, [product]);
 
+  // Parse included items from productToUpdate
+  useEffect(() => {
+    if (productToUpdate?.packageContents) {
+      try {
+        // Parse string to object if needed
+        const contents =
+          typeof productToUpdate.packageContents === 'string'
+            ? JSON.parse(productToUpdate.packageContents)
+            : productToUpdate.packageContents;
+
+        if (Array.isArray(contents)) {
+          // Handle both object format and string format
+          const parsedItems = contents.map((item) => {
+            // Case 1: Item is already in {item, amount} format
+            if (
+              typeof item === 'object' &&
+              item !== null &&
+              'item' in item &&
+              'amount' in item
+            ) {
+              return {
+                item: item.item,
+                amount: Number(item.amount),
+              };
+            }
+
+            // Case 2: Item is a string like "1 x Item name"
+            if (typeof item === 'string') {
+              const match = item.match(/^(\d+)\s*x\s*(.+)$/);
+              if (match) {
+                return {
+                  amount: parseInt(match[1], 10),
+                  item: match[2].trim(),
+                };
+              }
+              // Just a string with no amount pattern
+              return { amount: 1, item };
+            }
+
+            // Fallback
+            return { amount: 1, item: String(item) };
+          });
+
+          setIncludedItems(parsedItems);
+        }
+      } catch (error) {
+        console.error('Error parsing package contents:', error);
+      }
+    }
+  }, [productToUpdate]);
+
   // Set state values when editing a product
   useEffect(() => {
     if (productToUpdate) {
@@ -231,6 +282,7 @@ export default function ProductForm({}) {
       discount: discount || 0,
       sku: sku || '',
       weight: weight || '',
+      packageContents: JSON.stringify(includedItems),
 
       frequencyResponse: frequencyResponse || '',
       impedance: impedance || '',
@@ -296,6 +348,7 @@ export default function ProductForm({}) {
       setBatteryLife('');
       setColor('');
       setWarranty('');
+      setIncludedItems([]);
       setProductToUpdate(null);
     }
   }, [slug]);
@@ -466,32 +519,34 @@ export default function ProductForm({}) {
                     Actions
                   </span>
                 </div>
-                <div className=" flex-col space-y-4  ">
-                  {includedItems.map((includedItem, index) => (
-                    <div
-                      key={index}
-                      className="flex gap-2 w-full  items-center"
-                    >
-                      <span className="font-bold flex-1 pl-2.5">
-                        x{includedItem.amount}
-                      </span>
-                      <span className="flex-1 capitalize">
-                        {includedItem.item}
-                      </span>
-                      <TiDelete
-                        size={35}
-                        className="cursor-pointer text-black-500"
-                        onClick={() =>
-                          setIncludedItems((prev) =>
-                            prev.filter((_, i) => i !== index)
-                          )
-                        }
+                <>
+                  <div className=" flex-col space-y-4  ">
+                    {includedItems.map((includedItem, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-2 w-full  items-center"
                       >
-                        &times;
-                      </TiDelete>
-                    </div>
-                  ))}
-                </div>
+                        <span className="font-bold flex-1 pl-2.5">
+                          x{includedItem.amount}
+                        </span>
+                        <span className="flex-1 capitalize">
+                          {includedItem.item}
+                        </span>
+                        <TiDelete
+                          size={35}
+                          className="cursor-pointer text-black-500"
+                          onClick={() =>
+                            setIncludedItems((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
+                        >
+                          &times;
+                        </TiDelete>
+                      </div>
+                    ))}
+                  </div>{' '}
+                </>
               </CreateFormSection>
             )}
           </CreateFormSection>
