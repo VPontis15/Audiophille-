@@ -7,11 +7,19 @@ export default function CartItem({
   product: CartItemProp;
 }): React.ReactElement {
   const dispatch = useAppDispatch();
+  console.log(product);
+  const productImage = `/src/assets/desktop/product-${product.slug}/image-product.jpg`;
+  console.log(productImage);
   return (
     <div className="flex gap-4 items-center justify-between ">
-      {/* <img src={product.image} alt="" /> */}
       <div className="flex gap-8 items-center">
-        <div className="w-12 h-12 sm:w-16 sm:h-16 bg-grey"></div>
+        <img
+          width={48}
+          height={48}
+          src={productImage}
+          alt={product.name}
+          className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md"
+        />
         <div className="flex flex-col gap-1  justify-center">
           <h5 className="text-base max-w-[19ch] font-bold uppercase">
             {product.name}

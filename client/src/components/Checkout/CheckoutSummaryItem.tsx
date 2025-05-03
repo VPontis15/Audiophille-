@@ -7,14 +7,17 @@ export default function CheckoutSummaryItem({
   product: ProductCheckoutItemProps;
   imgSize: number;
 }): React.ReactElement {
+  const productImage = `/src/assets/desktop/product-${product.slug}/image-product.jpg`;
+
   return (
     <div className="flex justify-between items-center">
       <div className="flex gap-4">
         <img
-          src={product.image}
+          src={productImage}
           width={imgSize}
           height={imgSize}
           alt={product.name}
+          className="object-cover rounded-md"
         />
         <div className="flex flex-col gap-2">
           <h6 className="text-base font-bold">{product.name}</h6>

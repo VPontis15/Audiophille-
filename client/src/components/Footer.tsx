@@ -10,9 +10,8 @@ export default function Footer(): React.ReactElement {
       <div className="max-w-container mx-auto grid gap-8">
         <div className="flex flex-col sm:flex-row justify-between items-center">
           <div className=" mx-auto sm:mx-0 mb-12 sm:mb-0">
-            <Link href="/">
-              <Logo />
-            </Link>
+            {/* Using Logo directly with its built-in link functionality instead of wrapping it in another Link */}
+            <Logo />
           </div>
           <nav className="flex  items-center justify-center sm:justify-start  gap-8 ">
             <ul className="flex flex-col sm:flex-row items-center   gap-8 ">
@@ -43,7 +42,7 @@ export default function Footer(): React.ReactElement {
           Audiophile is an all in one stop to fulfill your audio needs. We're a
           small team of music lovers and sound specialists who are devoted to
           helping you get the most out of personal audio. Come and visit our
-          demo facility - we’re open 7 days a week.
+          demo facility - we're open 7 days a week.
         </p>
         <div className="flex flex-col sm:flex-row gap-8 justify-center items-center sm:justify-between ">
           <p className="opacity-50">Copyright 2021. All Rights Reserved</p>

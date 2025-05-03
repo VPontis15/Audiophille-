@@ -18,13 +18,14 @@ export default function Product({
       'md:flex-row-reverse': reversed,
     }
   );
+  const productImage = `/src/assets/desktop/product-${product.slug}/image-product.jpg`;
 
   return (
     <article className={className}>
       <div>
         <img
-          className="w-[540px] object-cover rounded-sm"
-          src={productImg}
+          className="lg:w-[540px] object-cover rounded-sm"
+          src={productImage}
           alt={product.name}
         />
       </div>

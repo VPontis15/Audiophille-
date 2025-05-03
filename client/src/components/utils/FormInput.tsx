@@ -94,9 +94,7 @@ export default function FormInput({
           onBlur={(e) => showErrorOnBlur(e)}
         />
         {errors[name] && (
-          <ErrorMessage className="absolute -bottom-5.5">
-            {errors[name]}
-          </ErrorMessage>
+          <ErrorMessage className="">{errors[name]}</ErrorMessage>
         )}
       </div>
     );
@@ -149,9 +147,7 @@ export default function FormInput({
           onBlur={(e) => showErrorOnBlur(e)}
         />
         {errors[name] && (
-          <ErrorMessage className="absolute -bottom-5.5">
-            {errors[name]}
-          </ErrorMessage>
+          <ErrorMessage className="">{errors[name]}</ErrorMessage>
         )}
       </div>
     );

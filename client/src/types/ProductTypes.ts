@@ -88,6 +88,7 @@ export interface ProductProps {
 
 export type CartItem = {
   price: number;
+  slug: string;
   name: string;
   image: string;
   id: string | number;
@@ -101,6 +102,7 @@ export interface ProductOverviewProps {
 
 export interface ProductCheckoutItemProps {
   name: string;
+  slug: string;
   quantity: number;
   price: number;
   image: string;

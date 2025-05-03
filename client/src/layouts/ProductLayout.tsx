@@ -19,8 +19,8 @@ export default function ProductLayout({
       {children}
       <section className="py-8 max-w-container mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />
-        <Category img={speakers} title="Earphones" to="earphones" />
-        <Category img={earphones} title="Speakers" to="speakers" />
+        <Category img={earphones} title="Earphones" to="earphones" />
+        <Category img={speakers} title="Speakers" to="speakers" />
       </section>
       <section className="  grid md:grid-cols-2 gap-16 lg:gap-33 max-w-container mx-auto mb-24 object-cover">
         <div className=" flex flex-col md:row-start-1 lg:row-start-1  h-full items-start justify-center gap-8  ">

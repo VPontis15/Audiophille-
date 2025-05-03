@@ -10,8 +10,8 @@ export default function Products(): React.ReactElement {
       <CategoryHeader>Products</CategoryHeader>
       <section className="py-8 max-w-container mx-auto mb-12 mt-36 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />
-        <Category img={speakers} title="Earphones" to="earphones" />
-        <Category img={earphones} title="Speakers" to="speakers" />
+        <Category img={earphones} title="Earphones" to="earphones" />
+        <Category img={speakers} title="Speakers" to="speakers" />
       </section>
     </>
   );

@@ -25,6 +25,7 @@ export default function AddToCartBtn({
         price: product.price,
         name: product.name,
         image: product.image.mobile,
+        slug: product.slug,
         id: product.id,
         quantity,
         total: product.price * quantity,
