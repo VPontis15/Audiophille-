@@ -11,7 +11,7 @@ export default function Cart(): React.ReactElement {
     <CartModal>
       <CartHeader />
       <div className="mb-8 grid gap-4">
-        {cartItems.length ? (
+        {cartItems && cartItems.length ? (
           cartItems.map((item) => <CartItem key={item.id} product={item} />)
         ) : (
           <div className="flex flex-col px-12 py-10 items-center justify-center gap-12 text-center">

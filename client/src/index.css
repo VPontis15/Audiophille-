@@ -53,6 +53,10 @@ body {
   scrollbar-color: var(--color-accent) var(--color-black);
   scrollbar-width: 10px;
 }
+
+body:has(.checkout-wrapper) {
+  overflow-y: hidden;
+}
 body::-webkit-scrollbar-track {
   background: var(--scrollbarBG);
 }

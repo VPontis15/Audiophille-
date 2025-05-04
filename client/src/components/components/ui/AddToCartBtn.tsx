@@ -24,7 +24,7 @@ export default function AddToCartBtn({
       const cartItem = {
         price: product.price,
         name: product.name,
-        image: product.image.mobile,
+        image: product.image.desktop,
         slug: product.slug,
         id: product.id,
         quantity,
