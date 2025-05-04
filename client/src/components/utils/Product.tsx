@@ -1,7 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
 import Button from './Button';
-import productImg from '../../assets/desktop/product-yx1-earphones/image-product.jpg';
 import { ProductProps } from '../../types/ProductTypes';
 
 export default function Product({
@@ -18,7 +17,10 @@ export default function Product({
       'md:flex-row-reverse': reversed,
     }
   );
-  const productImage = `/src/assets/desktop/product-${product.slug}/image-product.jpg`;
+
+  // Use the desktop image path from the product data
+  const productImage =
+    product.categoryImage?.desktop || '/images/no-product-image.png';
 
   return (
     <article className={className}>

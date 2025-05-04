@@ -2,61 +2,28 @@ import { useParams } from 'react-router';
 import data from '../../data/data.json';
 import { ProductProps } from '../../types/ProductTypes';
 
-// Import specific gallery images for headphones
-import headphoneGallery1 from '../../assets/desktop/product-xx99-mark-two-headphones/image-gallery-1.jpg';
-import headphoneGallery2 from '../../assets/desktop/product-xx99-mark-two-headphones/image-gallery-2.jpg';
-import headphoneGallery3 from '../../assets/desktop/product-xx99-mark-two-headphones/image-gallery-3.jpg';
-
-// Import specific gallery images for earphones
-import earphoneGallery1 from '../../assets/desktop/product-yx1-earphones/image-gallery-1.jpg';
-import earphoneGallery2 from '../../assets/desktop/product-yx1-earphones/image-gallery-2.jpg';
-import earphoneGallery3 from '../../assets/desktop/product-yx1-earphones/image-gallery-3.jpg';
-
-// Import specific gallery images for speakers
-import speakerGallery1 from '../../assets/desktop/product-zx9-speaker/image-gallery-1.jpg';
-import speakerGallery2 from '../../assets/desktop/product-zx9-speaker/image-gallery-2.jpg';
-import speakerGallery3 from '../../assets/desktop/product-zx9-speaker/image-gallery-3.jpg';
-
 export default function ProductImages(): React.ReactElement {
   const { slug } = useParams<{ slug: string }>();
   const product = data.find((product) => product.slug === slug) as ProductProps;
 
-  // Function to get the appropriate gallery images based on product category
+  // Fallback images in case product is not found
+  const fallbackImages = {
+    img1: '/images/no-product-image.png',
+    img2: '/images/no-product-image.png',
+    img3: '/images/no-product-image.png',
+  };
+
+  // Get gallery images from product data
   const getGalleryImages = () => {
-    if (!product || !product.category) {
-      return {
-        img1: earphoneGallery1,
-        img2: earphoneGallery2,
-        img3: earphoneGallery3,
-      };
+    if (!product || !product.gallery) {
+      return fallbackImages;
     }
 
-    switch (product.category.toLowerCase()) {
-      case 'headphones':
-        return {
-          img1: headphoneGallery1,
-          img2: headphoneGallery2,
-          img3: headphoneGallery3,
-        };
-      case 'speakers':
-        return {
-          img1: speakerGallery1,
-          img2: speakerGallery2,
-          img3: speakerGallery3,
-        };
-      case 'earphones':
-        return {
-          img1: earphoneGallery1,
-          img2: earphoneGallery2,
-          img3: earphoneGallery3,
-        };
-      default:
-        return {
-          img1: earphoneGallery1,
-          img2: earphoneGallery2,
-          img3: earphoneGallery3,
-        };
-    }
+    return {
+      img1: product.gallery.first.desktop,
+      img2: product.gallery.second.desktop,
+      img3: product.gallery.third.desktop,
+    };
   };
 
   const galleryImages = getGalleryImages();

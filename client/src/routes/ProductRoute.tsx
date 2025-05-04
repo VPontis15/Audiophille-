@@ -12,16 +12,8 @@ export default function ProductRoute(): React.ReactElement {
   const { slug } = useParams<{ slug: string }>();
   const product = data.find((product) => product.slug === slug) as ProductProps;
 
-  // If product has image data in the expected format, use it
-  // Otherwise, construct an image path based on the slug
-  if (product) {
-    const productImagePath = `/src/assets/desktop/product-${slug}/image-product.jpg`;
-    product.image = {
-      desktop: productImagePath,
-      mobile: `/src/assets/mobile/product-${slug}/image-product.jpg`,
-      tablet: `/src/assets/tablet/product-${slug}/image-product.jpg`,
-    };
-  }
+  // No need to override the image paths since we're now using the correct paths from JSON
+
   return (
     <ProductLayout>
       <ProductOverview product={product} />
