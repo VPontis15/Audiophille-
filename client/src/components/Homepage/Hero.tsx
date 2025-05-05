@@ -11,7 +11,7 @@ export default function Hero(): React.ReactElement {
   });
   return (
     <>
-      <div className="absolute  inset-0 -z-10 w-full h-[95vh] md:h-screen overflow-hidden">
+      <div className="absolute  inset-0 -z-10 w-full max-h-[92vh] md:h-screen overflow-hidden">
         <picture>
           <source media="(max-width: 550px)" srcSet={heroImageMobile} />
           <source
@@ -27,7 +27,7 @@ export default function Hero(): React.ReactElement {
           />
         </picture>
       </div>
-      <div className=" max-w-container min-h-[75vh] md:min-h-[90vh] mx-auto   ">
+      <div className=" max-w-container min-h-[75vh] md:min-h-[87vh] mx-auto   ">
         <div className="text-white flex flex-col items-center md:items-start pt-24   text-center md:text-left h-full  gap-4 ">
           <p className="text-[14px] opacity-50 uppercase tracking-[10px]">
             {' '}

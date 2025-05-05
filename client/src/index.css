@@ -54,7 +54,7 @@ body {
   scrollbar-width: 10px;
 }
 
-body:has(.checkout-wrapper) {
+body:has(.modal) {
   overflow-y: hidden;
 }
 body::-webkit-scrollbar-track {

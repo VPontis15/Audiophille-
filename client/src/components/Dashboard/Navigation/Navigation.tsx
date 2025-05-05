@@ -107,7 +107,7 @@ export default function Navigation(): React.ReactElement {
   return (
     <nav className="bg-black admin-navbar text-white h-screen sticky top-0 left-0 overflow-y-auto scrollbar p-4">
       <Logo />
-      <ul className="grid gap-2 mt-4">
+      <ul className="grid h-full justify-between items-start gap-2 mt-4">
         {dataNavigation.map((item, i: number) => {
           // Check if this item or any of its children is active
           const isItemActive = isPathActive(item.path);

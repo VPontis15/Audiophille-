@@ -10,7 +10,7 @@ export default function Cart(): React.ReactElement {
   return (
     <CartModal>
       <CartHeader />
-      <div className="mb-8 grid gap-4">
+      <div className="mb-8 grid gap-4 overflow-y-auto max-h-[55vh]">
         {cartItems && cartItems.length ? (
           cartItems.map((item) => <CartItem key={item.id} product={item} />)
         ) : (
