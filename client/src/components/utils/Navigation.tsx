@@ -2,7 +2,7 @@ import Link from './Link';
 
 export default function Navigation(): React.ReactElement {
   return (
-    <nav className="hidden md:flex items-center flex-1 justify-center gap-8 overflow-hidden ">
+    <nav className="hidden md:flex items-center flex-1 justify-center gap-8  ">
       <ul className="hidden md:flex items-center flex-1 justify-center gap-8 ">
         <li>
           <Link className="text-white" href="/">

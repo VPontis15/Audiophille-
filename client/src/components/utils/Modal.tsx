@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 export default function Modal({
   children,
@@ -62,16 +63,21 @@ export default function Modal({
   }, [closeModal]);
 
   return (
-    <div
+    <motion.div
       className="fixed modal inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={closeModal} // Close when clicking the overlay
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        key="box"
         className={`bg-white rounded-lg shadow-xl relative max-h-[90vh] overflow-auto ${className}`}
         onClick={(e) => e.stopPropagation()} // Prevent clicks inside dialog from closing
       >
         {children}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -9,7 +9,7 @@ import { keyfn } from '../../../../helpers/helper';
 import { createPortal } from 'react-dom';
 import ActionButtons from '../../../utils/ActionButtons';
 import { Outlet } from 'react-router-dom';
-
+import { AnimatePresence } from 'framer-motion';
 const categoriesConfig: Column[] = [
   {
     label: 'name',
@@ -115,7 +115,9 @@ export default function DashboardProductCategories(): React.ReactElement {
           results={results}
         />
       </AdminTable>
-      {createPortal(<Outlet />, document.body)}
+      <AnimatePresence>
+        {createPortal(<Outlet />, document.body)}
+      </AnimatePresence>
     </AdminContentWrapper>
   );
 }

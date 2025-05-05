@@ -13,6 +13,7 @@ import SelectInput from '../../utils/SelectInput';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import { TiDelete } from 'react-icons/ti';
+import { AnimatePresence, motion } from 'framer-motion';
 interface Category {
   id?: string;
   _id?: string;
@@ -506,49 +507,55 @@ export default function ProductForm({}) {
             >
               Add item
             </Button>
-            {includedItems && includedItems.length > 0 && (
-              <CreateFormSection className="border border-slate-300 px-4 py-2 rounded-lg">
-                <div className="flex gap-2 w-full  items-center">
-                  <span className="text-accent flex-1 text-left font-bold">
-                    Amount
-                  </span>
-                  <span className="text-accent flex-1 text-center pl-6 font-bold">
-                    Name
-                  </span>
-                  <span className="text-accent flex-1 text-end font-bold">
-                    Actions
-                  </span>
-                </div>
-                <>
-                  <div className=" flex-col space-y-4  ">
-                    {includedItems.map((includedItem, index) => (
-                      <div
-                        key={index}
-                        className="flex gap-2 w-full  items-center"
-                      >
-                        <span className="font-bold flex-1 pl-2.5">
-                          x{includedItem.amount}
-                        </span>
-                        <span className="flex-1 capitalize">
-                          {includedItem.item}
-                        </span>
-                        <TiDelete
-                          size={35}
-                          className="cursor-pointer text-black-500"
-                          onClick={() =>
-                            setIncludedItems((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            )
-                          }
+            <AnimatePresence>
+              {includedItems && includedItems.length > 0 && (
+                <CreateFormSection className="border border-slate-300 px-4 py-2 rounded-lg">
+                  <div className="flex gap-2 w-full  items-center">
+                    <span className="text-accent flex-1 text-left font-bold">
+                      Amount
+                    </span>
+                    <span className="text-accent flex-1 text-center pl-6 font-bold">
+                      Name
+                    </span>
+                    <span className="text-accent flex-1 text-end font-bold">
+                      Actions
+                    </span>
+                  </div>
+                  <div className="flex-col space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {includedItems.map((includedItem, index) => (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          key={`item-${includedItem.item}-${index}`}
+                          className="flex gap-2 w-full items-center"
                         >
-                          &times;
-                        </TiDelete>
-                      </div>
-                    ))}
-                  </div>{' '}
-                </>
-              </CreateFormSection>
-            )}
+                          <span className="font-bold flex-1 pl-2.5">
+                            x{includedItem.amount}
+                          </span>
+                          <span className="flex-1 capitalize">
+                            {includedItem.item}
+                          </span>
+                          <TiDelete
+                            size={35}
+                            className="cursor-pointer text-black-500"
+                            onClick={() =>
+                              setIncludedItems((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              )
+                            }
+                          >
+                            &times;
+                          </TiDelete>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </CreateFormSection>
+              )}
+            </AnimatePresence>
           </CreateFormSection>
           <CreateFormSection>
             <h2 className="text-xl font-bold">Price and stock options</h2>

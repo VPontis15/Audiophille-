@@ -1,5 +1,6 @@
 import { ProductOverviewProps } from '../../types/ProductTypes';
 import AddToCartBtn from '../components/ui/AddToCartBtn';
+import { motion } from 'framer-motion';
 
 export default function ProductOverview({
   product,
@@ -17,13 +18,17 @@ export default function ProductOverview({
 
   return (
     <div className="grid md:grid-cols-2 mt-20 gap-17 md:gap-24 lg:gap-31.5 product-wrapper">
-      <img
-        src={getProductImage()}
-        alt={product?.name || 'Product image'}
-        height={560}
-        width={540}
-        className="md:h-[560px] w-full rounded-md md:max-w-[540px] object-cover"
-      />
+      <div className="overflow-hidden rounded-md">
+        <motion.img
+          src={getProductImage()}
+          alt={product?.name || 'Product image'}
+          height={560}
+          width={540}
+          whileHover={{ scale: 1.15 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1.0] }}
+          className="md:h-[560px] w-full rounded-md md:max-w-[540px] object-cover"
+        />
+      </div>
       <div className="flex flex-col justify-center">
         {product?.new && (
           <span className="text-hover  inline-block mb-4 text-sm font-bold uppercase tracking-[10px]">
