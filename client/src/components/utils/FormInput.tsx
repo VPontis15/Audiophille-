@@ -1,7 +1,7 @@
 import { useState, ChangeEvent } from 'react';
 import { FormErrors, FormInputProps } from '../../types/formType';
 import ErrorMessage from './ErrorMessage';
-
+import { AnimatePresence } from 'framer-motion';
 export default function FormInput({
   label,
   name,
@@ -93,9 +93,11 @@ export default function FormInput({
           {...rest}
           onBlur={(e) => showErrorOnBlur(e)}
         />
-        {errors[name] && (
-          <ErrorMessage className="">{errors[name]}</ErrorMessage>
-        )}
+        <AnimatePresence initial={false} mode="wait">
+          {errors[name] && (
+            <ErrorMessage className="">{errors[name]}</ErrorMessage>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
