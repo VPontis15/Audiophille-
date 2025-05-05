@@ -17,7 +17,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "cross-env NODE_ENV=development node --watch server.js",
+    "dev": "dotenv -e .env.development -- nodemon server.js",
     "prod": "cross-env NODE_ENV=production node server.js",
     "seed:categories": "node seeders/seedCategories.js",
     "seed:brands": "node seeders/seedBrands.js",

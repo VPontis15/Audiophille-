@@ -2,13 +2,12 @@ import React from 'react';
 import Logo from './utils/Logo';
 import Navigation from './utils/Navigation';
 import CartBtn from './utils/CartBtn';
+import Link from './utils/Link';
 
 import Cart from './Cart/Cart';
 import { useAppSelector } from '../types/hooks';
 import MobileButton from './utils/MobileButton';
 import { SiAdminer } from 'react-icons/si';
-import { Link } from 'react-router';
-
 export default function Header(): React.ReactElement {
   const isOpen = useAppSelector((state) => state.settings.isOpen);
   return (
@@ -21,8 +20,11 @@ export default function Header(): React.ReactElement {
         <Navigation />
         <div className="flex items-center gap-6">
           <CartBtn />
-          <Link to={'/admin/dashboard'}>
+          <Link href={'/admin/dashboard'}>
             <SiAdminer className="text-white w-7.5 h-7.5 " />
+          </Link>
+          <Link className="text-white text-sm" href="/signup">
+            Login/Singup
           </Link>
         </div>
         {isOpen && <Cart />}

@@ -1,5 +1,5 @@
 const app = require('./app');
-const env = require('dotenv').config();
+const env = require('dotenv').config({ path: '.env.development' });
 const port = process.env.PORT || 5000;
 const { createTables } = require('./config/config');
 async function startServer() {

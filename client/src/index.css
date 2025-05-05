@@ -71,7 +71,12 @@ body::-webkit-scrollbar {
 }
 
 body
-  :where(:has(.product-wrapper), :has(.checkout-wrapper), :has(.dashboard))
+  :where(
+    :has(.product-wrapper),
+    :has(.checkout-wrapper),
+    :has(.dashboard),
+    :has(.signup-bg-wrapper)
+  )
   header {
   background-color: #000;
 }
@@ -89,6 +94,20 @@ body
 
 .nav-sub-menu.opened {
   block-size: auto;
+}
+
+.signup-bg-wrapper {
+}
+
+.signup-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle,
+    rgba(216, 125, 74, 0.5) 80%,
+    rgba(251, 175, 133, 0.6) 100%
+  );
+  z-index: 100;
 }
 
 .hero-img {

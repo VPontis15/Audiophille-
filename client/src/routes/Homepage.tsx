@@ -58,10 +58,10 @@ export default function Homepage(): React.ReactElement {
           <Category img={headphones} title="Headphones" to="headphones" />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <Category img={speakers} title="Earphones" to="earphones" />
+          <Category img={earphones} title="Earphones" to="earphones" />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <Category img={earphones} title="Speakers" to="speakers" />
+          <Category img={speakers} title="Speakers" to="speakers" />
         </motion.div>
       </motion.section>
       <ProductsShowcase />

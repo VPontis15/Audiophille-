@@ -22,6 +22,7 @@ import DashboardProductCategories from './components/Dashboard/Products/Categori
 import DashboardProductBrands from './components/Dashboard/Products/Brands/DashboardProductBrands';
 import EntityForm from './components/components/ui/EntityForm';
 import DashboardCreateProduct from './components/Dashboard/Products/DashboardCreateProduct';
+import SignupRoute from './routes/SignupRoute';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      {
+        path: 'signup',
+        element: <SignupRoute />,
       },
     ],
   },
