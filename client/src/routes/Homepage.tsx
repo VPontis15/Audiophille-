@@ -49,7 +49,7 @@ export default function Homepage(): React.ReactElement {
       {/* Categories */}
       <motion.section
         ref={ref}
-        className="py-8 max-w-container mx-auto mb-12 flex mt-24 md:mt-8 flex-col  sm:flex-row gap-18 items-center   md:items-start md:gap-8"
+        className="py-8 max-w-container flex-wrap justify-center  mx-auto mb-12 flex mt-24 md:mt-8 flex-col  sm:flex-row gap-18 items-center   md:items-start md:gap-8"
         variants={containerVariants}
         initial="hidden"
         animate={isInView ? 'visible' : 'hidden'}

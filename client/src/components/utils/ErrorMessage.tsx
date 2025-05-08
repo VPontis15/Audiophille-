@@ -11,17 +11,17 @@ export default function ErrorMessage({
   isVisible?: boolean;
 }): React.ReactElement {
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isVisible && (
-        <motion.span
-          initial={{ y: '0' }}
-          animate={{ y: '-48%' }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className={`bg-error text-white px-8 py-1 rounded-2xl text-[12px] absolute ${className}`}
+        <motion.div
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: -10 }}
+          exit={{ opacity: 0, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className={`bg-red-500 text-white text-sm rounded ${className}`}
         >
           {children}
-        </motion.span>
+        </motion.div>
       )}
     </AnimatePresence>
   );

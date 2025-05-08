@@ -19,7 +19,7 @@ export default function CategoriesTableContent({
         role="table"
         className="min-w-full rounded-t-lg overflow-y-auto divide-y pl-120 divide-gray-200 table-fixed"
       >
-        <thead role="heading" className="bg-gray-100">
+        <div role="heading" className="bg-gray-100">
           <div role="rowgroup" className="flex w-full">
             {config.map((column) => (
               <div
@@ -31,8 +31,8 @@ export default function CategoriesTableContent({
               </div>
             ))}
           </div>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        </div>
+        <div className="bg-white divide-y divide-gray-200">
           {data.map((category) => (
             <div key={category.id} className="category-group">
               {/* Main category row */}
@@ -67,7 +67,7 @@ export default function CategoriesTableContent({
               )}
             </div>
           ))}
-        </tbody>
+        </div>
       </div>
     </div>
   );

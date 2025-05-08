@@ -95,7 +95,9 @@ export default function FormInput({
         />
         <AnimatePresence initial={false} mode="wait">
           {errors[name] && (
-            <ErrorMessage className="">{errors[name]}</ErrorMessage>
+            <ErrorMessage className="absolute top-2 px-4 py-1 rounded">
+              {errors[name]}
+            </ErrorMessage>
           )}
         </AnimatePresence>
       </div>
@@ -149,7 +151,9 @@ export default function FormInput({
           onBlur={(e) => showErrorOnBlur(e)}
         />
         {errors[name] && (
-          <ErrorMessage className="">{errors[name]}</ErrorMessage>
+          <ErrorMessage className="absolute top-2 px-4 py-1 rounded">
+            {errors[name]}
+          </ErrorMessage>
         )}
       </div>
     );
