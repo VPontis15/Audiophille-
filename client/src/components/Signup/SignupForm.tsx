@@ -97,6 +97,12 @@ export default function SignupForm(): React.ReactElement {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+    if (e.target.value.length >= 8) {
+      setErrorMessages((prev) => ({
+        ...prev,
+        password: '',
+      }));
+    }
   };
 
   const handleConfirmPasswordChange = (
