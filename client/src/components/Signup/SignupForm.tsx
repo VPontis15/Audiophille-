@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Button from '../utils/Button';
 import ErrorMessage from '../utils/ErrorMessage';
-
+import { FaEyeSlash, FaEye } from 'react-icons/fa';
 const errorStyle =
   'mt-2 self-start justify-self-start px-4 py-1 absolute top-0 ';
 
@@ -10,6 +10,12 @@ const inputStyle = `border border-gray-300 p-2 w-full rounded-md focus:outline-n
 export default function SignupForm(): React.ReactElement {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [passwordInputType, setPasswordInputType] = useState('password');
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPasswordInputType, setConfirmPasswordInputType] =
+    useState('password');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessages, setErrorMessages] = useState({
@@ -117,6 +123,18 @@ export default function SignupForm(): React.ReactElement {
         name: '',
       }));
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+    setPasswordInputType((prev) => (prev === 'password' ? 'text' : 'password'));
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prev) => !prev);
+    setConfirmPasswordInputType((prev) =>
+      prev === 'password' ? 'text' : 'password'
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -253,15 +271,24 @@ export default function SignupForm(): React.ReactElement {
           <label htmlFor="password" className="block  text-gray-700 mb-2">
             Password
           </label>
-          <input
-            type="password"
-            onChange={handlePasswordChange}
-            onBlur={handlePasswordBlur}
-            value={password}
-            id="password"
-            className={inputStyle}
-            required
-          />
+          <div className="relative">
+            <input
+              type={passwordInputType}
+              name="password"
+              onChange={handlePasswordChange}
+              onBlur={handlePasswordBlur}
+              value={password}
+              id="password"
+              className={inputStyle}
+              required
+            />
+            <div
+              onClick={togglePasswordVisibility}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-text cursor-pointer"
+            >
+              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            </div>
+          </div>
           <ErrorMessage
             isVisible={!!errorMessages.password}
             className={errorStyle}
@@ -277,14 +304,26 @@ export default function SignupForm(): React.ReactElement {
           >
             Confirm Password
           </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            id="confirm-password"
-            className={inputStyle}
-            required
-          />{' '}
+          <div className="relative">
+            <input
+              type={confirmPasswordInputType}
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              id="confirm-password"
+              className={inputStyle}
+              required
+            />{' '}
+            <div
+              onClick={toggleConfirmPasswordVisibility}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-text cursor-pointer"
+            >
+              {showConfirmPassword ? (
+                <FaEyeSlash size={20} />
+              ) : (
+                <FaEye size={20} />
+              )}
+            </div>
+          </div>
           <ErrorMessage
             isVisible={!!errorMessages.confirmPassword}
             className={errorStyle}
