@@ -214,7 +214,7 @@ export default function SignupForm(): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col gap-8 items-center justify-center h-screen">
+    <div className="flex flex-col px-8 max-w-lg mx-auto md:max-w-full  md:pr-8 gap-8 items-center justify-start py-10 md:pt-0 md:justify-center md:h-screen">
       <div className="flex flex-col gap-3 items-center">
         <h2 className="bg-gradient-to-r from-accent to-hover bg-clip-text text-5xl font-extrabold text-transparent">
           Audiophile
