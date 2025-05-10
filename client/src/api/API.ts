@@ -56,11 +56,8 @@ export default class API {
     return response.data;
   }
 
-  createOneWithFormData(endpoint: string, formData: FormData) {
-    return axios.post(`${this.baseUrl}/${endpoint}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  async singUp<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
+    const response = await axios.post<T>(`${this.baseUrl}/${endpoint}`, data);
+    return response.data;
   }
 }
