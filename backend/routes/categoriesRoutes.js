@@ -1,6 +1,5 @@
 const express = require('express');
 const categoryRoute = express.Router();
-const { pool } = require('../config/config');
 
 const {
   getAllCategories,

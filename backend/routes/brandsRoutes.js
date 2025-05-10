@@ -1,6 +1,5 @@
 const express = require('express');
 const brandRouter = express.Router();
-const { pool } = require('../config/config');
 
 const {
   getAllBrands,
