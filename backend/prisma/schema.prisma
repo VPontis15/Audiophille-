@@ -157,21 +157,21 @@ model products {
 }
 
 model users {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(100)
-  email        String   @unique(map: "email") @db.VarChar(100)
-  password     String   @db.VarChar(100)
-  phone        String?  @db.VarChar(15)
-  address      String?  @db.VarChar(255)
-  city         String?  @db.VarChar(100)
-  country      String?  @db.VarChar(100)
-  postalCode   String?  @db.VarChar(20)
-  profileImage String?  @db.VarChar(255)
-  isAdmin      Boolean? @default(false)
-  createdAt    DateTime @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime @default(now()) @db.Timestamp(0)
-  carts        carts[]
-  orders       orders[]
+  id                Int      @id @default(autoincrement())
+  name              String   @db.VarChar(100)
+  email             String   @unique(map: "email") @db.VarChar(100)
+  password          String   @db.VarChar(100)
+  phone             String?  @db.VarChar(15)
+  address           String?  @db.VarChar(255)
+  city              String?  @db.VarChar(100)
+  country           String?  @db.VarChar(100)
+  postalCode        String?  @db.VarChar(20)
+  profileImage      String?  @db.VarChar(255)
+  isAdmin           Boolean? @default(false)
+  createdAt         DateTime @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime @default(now()) @db.Timestamp(0)
+  carts             carts[]
+  orders            orders[]
 
   @@index([email], map: "email_2")
   @@index([name], map: "name")
