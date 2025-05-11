@@ -1,4 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
+
 const {
   hashPassword,
   comparePassword,
@@ -42,16 +44,24 @@ exports.signup = async (req, res) => {
         password: hashedPassword,
       },
     });
+    // Generate JWT token
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
 
     // Send response
     res.status(201).json({
       status: 'success',
+      token: token,
       data: {
         user: {
-          id: newUser.id,
           name: newUser.name,
           email: newUser.email,
-          createdAt: newUser.createdAt,
+          createdAt: newUser.createdAt.toLocaleDateString('el-GR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }),
         },
       },
     });

@@ -18,5 +18,11 @@
 # Avoid your project being littered with annoying .DS_Store files!
 .DS_Store
 .prettierignore
-.env
+
+
 node_modules
+
+# Ignore local env files
+.env
+.env.development
+.env.production
