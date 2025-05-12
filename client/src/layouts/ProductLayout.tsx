@@ -15,7 +15,7 @@ export default function ProductLayout({
     <div className="max-w-container mx-auto space-y-40">
       <BreadCrumps />
       {children}
-      <section className="py-8 max-w-container mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
+      <section className="py-8 max-w-container justify-between mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />
         <Category img={earphones} title="Earphones" to="earphones" />
         <Category img={speakers} title="Speakers" to="speakers" />
