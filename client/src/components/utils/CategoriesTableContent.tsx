@@ -1,11 +1,8 @@
-import TableHeadTitles from '../components/ui/TableHeadTitles';
-import { CategoryProps, TableConfig } from '../../types/Dashboard/tableTypes';
-import { createPortal } from 'react-dom';
+import { CategoryProps } from '../../types/Dashboard/types';
 
 export default function CategoriesTableContent({
   data,
-  isLoading,
-  error,
+
   config,
 }: {
   data: CategoryProps[];

@@ -18,7 +18,7 @@ export default function ProductOverview({
 
   return (
     <div className="grid md:grid-cols-2 mt-20 gap-17 md:gap-24 lg:gap-31.5 product-wrapper">
-      <div className="overflow-hidden rounded-md">
+      <div className="overflow-hidden md:h-[560px] w-full rounded-md md:max-w-[540px]">
         <motion.img
           src={getProductImage()}
           alt={product?.name || 'Product image'}
