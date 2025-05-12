@@ -2,6 +2,11 @@ import { useState } from 'react';
 import Button from '../utils/Button';
 import ErrorMessage from '../utils/ErrorMessage';
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
+import API from '../../api/API';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router';
 const errorStyle =
   'mt-2 self-start justify-self-start px-4 py-1 absolute top-0 ';
 
@@ -15,7 +20,7 @@ export default function SignupForm(): React.ReactElement {
   const [confirmPasswordInputType, setConfirmPasswordInputType] =
     useState('password');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessages, setErrorMessages] = useState({
@@ -23,6 +28,49 @@ export default function SignupForm(): React.ReactElement {
     email: '',
     password: '',
     confirmPassword: '',
+  });
+  const navigate = useNavigate();
+  const api = new API();
+
+  const signupMutation = useMutation({
+    mutationFn: (userData: {
+      name: string;
+      email: string;
+      password: string;
+      confirmedPassword: string;
+    }) => {
+      setIsLoading(true);
+      return api.singUp('users/signup', userData);
+    },
+    onSuccess: () => {
+      navigate('/');
+      toast.success(
+        'Signup successful! Please check your email for verification.'
+      );
+      // Reset form fields if needed
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setIsLoading(false);
+      // Redirect to the homepage
+    },
+    onError: (error: AxiosError) => {
+      // Use 'any' or create a proper type for the error
+      console.error('Error during signup:', error);
+
+      // Check if it's an Axios error with a response from the server
+      if (error.response && error.response.data) {
+        // Extract the error message from the server response
+        const serverErrorMessage =
+          error.response.data.message || 'Signup failed';
+        toast.error(serverErrorMessage);
+      } else {
+        // Fallback to the generic error message
+        toast.error(error.message);
+      }
+      setIsLoading(false);
+    },
   });
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,16 +249,13 @@ export default function SignupForm(): React.ReactElement {
       return;
     }
 
-    // If we get here, the form is valid
-    console.log('Form is valid! Signup:', {
+    // Execute the mutation
+    signupMutation.mutate({
       name,
       email,
       password,
-      confirmPassword,
+      confirmedPassword: confirmPassword,
     });
-
-    // Handle signup logic here
-    // e.g., API call to register user
   };
 
   return (
@@ -339,7 +384,7 @@ export default function SignupForm(): React.ReactElement {
         </div>
 
         <Button type="submit" primary className="">
-          Signup now
+          {isLoading ? 'Signing up...' : 'Signup'}
         </Button>
       </form>
     </div>
