@@ -84,6 +84,14 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide email and password',
+      });
+    }
+
     // Check if user exists
     const user = await prisma.users.findUnique({
       where: {
