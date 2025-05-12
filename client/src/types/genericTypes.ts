@@ -11,3 +11,14 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     sm?: boolean;
     lg?: boolean;
   }>;
+
+export interface AxiosError {
+  response?: {
+    data?: {
+      status?: string;
+      message?: string;
+    };
+    status?: number;
+  };
+  message: string;
+}
