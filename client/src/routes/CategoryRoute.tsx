@@ -18,7 +18,7 @@ export default function CategoryRoute(): React.ReactElement {
   return (
     <>
       <CategoryHeader>{category}</CategoryHeader>
-      <BreadCrumps />
+      <BreadCrumps classname="mx-auto" />
       <section className="max-w-container mt-30 mx-auto grid gap-40 mb-40 ">
         {products && products.length > 0 ? (
           products.map((product: ProductProps, index: number) => (

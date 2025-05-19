@@ -13,7 +13,7 @@ export default function ProductLayout({
 }): React.ReactElement {
   return (
     <div className="max-w-container mx-auto space-y-40">
-      <BreadCrumps />
+      <BreadCrumps classname="" />
       {children}
       <section className="py-8 max-w-container justify-between mx-auto mb-12 flex flex-col sm:flex-row gap-18 items-center   md:items-start md:gap-8">
         <Category img={headphones} title="Headphones" to="headphones" />

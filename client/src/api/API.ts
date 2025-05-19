@@ -60,4 +60,9 @@ export default class API {
     const response = await axios.post<T>(`${this.baseUrl}/${endpoint}`, data);
     return response.data;
   }
+
+  async logout<T>(endpoint: string): Promise<T> {
+    const response = await axios.post<T>(`${this.baseUrl}/${endpoint}`);
+    return response.data;
+  }
 }

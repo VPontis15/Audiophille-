@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router';
+import { useAppDispatch, useAppSelector } from '../../types/hooks';
 const errorStyle =
   'mt-2 self-start justify-self-start px-4 py-1 absolute top-0 ';
 
@@ -29,9 +30,10 @@ export default function SignupForm(): React.ReactElement {
     password: '',
     confirmPassword: '',
   });
+  const cartItems = useAppSelector((state) => state.cart.items);
   const navigate = useNavigate();
   const api = new API();
-
+  const dispatch = useAppDispatch();
   const signupMutation = useMutation({
     mutationFn: (userData: {
       name: string;
@@ -42,7 +44,24 @@ export default function SignupForm(): React.ReactElement {
       setIsLoading(true);
       return api.singUp('users/signup', userData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Properly store user data from API response
+      const userData = data.user || { name, email, isAdmin: false };
+      console.log('User data:', userData);
+      // Store auth token
+      localStorage.setItem('authToken', data.token);
+
+      // Update Redux
+      dispatch({
+        type: 'user/setUser',
+        payload: {
+          name: userData.name,
+          email: userData.email,
+          isAdmin: userData.isAdmin,
+          cart: cartItems,
+        },
+      }); // Use the action creator, not type
+
       navigate('/');
       toast.success(
         'Signup successful! Please check your email for verification.'
@@ -53,7 +72,6 @@ export default function SignupForm(): React.ReactElement {
       setPassword('');
       setConfirmPassword('');
       setIsLoading(false);
-      // Redirect to the homepage
     },
     onError: (error: AxiosError) => {
       // Use 'any' or create a proper type for the error

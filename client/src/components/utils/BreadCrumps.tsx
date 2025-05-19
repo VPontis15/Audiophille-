@@ -1,7 +1,11 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router';
 
-export default function BreadCrumps(): React.ReactElement {
+export default function BreadCrumps({
+  classname,
+}: {
+  classname?: string;
+}): React.ReactElement {
   const location = useLocation().pathname.split('/');
   const currentPath = useLocation().pathname.split('/').pop();
   let path = '';
@@ -20,7 +24,12 @@ export default function BreadCrumps(): React.ReactElement {
     );
   });
   return (
-    <div className="text-text mb-8 mt-24 text-sm max-w-container mx-auto flex items-center gap-0.5">
+    <div
+      className={
+        'text-text mb-8 mt-24 text-sm max-w-container  flex items-center gap-0.5 ' +
+        classname
+      }
+    >
       {breadcrumpsHtml}
       <span>&gt;</span>
 

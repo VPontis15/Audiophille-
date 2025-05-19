@@ -137,3 +137,20 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+    // Invalidate the token (if using a token-based authentication system)
+    // This is usually done on the client side by removing the token from local storage or cookies
+    res.status(200).json({
+      status: 'success',
+      message: 'Logged out successfully',
+    });
+  } catch (error) {
+    console.error('Error logging out:', error);
+    res.status(500).json({
+      status: 'fail',
+      message: error.message,
+    });
+  }
+};
