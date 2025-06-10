@@ -4,25 +4,30 @@ const { pool } = require('../config/config');
 
 async function seedUsers(count = 50) {
   try {
-    console.log(`Seeding ${count} users...`);
+    console.log(`Seeding ${count} users...`); // Create admin user if it doesn't exist
+    const checkAdminSql = `SELECT id FROM users WHERE email = 'admin@audiophile.com'`;
+    const [existingAdmin] = await pool.query(checkAdminSql);
 
-    // Create admin user
-    const adminPassword = await bcrypt.hash('admin123', 10);
-    const adminUser = {
-      name: 'Admin User',
-      email: 'admin@audiophile.com',
-      password: adminPassword,
-      isAdmin: true,
-      address: '123 Admin Street',
-      city: 'Tech City',
-      country: 'USA',
-      postalCode: '90210',
-      phone: '(555) 123-4567',
-    };
+    if (existingAdmin.length === 0) {
+      const adminPassword = await bcrypt.hash('admin123', 10);
+      const adminUser = {
+        name: 'Admin User',
+        email: 'admin@audiophile.com',
+        password: adminPassword,
+        isAdmin: true,
+        address: '123 Admin Street',
+        city: 'Tech City',
+        country: 'USA',
+        postalCode: '90210',
+        phone: '(555) 123-4567',
+      };
 
-    const adminSql = `INSERT INTO users SET ?`;
-    await pool.query(adminSql, adminUser);
-    console.log('Admin user created');
+      const adminSql = `INSERT INTO users SET ?`;
+      await pool.query(adminSql, adminUser);
+      console.log('Admin user created');
+    } else {
+      console.log('Admin user already exists, skipping...');
+    }
 
     // Create regular users
     for (let i = 0; i < count; i++) {
